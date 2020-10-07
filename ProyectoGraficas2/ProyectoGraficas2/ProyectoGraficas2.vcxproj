@@ -88,10 +88,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\include;$(SolutionDir)IncludeOGL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,12 +105,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\include;$(SolutionDir)IncludeOGL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,10 +122,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\include;$(SolutionDir)IncludeOGL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -130,24 +139,51 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\include;$(SolutionDir)IncludeOGL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CPPs\CGraphicApi.cpp" />
     <ClCompile Include="CPPs\CGraphicApiDX.cpp" />
     <ClCompile Include="CPPs\CGraphicApiOGL.cpp" />
+    <ClCompile Include="CPPs\glad.c" />
     <ClCompile Include="CPPs\Main.cpp" />
+    <ClCompile Include="Includes\CBufferDX.cpp" />
+    <ClCompile Include="Includes\CBufferOGL.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Includes\CBuffer.h" />
+    <ClInclude Include="Includes\CBufferDX.h" />
+    <ClInclude Include="Includes\CBufferOGL.h" />
     <ClInclude Include="Includes\CGraphicApi.h" />
     <ClInclude Include="Includes\CGraphicApiDX.h" />
     <ClInclude Include="Includes\CGraphicApiOGL.h" />
+    <ClInclude Include="Includes\CInputLayout.h" />
+    <ClInclude Include="Includes\CInputLayoutDX.h" />
+    <ClInclude Include="Includes\CInputLayoutOGL.h" />
+    <ClInclude Include="Includes\CRenderTarget.h" />
+    <ClInclude Include="Includes\CRenderTargetDX.h" />
+    <ClInclude Include="Includes\CRenderTargetOGL.h" />
+    <ClInclude Include="Includes\CRenderTargetView.h" />
+    <ClInclude Include="Includes\CRenderTargetViewDX.h" />
+    <ClInclude Include="Includes\CRenderTargetViewOGL.h" />
+    <ClInclude Include="Includes\CShader.h" />
+    <ClInclude Include="Includes\CShaderDX.h" />
+    <ClInclude Include="Includes\CShaderOGL.h" />
+    <ClInclude Include="Includes\CSwapChain.h" />
+    <ClInclude Include="Includes\CSwapChainDX.h" />
+    <ClInclude Include="Includes\CSwapChainOGL.h" />
+    <ClInclude Include="Includes\CVertexBuffer.h" />
+    <ClInclude Include="Includes\CVertexBufferDX.h" />
+    <ClInclude Include="Includes\CVertexBufferOGL.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
