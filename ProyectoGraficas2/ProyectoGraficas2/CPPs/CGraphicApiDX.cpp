@@ -1,5 +1,7 @@
 #include "../Includes/CGraphicApiDX.h"
 #include "../Includes/CBufferDX.h"
+#include "../Includes/CTexturesDX.h"
+#include "../Includes/CVertexBufferDX.h"
 
 void CGraphicApiDX::Init(){
 
@@ -7,10 +9,28 @@ void CGraphicApiDX::Init(){
     m_pDeviceContext = NULL;
 }
 
-int CGraphicApiDX::GACreateDeviceAndSwapChain(){
+HRESULT CGraphicApiDX::CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, 
+                                             LPCSTR szShaderModel, ID3DBlob** ppBlobOut){
+    HRESULT hr = S_OK;
 
+    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+    dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
 
-    return 0;
+    ID3DBlob* pErrorBlob;
+    hr = D3DX11CompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
+        dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
+    if (FAILED(hr))
+    {
+        if (pErrorBlob != NULL)
+            OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+        if (pErrorBlob) pErrorBlob->Release();
+        return hr;
+    }
+    if (pErrorBlob) pErrorBlob->Release();
+
+    return S_OK;
 }
 
 int CGraphicApiDX::GACreateBuffer(unsigned int _bufferOGL,
@@ -24,21 +44,71 @@ int CGraphicApiDX::GACreateBuffer(unsigned int _bufferOGL,
                    _CPUAccessFlags, _miscFlags, 
                    _structureByteStride, _pSysMem);
 
-    D3D11_BUFFER_DESC pepe;
-    pepe.ByteWidth = 
-
-    m_pDevice->CreateBuffer(, ,_pBuffer);
     return 0;
 }
 
-int CGraphicApiDX::GACreateTexture3D(const D3D11_TEXTURE3D_DESC* _pDesc, const D3D11_SUBRESOURCE_DATA* _pInitialData, 
-                                     ID3D11Texture3D** _ppTexture3D){
+int CGraphicApiDX::GACreateTexture2D(unsigned int _texture,
+                                     unsigned int _width, unsigned int _height,
+                                     unsigned int _mipLevels, unsigned int _arraySize,
+                                     unsigned int _format, unsigned int _sampleDescCount,
+                                     unsigned int _sampleDescQuality, unsigned int _usage,
+                                     unsigned int _bindFlags, unsigned int _cpuAccessFlags,
+                                     unsigned int _miscFlags, const void* _pSysMem,
+                                     CTextures* _pTexture){
+    _pTexture->Init(_texture, _width, 
+                    _height, _mipLevels, 
+                    _arraySize, _format, 
+                    _sampleDescCount, _sampleDescQuality, 
+                    _usage, _bindFlags, 
+                    _cpuAccessFlags, _miscFlags, 
+                    _pSysMem);
 
+    return 0;
+}
+
+int CGraphicApiDX::GACreateVertexShader(const char* _vertexPath, const char* _fragmentPath,
+                                        const char* _geometryPath) {
+    HRESULT hr = S_OK;
+    ID3DBlob* pVSBlob = NULL;
+    hr = CompileShaderFromFile(L"Tutorial07.fx", "VS", "vs_4_0", &pVSBlob);
+    if (FAILED(hr)){
+        MessageBox(NULL,
+            L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+        return hr;
+    }
+
+    CVertexBufferDX vertexBuff;
+
+    // Create the vertex shader
+    hr = m_pDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), NULL, &vertexBuff.m_pVertexShader);
+    if (FAILED(hr)){
+        pVSBlob->Release();
+        return hr;
+    }
     return 0;
 }
 
 int CGraphicApiDX::GACreatePixelShader(const void* _pShaderBytecode, SIZE_T _bytecodeLength, 
                                        ID3D11ClassLinkage* _pClassLinkage, ID3D11PixelShader** _ppPixelShader){
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int CGraphicApiDX::GACreateDeviceAndSwapChain() {
+
 
     return 0;
 }
@@ -50,11 +120,7 @@ int CGraphicApiDX::GACreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* _pInputEl
     return 0;
 }
 
-int CGraphicApiDX::GACreateVertexShader(const void* _pShaderBytecode, SIZE_T _bytecodeLength, 
-                                        ID3D11ClassLinkage* _pClassLinkage, ID3D11VertexShader** _ppVertexShader){
 
-    return 0;
-}
 
 int CGraphicApiDX::GACreateSamplerState(const D3D11_SAMPLER_DESC* _pSamplerDesc, ID3D11SamplerState** _ppSamplerState){
 
@@ -108,7 +174,7 @@ int CGraphicApiDX::GASetBuffer(){
     return 0;
 }
 
-int CGraphicApiDX::GASetTexture3D(){
+int CGraphicApiDX::GASetTexture2D(){
 
     return 0;
 }

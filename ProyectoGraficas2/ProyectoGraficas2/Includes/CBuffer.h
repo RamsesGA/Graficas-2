@@ -14,7 +14,7 @@ class CBuffer {
 		
 		/// <summary>
 		/// Inicialización de valores para OpenGL y DirectX,
-		/// Falta el target, este lo defino yo
+		/// Falta el target para OGL, este lo defino yo
 		/// </summary>
 		/// <param name="_bufferOGL">Especifica el nombre de un objeto de búfer</param>
 		/// <param name="_byteWidth">Tamaño del búfer en bytes</param>

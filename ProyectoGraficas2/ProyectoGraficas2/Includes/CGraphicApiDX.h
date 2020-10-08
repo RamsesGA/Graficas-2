@@ -1,6 +1,8 @@
 #pragma once
 #include "CGraphicApi.h"
+#include <d3dcompiler.h>
 #include <d3d11.h>
+#include <d3dx11.h>
 
 
 /// <summary>
@@ -29,6 +31,9 @@ class CGraphicApiDX : public CGraphicApi {
 
 		void Delete()override {};
 
+		HRESULT CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint,
+									  LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
+
 		///
 		/// Create
 		/// 
@@ -52,9 +57,28 @@ class CGraphicApiDX : public CGraphicApi {
 		/// Create an array of 3D textures.
 		/// </summary>
 		/// <returns></returns>
-		int GACreateTexture3D(const D3D11_TEXTURE3D_DESC * _pDesc,
-							  const D3D11_SUBRESOURCE_DATA * _pInitialData,
-							  ID3D11Texture3D * *_ppTexture3D)override;
+		int GACreateTexture2D(unsigned int _texture,
+							  unsigned int _width, unsigned int _height,
+							  unsigned int _mipLevels, unsigned int _arraySize,
+							  unsigned int _format, unsigned int _sampleDescCount,
+							  unsigned int _sampleDescQuality, unsigned int _usage,
+							  unsigned int _bindFlags, unsigned int _cpuAccessFlags,
+							  unsigned int _miscFlags, const void* _pSysMem,
+							  CTextures* _pTexture)override;
+		/// <summary>
+		/// Create a vertex-shader object from a compiled shader.
+		/// </summary>
+		/// <returns></returns>
+		int GACreateVertexShader(const char* _vertexPath, const char* _fragmentPath,
+								 const char* _geometryPath)override;
+
+
+
+
+
+
+
+
 		/// <summary>
 		/// Create a pixel shader.
 		/// </summary>
@@ -73,14 +97,7 @@ class CGraphicApiDX : public CGraphicApi {
 								const void* _pShaderBytecodeWithInputSignature,
 								SIZE_T _bytecodeLength,
 								ID3D11InputLayout * *_ppInputLayout)override;
-		/// <summary>
-		/// Create a vertex-shader object from a compiled shader.
-		/// </summary>
-		/// <returns></returns>
-		int GACreateVertexShader(const void* _pShaderBytecode,
-								 SIZE_T _bytecodeLength,
-								 ID3D11ClassLinkage * _pClassLinkage,
-								 ID3D11VertexShader * *_ppVertexShader)override;
+		
 		/// <summary>
 		/// Create a sampler-state object 
 		/// that encapsulates sampling information for a texture.
@@ -149,7 +166,7 @@ class CGraphicApiDX : public CGraphicApi {
 		/// Set an array of 3D textures.
 		/// </summary>
 		/// <returns></returns>
-		int GASetTexture3D()override;
+		int GASetTexture2D()override;
 		/// <summary>
 		/// Set a pixel shader.
 		/// </summary>

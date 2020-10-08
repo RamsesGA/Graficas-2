@@ -1,7 +1,7 @@
 #pragma once
-#include <d3d11.h>
 #include "CBuffer.h"
-#include "glew-2.1.0/include/GL/glew.h"
+#include "CTextures.h"
+#include "CVertexBuffer.h"
 
 /// <summary>
 /// Clase padre donde podremos añadir 
@@ -29,11 +29,7 @@ class CGraphicApi {
 		/// Create
 		/// 
 		
-		/// <summary>
-		/// Creates a device that represents the display adapter.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateDeviceAndSwapChain() = 0;
+		
 		/// <summary>
 		/// Creates a buffer (vertex buffer, 
 		/// index buffer, or shader-constant buffer).
@@ -45,20 +41,42 @@ class CGraphicApi {
 								   unsigned int _miscFlags, unsigned int _structureByteStride,
 								   const void* _pSysMem, CBuffer* _pBuffer) = 0;
 		/// <summary>
-		/// Create an array of 3D textures.
+		/// Create an array of textures.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreateTexture3D(const D3D11_TEXTURE3D_DESC* _pDesc,
-									  const D3D11_SUBRESOURCE_DATA* _pInitialData,
-									  ID3D11Texture3D** _ppTexture3D) = 0;
+		virtual int GACreateTexture2D(unsigned int _texture,
+									  unsigned int _width, unsigned int _height,
+									  unsigned int _mipLevels, unsigned int _arraySize,
+									  unsigned int _format, unsigned int _sampleDescCount,
+									  unsigned int _sampleDescQuality, unsigned int _usage, 
+									  unsigned int _bindFlags, unsigned int _cpuAccessFlags, 
+									  unsigned int _miscFlags, const void* _pSysMem, 
+									  CTextures* _pTexture) = 0;
+		/// <summary>
+		/// Create a vertex-shader object from a compiled shader.
+		/// </summary>
+		/// <returns></returns>
+		virtual int GACreateVertexShader(const char* _vertexPath, const char* _fragmentPath,
+										 const char* _geometryPath) = 0;
 		/// <summary>
 		/// Create a pixel shader.
 		/// </summary>
 		/// <returns></returns>
 		virtual int GACreatePixelShader(const void* _pShaderBytecode,
-										SIZE_T _bytecodeLength,
-										ID3D11ClassLinkage* _pClassLinkage,
-										ID3D11PixelShader** _ppPixelShader) = 0;
+			SIZE_T _bytecodeLength,
+			ID3D11ClassLinkage* _pClassLinkage,
+			ID3D11PixelShader** _ppPixelShader) = 0;
+
+
+
+
+
+		/// <summary>
+		/// Creates a device that represents the display adapter.
+		/// </summary>
+		/// <returns></returns>
+		virtual int GACreateDeviceAndSwapChain() = 0;
+		
 		/// <summary>
 		/// Create an input-layout object to describe 
 		/// the input-buffer data for the input-assembler stage.
@@ -69,14 +87,7 @@ class CGraphicApi {
 										const void* _pShaderBytecodeWithInputSignature,
 										SIZE_T _bytecodeLength,
 										ID3D11InputLayout** _ppInputLayout) = 0;
-		/// <summary>
-		/// Create a vertex-shader object from a compiled shader.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateVertexShader(const void* _pShaderBytecode,
-										 SIZE_T _bytecodeLength,
-										 ID3D11ClassLinkage* _pClassLinkage,
-										 ID3D11VertexShader** _ppVertexShader) = 0;
+		
 		/// <summary>
 		/// Create a sampler-state object 
 		/// that encapsulates sampling information for a texture.
@@ -142,10 +153,10 @@ class CGraphicApi {
 		/// <returns></returns>
 		virtual int GASetBuffer() = 0;
 		/// <summary>
-		/// Set an array of 3D textures.
+		/// Set an array of textures.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GASetTexture3D() = 0;
+		virtual int GASetTexture2D() = 0;
 		/// <summary>
 		/// Set a pixel shader.
 		/// </summary>
