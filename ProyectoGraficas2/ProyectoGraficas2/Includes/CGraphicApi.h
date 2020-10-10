@@ -1,7 +1,11 @@
 #pragma once
+#include <string>
 #include "CBuffer.h"
 #include "CTextures.h"
 #include "CVertexBuffer.h"
+#include "CInputLayout.h"
+#include "CSampleState.h"
+#include "CSwapChain.h"
 
 /// <summary>
 /// Clase padre donde podremos añadir 
@@ -56,164 +60,73 @@ class CGraphicApi {
 		/// Create a vertex-shader object from a compiled shader.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreateVertexShader(const char* _vertexPath, const char* _fragmentPath,
-										 const char* _geometryPath) = 0;
+		virtual int GACreateVertexShader(unsigned int _shaderType) = 0;
 		/// <summary>
 		/// Create a pixel shader.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreatePixelShader(const void* _pShaderBytecode,
-			SIZE_T _bytecodeLength,
-			ID3D11ClassLinkage* _pClassLinkage,
-			ID3D11PixelShader** _ppPixelShader) = 0;
-
-
-
-
-
-		/// <summary>
-		/// Creates a device that represents the display adapter.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateDeviceAndSwapChain() = 0;
-		
+		virtual int GACreatePixelShader(unsigned int _shaderType) = 0;
 		/// <summary>
 		/// Create an input-layout object to describe 
 		/// the input-buffer data for the input-assembler stage.
+		/// 
+		/// ---FALTA OGL
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* _pInputElementDescs,
-										unsigned int _numElements,
-										const void* _pShaderBytecodeWithInputSignature,
-										SIZE_T _bytecodeLength,
-										ID3D11InputLayout** _ppInputLayout) = 0;
-		
+		virtual int GACreateInputLayout(char* _semanticName, unsigned int _semanticIndex,
+										unsigned int _format, unsigned int _inputSlot,
+										unsigned int _alignedByteOffset, unsigned int _inputSlotClass,
+										unsigned int _instanceDataStepRate, unsigned int _numElements,
+										CInputLayout** _ppInputLayout) = 0;
 		/// <summary>
 		/// Create a sampler-state object 
 		/// that encapsulates sampling information for a texture.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreateSamplerState(const D3D11_SAMPLER_DESC* _pSamplerDesc,
-										 ID3D11SamplerState** _ppSamplerState) = 0;
-		/// <summary>
-		/// Create a depth-stencil state object that encapsulates 
-		/// depth-stencil test information for the output-merger stage.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateDepthStencil(const D3D11_DEPTH_STENCIL_DESC* _pDepthStencilDesc,
-										 ID3D11DepthStencilState** _ppDepthStencilState) = 0;
-		/// <summary>
-		/// Create a rasterizer state object that 
-		/// tells the rasterizer stage how to behave.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateRasterizerState(const D3D11_RASTERIZER_DESC* _pRasterizerDesc,
-											ID3D11RasterizerState**_ppRasterizerState) = 0;
-		/// <summary>
-		/// Creates a deferred context, which can record command lists.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateDeferredContext(unsigned int _contextFlags,
-											ID3D11DeviceContext** _ppDeferredContext) = 0;
-		/// <summary>
-		/// Creates a render-target view for accessing resource data.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GACreateRenderTargetView(ID3D11Resource* _pResource,
-											 const D3D11_RENDER_TARGET_VIEW_DESC* _pDesc,
-											 ID3D11RenderTargetView** _ppRTView) = 0;
+		virtual int GACreateSamplerState(unsigned int* _sampler,
+										 unsigned int _filter, unsigned int _addresU,
+										 unsigned int _addressV, unsigned int _addressW,
+										 unsigned int _camparisionFunc, float _minLOD, 
+										 float _maxLOD, CSampleState** _ppSamplerState) = 0;
 		/// <summary>
 		/// The depth-stencil view to bind to the device
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreateDepthStencilView(ID3D11Resource* _pResource,
-											 const D3D11_DEPTH_STENCIL_VIEW_DESC* _pDesc,
-											 ID3D11DepthStencilView** _ppDepthStencilView) = 0;
+		virtual int GACreateDepthStencilView(unsigned int _mipSliceTex2D, unsigned int m_viewDimension,
+											 unsigned int _format) = 0;
+		/// <summary>
+		/// Creates a render-target view for accessing resource data.
+		/// </summary>
+		/// <returns></returns>
+		virtual int GACreateRenderTargetView() = 0;
 		/// <summary>
 		/// Create a shader-resource view for accessing data in a resource.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GACreateShaderResourceView(ID3D11Resource* _pResource,
-											   const D3D11_SHADER_RESOURCE_VIEW_DESC* _pDesc,
-											   ID3D11ShaderResourceView** _ppSRView) = 0;
+		virtual int GACreateShaderResourceViewFromFile(const char _pSrcFile,
+													   std::string _shaderNameOGL, unsigned int _idOGL) = 0;
+		/// <summary>
+		/// Creates a device that represents the display adapter.
+		/// </summary>
+		/// <returns></returns>
+		virtual int GACreateDeviceAndSwapChain(unsigned int _driverType, unsigned int _flags,
+			unsigned int* _pFeatureLevels, unsigned int _featureLevels,
+			unsigned int _sdkVersion, unsigned int _bufferCount,
+			unsigned int _width, unsigned int _height,
+			unsigned int _format, unsigned int _numerator,
+			unsigned int _denominator, unsigned int _bufferUsage,
+			int* _hwnd, unsigned int _count,
+			unsigned int _quality, bool _windowed,
+			CSwapChain** _ppSwapChain, unsigned int* _pFeatureLevel) = 0;
 	
 		///
 		/// Set
 		/// 
 		
 		/// <summary>
-		/// Set a device that represents the display adapter.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetDeviceAndSwapChain() = 0;
-		/// <summary>
-		/// Set a buffer (vertex buffer, 
-		/// index buffer, or shader-constant buffer).
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetBuffer() = 0;
-		/// <summary>
-		/// Set an array of textures.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetTexture2D() = 0;
-		/// <summary>
-		/// Set a pixel shader.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetPixelShader() = 0;
-		/// <summary>
 		/// Set an input-layout object to describe 
 		/// the input-buffer data for the input-assembler stage.
 		/// </summary>
 		/// <returns></returns>
-		virtual int GASetInputLayout() = 0;
-		/// <summary>
-		/// Set a vertex-shader object from a compiled shader.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetVertexShader() = 0;
-		/// <summary>
-		/// Set a sampler-state object 
-		/// that encapsulates sampling information for a texture.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetSamplerState() = 0;
-		/// <summary>
-		/// Set a depth-stencil state object that encapsulates 
-		/// depth-stencil test information for the output-merger stage.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetDepthStencil() = 0;
-		/// <summary>
-		/// Set a render-target view for accessing resource data.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetRenderTarget() = 0;
-		/// <summary>
-		/// Set a rasterizer state object that 
-		/// tells the rasterizer stage how to behave.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetRasterizerState() = 0;
-		/// <summary>
-		/// Set a deferred context, which can record command lists.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetDeferredContext() = 0;
-		/// <summary>
-		/// Sets a render-target view for accessing resource data.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetRenderTargetView() = 0;
-		/// <summary>
-		/// Set the depth-stencil view to bind to the device
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetDepthStencilView() = 0;
-		/// <summary>
-		/// Set a shader-resource view for accessing data in a resource.
-		/// </summary>
-		/// <returns></returns>
-		virtual int GASetShaderResourceView() = 0;
+		virtual int GAIASetInputLayout() = 0;
 };

@@ -8,12 +8,11 @@ void CBufferDX::Init(unsigned int _bufferOGL,
 
 	///Inicialización de las variables para DX
 	m_byteWidth = _byteWidth;
-	m_usage =_usage;
+	m_usage = (D3D11_USAGE)_usage;
 	m_bindFlags = _bindFlags;
 	m_cpuAccessFlags = _cpuAccessFlags;
 	m_miscFlags = _miscFlags;
 	m_structureByteStride = _structureByteStride;
 
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = _pSysMem;
+	m_pSysMem = _pSysMem;
 }

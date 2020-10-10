@@ -8,12 +8,14 @@ class CBufferDX : public CBuffer{
 		///
 		/// Miembros
 		/// 
-		unsigned int m_byteWidth;
-		unsigned int m_usage;
-		unsigned int m_bindFlags;
-		unsigned int m_cpuAccessFlags;
-		unsigned int m_miscFlags;
-		unsigned int m_structureByteStride;
+		UINT m_byteWidth;
+		D3D11_USAGE m_usage;
+		UINT m_bindFlags;
+		UINT m_cpuAccessFlags;
+		UINT m_miscFlags;
+		UINT m_structureByteStride;
+
+		const void* m_pSysMem;
 
 		ID3D11Buffer* m_pVertexBuffer;
 

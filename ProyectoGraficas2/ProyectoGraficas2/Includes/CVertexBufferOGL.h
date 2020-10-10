@@ -7,15 +7,12 @@ class CVertexBufferOGL : public CVertexBuffer{
 		///
 		/// Miembros
 		/// 
-		const char* m_vertexPath;
-		const char* m_fragmentPath;
-		const char* m_geometryPath;
+		unsigned int m_shaderType;
 		///
 		/// Métodos
 		/// 
 		CVertexBufferOGL() = default;
 		~CVertexBufferOGL() = default;
 
-		void Init(const char* _vertexPath, const char* _fragmentPath,
-				  const char* _geometryPath)override;
+		void Init(unsigned int _shaderType)override;
 };

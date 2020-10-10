@@ -12,14 +12,13 @@ void CTexturesDX::Init(unsigned int _texture,
 	m_height = _height;
 	m_mipLevels = _mipLevels;
 	m_arraySize = _arraySize;
-	m_format = _format;
+	m_format = (DXGI_FORMAT)_format;
 	m_sampleDescCount = _sampleDescCount;
 	m_sampleDescQuality = _sampleDescQuality;
-	m_usage = _usage;
+	m_usage = (D3D11_USAGE)_usage;
 	m_bindFlags = _bindFlags;
 	m_cpuAccessFlags = _cpuAccessFlags;
 	m_miscFlags = _miscFlags;
 
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = _pSysMem;
+	m_pSysMem = _pSysMem;
 }

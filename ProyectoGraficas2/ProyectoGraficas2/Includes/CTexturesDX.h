@@ -8,17 +8,19 @@ class CTexturesDX : public CTextures{
 		///
 		/// Miembros 
 		/// 
-		unsigned int m_width;
-		unsigned int m_height;
-		unsigned int m_mipLevels;
-		unsigned int m_arraySize;
-		unsigned int m_format;
-		unsigned int m_sampleDescCount;
-		unsigned int m_sampleDescQuality;
-		unsigned int m_usage;
-		unsigned int m_bindFlags;
-		unsigned int m_cpuAccessFlags;
-		unsigned int m_miscFlags;
+		UINT m_width;
+		UINT m_height;
+		UINT m_mipLevels;
+		UINT m_arraySize;
+		DXGI_FORMAT m_format;
+		UINT m_sampleDescCount;
+		UINT m_sampleDescQuality;
+		D3D11_USAGE m_usage;
+		UINT m_bindFlags;
+		UINT m_cpuAccessFlags;
+		UINT m_miscFlags;
+
+		const void* m_pSysMem;
 
 		ID3D11Texture2D* m_pDepthStencil;
 

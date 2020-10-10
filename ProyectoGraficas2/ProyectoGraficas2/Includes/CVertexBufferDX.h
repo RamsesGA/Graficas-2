@@ -17,6 +17,5 @@ class CVertexBufferDX : public CVertexBuffer{
 		CVertexBufferDX() = default;
 		~CVertexBufferDX() = default;
 
-		void Init(const char* _vertexPath, const char* _fragmentPath,
-				  const char* _geometryPath)override;
+		void Init(unsigned int _shaderType)override;
 };

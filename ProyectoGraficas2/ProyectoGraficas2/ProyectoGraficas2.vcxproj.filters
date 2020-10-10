@@ -57,6 +57,30 @@
     <ClCompile Include="Includes\CBufferOGL.cpp">
       <Filter>Archivos de origen\ClassOGL</Filter>
     </ClCompile>
+    <ClCompile Include="CPPs\CTexturesDX.cpp">
+      <Filter>Archivos de origen\ClassDX</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CTexturesOGL.cpp">
+      <Filter>Archivos de origen\ClassOGL</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CVertexBufferDX.cpp">
+      <Filter>Archivos de origen\ClassDX</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CVertexBufferOGL.cpp">
+      <Filter>Archivos de origen\ClassOGL</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CInputLayoutDX.cpp">
+      <Filter>Archivos de origen\ClassDX</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CSampleStateDX.cpp">
+      <Filter>Archivos de origen\ClassDX</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CSampleStateOGL.cpp">
+      <Filter>Archivos de origen\ClassOGL</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CSwapChainDX.cpp">
+      <Filter>Archivos de origen\ClassDX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\CGraphicApi.h">
@@ -130,6 +154,30 @@
     </ClInclude>
     <ClInclude Include="Includes\CVertexBufferOGL.h">
       <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CTexturesDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CTexturesOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CTextures.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CSampleState.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CSampleStateDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CSampleStateOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CPixelShaderDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\stb_image.h">
+      <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

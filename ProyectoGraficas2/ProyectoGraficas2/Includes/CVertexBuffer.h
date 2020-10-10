@@ -9,6 +9,5 @@ class CVertexBuffer {
 		CVertexBuffer() = default;
 		~CVertexBuffer() = default;
 
-		virtual void Init(const char* vertexPath, const char* fragmentPath,
-						  const char* geometryPath) = 0;
+		virtual void Init(unsigned int _shaderType) = 0;
 };

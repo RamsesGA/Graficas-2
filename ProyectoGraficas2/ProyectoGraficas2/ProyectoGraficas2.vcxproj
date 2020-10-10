@@ -72,9 +72,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -154,6 +160,14 @@
     <ClCompile Include="CPPs\CGraphicApi.cpp" />
     <ClCompile Include="CPPs\CGraphicApiDX.cpp" />
     <ClCompile Include="CPPs\CGraphicApiOGL.cpp" />
+    <ClCompile Include="CPPs\CInputLayoutDX.cpp" />
+    <ClCompile Include="CPPs\CSampleStateDX.cpp" />
+    <ClCompile Include="CPPs\CSampleStateOGL.cpp" />
+    <ClCompile Include="CPPs\CSwapChainDX.cpp" />
+    <ClCompile Include="CPPs\CTexturesDX.cpp" />
+    <ClCompile Include="CPPs\CTexturesOGL.cpp" />
+    <ClCompile Include="CPPs\CVertexBufferDX.cpp" />
+    <ClCompile Include="CPPs\CVertexBufferOGL.cpp" />
     <ClCompile Include="CPPs\glad.c" />
     <ClCompile Include="CPPs\Main.cpp" />
     <ClCompile Include="Includes\CBufferDX.cpp" />
@@ -169,21 +183,29 @@
     <ClInclude Include="Includes\CInputLayout.h" />
     <ClInclude Include="Includes\CInputLayoutDX.h" />
     <ClInclude Include="Includes\CInputLayoutOGL.h" />
+    <ClInclude Include="Includes\CPixelShaderDX.h" />
     <ClInclude Include="Includes\CRenderTarget.h" />
     <ClInclude Include="Includes\CRenderTargetDX.h" />
     <ClInclude Include="Includes\CRenderTargetOGL.h" />
     <ClInclude Include="Includes\CRenderTargetView.h" />
     <ClInclude Include="Includes\CRenderTargetViewDX.h" />
     <ClInclude Include="Includes\CRenderTargetViewOGL.h" />
+    <ClInclude Include="Includes\CSampleState.h" />
+    <ClInclude Include="Includes\CSampleStateDX.h" />
+    <ClInclude Include="Includes\CSampleStateOGL.h" />
     <ClInclude Include="Includes\CShader.h" />
     <ClInclude Include="Includes\CShaderDX.h" />
     <ClInclude Include="Includes\CShaderOGL.h" />
     <ClInclude Include="Includes\CSwapChain.h" />
     <ClInclude Include="Includes\CSwapChainDX.h" />
     <ClInclude Include="Includes\CSwapChainOGL.h" />
+    <ClInclude Include="Includes\CTextures.h" />
+    <ClInclude Include="Includes\CTexturesDX.h" />
+    <ClInclude Include="Includes\CTexturesOGL.h" />
     <ClInclude Include="Includes\CVertexBuffer.h" />
     <ClInclude Include="Includes\CVertexBufferDX.h" />
     <ClInclude Include="Includes\CVertexBufferOGL.h" />
+    <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
