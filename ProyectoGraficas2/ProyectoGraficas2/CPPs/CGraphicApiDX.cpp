@@ -1,290 +1,112 @@
-#include "../Includes/CGraphicApiDX.h"
-#include "../Includes/CBufferDX.h"
-#include "../Includes/CTexturesDX.h"
-#include "../Includes/CVertexBufferDX.h"
-#include "../Includes/CPixelShaderDX.h"
-#include "../Includes/CInputLayoutDX.h"
-#include "../Includes/CSampleStateDX.h"
+#include "..\Includes\CGraphicApiDX.h"
 
+LRESULT CALLBACK WndProc(HWND hWnd,
+                         UINT message,
+                         WPARAM wParam,
+                         LPARAM lParam) {
+
+    PAINTSTRUCT ps;
+    HDC hdc;
+
+    switch (message)
+    {
+        case WM_PAINT:
+            hdc = BeginPaint(hWnd, &ps);
+            EndPaint(hWnd, &ps);
+            break;
+
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+
+    return 0;
+}
 
 void CGraphicApiDX::Init(){
 
-    m_pDevice = NULL;
-    m_pDeviceContext = NULL;
+    m_width = 0;
+    m_height = 0;
+
+    m_hInst = NULL;
+    m_hWnd = NULL;
+
+    m_pImmediateContext = NULL;
+    m_pSamplerLinear = NULL;
+    m_pTextureRV = NULL;
+    m_pCBNeverChanges = NULL;
+    m_pCBChangeOnResize = NULL;
+    m_pCBChangesEveryFrame = NULL;
+    m_pVertexBuffer = NULL;
+    m_pIndexBuffer  = NULL;
+    m_pVertexLayout = NULL;
+    m_pVertexShader = NULL;
+    m_pPixelShader  = NULL;
+    m_pDepthStencil = NULL;
+    m_pDepthStencilView = NULL;
+    m_pRenderTargetView = NULL;
+    m_pSwapChain = NULL;
+    m_pImmediateContext = NULL;
+    m_pd3dDevice = NULL;
 }
 
-HRESULT CGraphicApiDX::CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, 
-                                             LPCSTR szShaderModel, ID3DBlob** ppBlobOut){
-    HRESULT hr = S_OK;
+bool CGraphicApiDX::InitWindow(){
 
-    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-    dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
+    ///Inicializamos nuestras variables
+    /// para continuar con el trabajo sin problemas
+    Init();
 
-    ID3DBlob* pErrorBlob;
-    hr = D3DX11CompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
-        dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
-    if (FAILED(hr))
-    {
-        if (pErrorBlob != NULL)
-            OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-        if (pErrorBlob) pErrorBlob->Release();
-        return hr;
+	HINSTANCE instance; ///Por ahora, duda, quien le envía HInstance a WindowDX
+
+    if (FAILED(WindowDX(instance, 10))) {
+        return 0;
     }
-    if (pErrorBlob) pErrorBlob->Release();
 
-    return S_OK;
-}
+    ///Aquí empieza el Device
+    if (FAILED(InitDevice())){
 
-int CGraphicApiDX::GACreateBuffer(unsigned int _bufferOGL,
-                                  unsigned int _byteWidth, unsigned int _usage,
-                                  unsigned int _bindFlags, unsigned int _CPUAccessFlags,
-                                  unsigned int _miscFlags, unsigned int _structureByteStride,
-                                  const void* _pSysMem, CBuffer* _pBuffer){
-    HRESULT hr = S_OK;
-
-    CBufferDX* newBuffer;
-    newBuffer->Init(_bufferOGL,
-                    _byteWidth, _usage,
-                    _bindFlags, _CPUAccessFlags,
-                    _miscFlags, _structureByteStride,
-                    _pSysMem);
-
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = newBuffer->m_usage;
-    bd.ByteWidth = newBuffer->m_byteWidth;
-    bd.BindFlags = newBuffer->m_bindFlags;
-    bd.CPUAccessFlags = newBuffer->m_cpuAccessFlags;
-
-    D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = newBuffer->m_pSysMem;
-
-    hr = m_pDevice->CreateBuffer(&bd, &InitData, &newBuffer->m_pVertexBuffer);
-    if (FAILED(hr)) {
-        return hr;
+        CleanupDevice();
+        return 0;
     }
-    return 0;
 }
 
-int CGraphicApiDX::GACreateTexture2D(unsigned int _texture,
-                                     unsigned int _width, unsigned int _height,
-                                     unsigned int _mipLevels, unsigned int _arraySize,
-                                     unsigned int _format, unsigned int _sampleDescCount,
-                                     unsigned int _sampleDescQuality, unsigned int _usage,
-                                     unsigned int _bindFlags, unsigned int _cpuAccessFlags,
-                                     unsigned int _miscFlags, const void* _pSysMem,
-                                     CTextures* _pTexture){
-    HRESULT hr = S_OK;
+void CGraphicApiDX::CleanupDevice(){
 
-    CTexturesDX* newTexture2D;
-    newTexture2D->Init(_texture,
-                       _width,
-                       _height, _mipLevels, 
-                       _arraySize, _format, 
-                       _sampleDescCount, _sampleDescQuality, 
-                       _usage, _bindFlags, 
-                       _cpuAccessFlags, _miscFlags, 
-                       _pSysMem);
-
-    D3D11_TEXTURE2D_DESC descDepth;
-    ZeroMemory(&descDepth, sizeof(descDepth));
-    descDepth.Width = newTexture2D->m_width;
-    descDepth.Height = newTexture2D->m_height;
-    descDepth.MipLevels = newTexture2D->m_mipLevels;
-    descDepth.ArraySize = newTexture2D->m_arraySize;
-    descDepth.Format = newTexture2D->m_format;
-    descDepth.SampleDesc.Count = newTexture2D->m_sampleDescCount;
-    descDepth.SampleDesc.Quality = newTexture2D->m_sampleDescQuality;
-    descDepth.Usage = newTexture2D->m_usage;
-    descDepth.BindFlags = newTexture2D->m_bindFlags;
-    descDepth.CPUAccessFlags = newTexture2D->m_cpuAccessFlags;
-    descDepth.MiscFlags = newTexture2D->m_miscFlags;
-    hr = m_pDevice->CreateTexture2D(&descDepth, NULL, &m_pDepthStencil);
-    if (FAILED(hr)) {
-        return hr;
-    }
-    m_descDepth = descDepth;
-
-    return 0;
+    if (m_pImmediateContext)    m_pImmediateContext     ->ClearState();
+    if (m_pSamplerLinear)       m_pSamplerLinear        ->Release();
+    if (m_pTextureRV)           m_pTextureRV            ->Release();
+    if (m_pCBNeverChanges)      m_pCBNeverChanges       ->Release();
+    if (m_pCBChangeOnResize)    m_pCBChangeOnResize     ->Release();
+    if (m_pCBChangesEveryFrame) m_pCBChangesEveryFrame  ->Release();
+    if (m_pVertexBuffer)        m_pVertexBuffer         ->Release();
+    if (m_pIndexBuffer)         m_pIndexBuffer          ->Release();
+    if (m_pVertexLayout)        m_pVertexLayout         ->Release();
+    if (m_pVertexShader)        m_pVertexShader         ->Release();
+    if (m_pPixelShader)         m_pPixelShader          ->Release();
+    if (m_pDepthStencil)        m_pDepthStencil         ->Release();
+    if (m_pDepthStencilView)    m_pDepthStencilView     ->Release();
+    if (m_pRenderTargetView)    m_pRenderTargetView     ->Release();
+    if (m_pSwapChain)           m_pSwapChain            ->Release();
+    if (m_pImmediateContext)    m_pImmediateContext     ->Release();
+    if (m_pd3dDevice)           m_pd3dDevice            ->Release();
 }
 
-int CGraphicApiDX::GACreateVertexShader(unsigned int _shaderType) {
+HRESULT CGraphicApiDX::InitDevice(){
 
     HRESULT hr = S_OK;
 
-    m_pVSBlob = NULL;
-    hr = CompileShaderFromFile(L"Tutorial07.fx", "VS", "vs_4_0", &m_pVSBlob);
-    if (FAILED(hr)){
-        MessageBox(NULL,
-            L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-        return hr;
-    }
+    RECT rc;
 
-    CVertexBufferDX vertexBuff;
+    GetClientRect(m_hWnd, &rc);
 
-    // Create the vertex shader
-    hr = m_pDevice->CreateVertexShader(m_pVSBlob->GetBufferPointer(), m_pVSBlob->GetBufferSize(), NULL, &vertexBuff.m_pVertexShader);
-    m_pVSBlob->Release();
-    if (FAILED(hr)){
-        
-        return hr;
-    }
-    return 0;
-}
+    m_width = rc.right - rc.left;
+    m_height = rc.bottom - rc.top;
 
-int CGraphicApiDX::GACreatePixelShader(unsigned int _shaderType){
-
-    HRESULT hr = S_OK;
-
-    m_pPSBlob = NULL;
-    hr = CompileShaderFromFile(L"Tutorial07.fx", "PS", "ps_4_0", &m_pPSBlob);
-    if (FAILED(hr)){
-        MessageBox(NULL,
-            L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-        return hr;
-    }
-
-    CPixelShaderDX newPixel;
-
-    // Create the pixel shader
-    hr = m_pDevice->CreatePixelShader(m_pPSBlob->GetBufferPointer(), m_pPSBlob->GetBufferSize(), NULL, &newPixel.m_pPixelShader);
-    m_pPSBlob->Release();
-    if (FAILED(hr)) {
-        return hr;
-    }
-    return 0;
-}
-
-int CGraphicApiDX::GACreateInputLayout(char* _semanticName, unsigned int _semanticIndex,
-                                       unsigned int _format, unsigned int _inputSlot,
-                                       unsigned int _alignedByteOffset, unsigned int _inputSlotClass,
-                                       unsigned int _instanceDataStepRate, unsigned int _numElements,
-                                       CInputLayout** _ppInputLayout) {
-    HRESULT hr = S_OK;
-
-    D3D11_INPUT_ELEMENT_DESC layout[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-
-    UINT numElements = ARRAYSIZE(layout);
-
-    CInputLayoutDX newInput;
-
-    // Create the input layout
-    hr = m_pDevice->CreateInputLayout(layout, numElements, m_pVSBlob->GetBufferPointer(),
-                                      m_pVSBlob->GetBufferSize(), &newInput.m_pVertexLayout);
-    m_pVSBlob->Release();
-    if (FAILED(hr)) {
-        return hr;
-    }
-    return 0;
-}
-
-int CGraphicApiDX::GACreateSamplerState(unsigned int* _sampler,
-                                        unsigned int _filter, unsigned int _addresU,
-                                        unsigned int _addressV, unsigned int _addressW,
-                                        unsigned int _camparisionFunc, float _minLOD,
-                                        float _maxLOD, CSampleState** _ppSamplerState) {
-    HRESULT hr = S_OK;
-
-    CSampleStateDX newSampler;
-
-    newSampler.Init(_sampler,
-                    _filter, _addresU,
-                    _addressV, _addressW,
-                    _camparisionFunc, _minLOD,
-                    _maxLOD);
-
-    D3D11_SAMPLER_DESC sampDesc;
-    ZeroMemory(&sampDesc, sizeof(sampDesc));
-    sampDesc.Filter = newSampler.m_filter;
-    sampDesc.AddressU = newSampler.m_addressU;
-    sampDesc.AddressV = newSampler.m_addressV;
-    sampDesc.AddressW = newSampler.m_addressW;
-    sampDesc.ComparisonFunc = newSampler.m_comparissionFunc;
-    sampDesc.MinLOD = newSampler.m_minLOD;
-    sampDesc.MaxLOD = newSampler.m_maxLOD;
-
-    hr = m_pDevice->CreateSamplerState(&sampDesc, &newSampler.m_pSamplerLinear);
-    if (FAILED(hr)) {
-        return hr;
-    }
-    return 0;
-}
-
-int CGraphicApiDX::GACreateDepthStencilView(unsigned int _mipSliceTex2D, 
-                                            unsigned int _viewDimension,
-                                            unsigned int _format) {
-    HRESULT hr = S_OK;
-
-    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-    ZeroMemory(&descDSV, sizeof(descDSV));
-    descDSV.Format = m_descDepth.Format;
-    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    descDSV.Texture2D.MipSlice = 0;
-    hr = m_pDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
-    if (FAILED(hr)) {
-        return hr;
-    }
-    return 0;
-}
-
-int CGraphicApiDX::GACreateRenderTargetView() {
-
-    HRESULT hr = S_OK;
-
-    hr = m_pDevice->CreateRenderTargetView(m_pBackBuffer, NULL, &m_pRenderTargetView);
-
-    m_pBackBuffer->Release();
-    if (FAILED(hr)) {
-        return hr;
-    }
-    return 0;
-}
-
-int CGraphicApiDX::GACreateShaderResourceViewFromFile(const char _pSrcFile,
-                                                      std::string _shaderNameOGL, 
-                                                      unsigned int _idOGL) {
-    HRESULT hr = S_OK;
-
-    hr = D3DX11CreateShaderResourceViewFromFile(m_pDevice, L"seafloor.dds", NULL, NULL, &m_pTextureRV, NULL);
-    if (FAILED(hr)) {
-        return hr;
-    }
-
-    return 0;
-}
-
-int CGraphicApiDX::GACreateDeviceAndSwapChain(unsigned int _driverType, unsigned int _flags,
-                                              unsigned int* _pFeatureLevels, unsigned int _featureLevels,
-                                              unsigned int _sdkVersion, unsigned int _bufferCount,
-                                              unsigned int _width, unsigned int _height,
-                                              unsigned int _format, unsigned int _numerator,
-                                              unsigned int _denominator, unsigned int _bufferUsage,
-                                              int* _hwnd, unsigned int _count,
-                                              unsigned int _quality, bool _windowed,
-                                              CSwapChain** _ppSwapChain, unsigned int* _pFeatureLevel) {
-
-    HRESULT hr = S_OK;
-
-    DXGI_SWAP_CHAIN_DESC sd;
-    ZeroMemory(&sd, sizeof(sd));
-    sd.BufferCount = 1;
-    sd.BufferDesc.Width = _width;
-    sd.BufferDesc.Height = _height;
-    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.BufferDesc.RefreshRate.Numerator = _numerator;
-    sd.BufferDesc.RefreshRate.Denominator = _denominator;
-    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.OutputWindow = m_hWnd;
-    sd.SampleDesc.Count = _count;
-    sd.SampleDesc.Quality = _quality;
-    sd.Windowed = _windowed;
+    UINT createDeviceFlags = 0;
+    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 
     D3D_DRIVER_TYPE driverTypes[] =
     {
@@ -292,6 +114,7 @@ int CGraphicApiDX::GACreateDeviceAndSwapChain(unsigned int _driverType, unsigned
         D3D_DRIVER_TYPE_WARP,
         D3D_DRIVER_TYPE_REFERENCE,
     };
+
     UINT numDriverTypes = ARRAYSIZE(driverTypes);
 
     D3D_FEATURE_LEVEL featureLevels[] =
@@ -300,40 +123,327 @@ int CGraphicApiDX::GACreateDeviceAndSwapChain(unsigned int _driverType, unsigned
         D3D_FEATURE_LEVEL_10_1,
         D3D_FEATURE_LEVEL_10_0,
     };
+
     UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
-    UINT createDeviceFlags = 0;
-#ifdef _DEBUG
-    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+    DXGI_SWAP_CHAIN_DESC sd;
+    ZeroMemory(&sd, sizeof(sd));
+    sd.BufferCount = 1;
+    sd.BufferDesc.Width = m_width;
+    sd.BufferDesc.Height = m_height;
+    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    sd.BufferDesc.RefreshRate.Numerator = 60;
+    sd.BufferDesc.RefreshRate.Denominator = 1;
+    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    sd.OutputWindow = g_hWnd;
+    sd.SampleDesc.Count = 1;
+    sd.SampleDesc.Quality = 0;
+    sd.Windowed = TRUE;
 
     for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
     {
-        m_driverType = driverTypes[driverTypeIndex];
-        hr = D3D11CreateDeviceAndSwapChain(NULL, m_driverType, 
-                                           NULL, createDeviceFlags, 
-                                           featureLevels, numFeatureLevels,
-                                           D3D11_SDK_VERSION, &sd, 
-                                           &m_pSwapChain, &m_pDevice,
-                                           &m_featureLevel, &m_pImmediateContext);
-        if (SUCCEEDED(hr)) {
+        g_driverType = driverTypes[driverTypeIndex];
+        hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
+            D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &g_featureLevel, &g_pImmediateContext);
+        if (SUCCEEDED(hr))
             break;
-        }
     }
-    if (FAILED(hr)) {
+    if (FAILED(hr))
+        return hr;
+
+    // Create a render target view
+    ID3D11Texture2D* pBackBuffer = NULL;
+    hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+    if (FAILED(hr))
+        return hr;
+
+    hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
+    pBackBuffer->Release();
+    if (FAILED(hr))
+        return hr;
+
+    // Create depth stencil texture
+    D3D11_TEXTURE2D_DESC descDepth;
+    ZeroMemory(&descDepth, sizeof(descDepth));
+    descDepth.Width = m_width;
+    descDepth.Height = m_height;
+    descDepth.MipLevels = 1;
+    descDepth.ArraySize = 1;
+    descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    descDepth.SampleDesc.Count = 1;
+    descDepth.SampleDesc.Quality = 0;
+    descDepth.Usage = D3D11_USAGE_DEFAULT;
+    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    descDepth.CPUAccessFlags = 0;
+    descDepth.MiscFlags = 0;
+    hr = g_pd3dDevice->CreateTexture2D(&descDepth, NULL, &g_pDepthStencil);
+    if (FAILED(hr))
+        return hr;
+
+    // Create the depth stencil view
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+    ZeroMemory(&descDSV, sizeof(descDSV));
+    descDSV.Format = descDepth.Format;
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    descDSV.Texture2D.MipSlice = 0;
+    hr = g_pd3dDevice->CreateDepthStencilView(g_pDepthStencil, &descDSV, &g_pDepthStencilView);
+    if (FAILED(hr))
+        return hr;
+
+    g_pImmediateContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
+
+    // Setup the viewport
+    D3D11_VIEWPORT vp;
+    vp.Width = (FLOAT)m_width;
+    vp.Height = (FLOAT)m_height;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    g_pImmediateContext->RSSetViewports(1, &vp);
+
+    // Compile the vertex shader
+    ID3DBlob* pVSBlob = NULL;
+    hr = CompileShaderFromFile(L"Tutorial07.fx", "VS", "vs_4_0", &pVSBlob);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL,
+            L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
         return hr;
     }
-    return 0;
+
+    // Create the vertex shader
+    hr = g_pd3dDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), NULL, &g_pVertexShader);
+    if (FAILED(hr))
+    {
+        pVSBlob->Release();
+        return hr;
+    }
+
+    // Define the input layout
+    D3D11_INPUT_ELEMENT_DESC layout[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+    UINT numElements = ARRAYSIZE(layout);
+
+    // Create the input layout
+    hr = g_pd3dDevice->CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(),
+        pVSBlob->GetBufferSize(), &g_pVertexLayout);
+    pVSBlob->Release();
+    if (FAILED(hr))
+        return hr;
+
+    // Set the input layout
+    g_pImmediateContext->IASetInputLayout(g_pVertexLayout);
+
+    // Compile the pixel shader
+    ID3DBlob* pPSBlob = NULL;
+    hr = CompileShaderFromFile(L"Tutorial07.fx", "PS", "ps_4_0", &pPSBlob);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL,
+            L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+        return hr;
+    }
+
+    // Create the pixel shader
+    hr = g_pd3dDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), NULL, &g_pPixelShader);
+    pPSBlob->Release();
+    if (FAILED(hr))
+        return hr;
+
+    // Create vertex buffer
+    SimpleVertex vertices[] =
+    {
+        { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+    };
+
+    D3D11_BUFFER_DESC bd;
+    ZeroMemory(&bd, sizeof(bd));
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.ByteWidth = sizeof(SimpleVertex) * 24;
+    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bd.CPUAccessFlags = 0;
+    D3D11_SUBRESOURCE_DATA InitData;
+    ZeroMemory(&InitData, sizeof(InitData));
+    InitData.pSysMem = vertices;
+    hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
+    if (FAILED(hr))
+        return hr;
+
+    // Set vertex buffer
+    UINT stride = sizeof(SimpleVertex);
+    UINT offset = 0;
+    g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+
+    // Create index buffer
+    // Create vertex buffer
+    WORD indices[] =
+    {
+        3,1,0,
+        2,1,3,
+
+        6,4,5,
+        7,4,6,
+
+        11,9,8,
+        10,9,11,
+
+        14,12,13,
+        15,12,14,
+
+        19,17,16,
+        18,17,19,
+
+        22,20,21,
+        23,20,22
+    };
+
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.ByteWidth = sizeof(WORD) * 36;
+    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bd.CPUAccessFlags = 0;
+    InitData.pSysMem = indices;
+    hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
+    if (FAILED(hr))
+        return hr;
+
+    // Set index buffer
+    g_pImmediateContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+    // Set primitive topology
+    g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // Create the constant buffers
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.ByteWidth = sizeof(CBNeverChanges);
+    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    bd.CPUAccessFlags = 0;
+    hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
+    if (FAILED(hr))
+        return hr;
+
+    bd.ByteWidth = sizeof(CBChangeOnResize);
+    hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangeOnResize);
+    if (FAILED(hr))
+        return hr;
+
+    bd.ByteWidth = sizeof(CBChangesEveryFrame);
+    hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
+    if (FAILED(hr))
+        return hr;
+
+    // Load the Texture
+    hr = D3DX11CreateShaderResourceViewFromFile(g_pd3dDevice, L"seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
+    if (FAILED(hr))
+        return hr;
+
+    // Create the sample state
+    D3D11_SAMPLER_DESC sampDesc;
+    ZeroMemory(&sampDesc, sizeof(sampDesc));
+    sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    sampDesc.MinLOD = 0;
+    sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
+    if (FAILED(hr))
+        return hr;
+
+    // Initialize the world matrices
+    g_World = XMMatrixIdentity();
+
+    // Initialize the view matrix
+    XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
+    XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    g_View = XMMatrixLookAtLH(Eye, At, Up);
+
+    CBNeverChanges cbNeverChanges;
+    cbNeverChanges.mView = XMMatrixTranspose(g_View);
+    g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges, 0, NULL, &cbNeverChanges, 0, 0);
+
+    // Initialize the projection matrix
+    g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_width / (FLOAT)m_height, 0.01f, 100.0f);
+
+    CBChangeOnResize cbChangesOnResize;
+    cbChangesOnResize.mProjection = XMMatrixTranspose(g_Projection);
+    g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
+
+    return S_OK;
 }
 
+HRESULT CGraphicApiDX::WindowDX(HINSTANCE _hInstance, 
+                                int _cmdShow){
 
+    // Register class
+    WNDCLASSEX wcex;
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = _hInstance;
+    wcex.hIcon = NULL;
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = L"WindowClass";
+    wcex.hIconSm = NULL;
 
-///
-/// S E T
-/// 
+    if (!RegisterClassEx(&wcex)) {
+        return E_FAIL;
+    }
 
-int CGraphicApiDX::GAIASetInputLayout(){
+    // Create window
+    RECT rc = { 0, 0, 640, 480 };
+    AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
-    m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
-    return 0;
+    m_hInst = _hInstance;
+    m_hWnd = CreateWindow(L"WindowClass", L"Direct3D 11",
+                          WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 
+                          CW_USEDEFAULT, (rc.right - rc.left), 
+                          (rc.bottom - rc.top), 
+                          NULL, NULL, 
+                          _hInstance, NULL);
+
+    if (!m_hWnd) {
+        return E_FAIL;
+    }
+
+    ShowWindow(m_hWnd, _cmdShow);
+
+    return S_OK;
 }

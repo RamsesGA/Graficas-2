@@ -157,54 +157,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CPPs\CGraphicApi.cpp" />
-    <ClCompile Include="CPPs\CGraphicApiDX.cpp" />
-    <ClCompile Include="CPPs\CGraphicApiOGL.cpp" />
-    <ClCompile Include="CPPs\CInputLayoutDX.cpp" />
-    <ClCompile Include="CPPs\CSampleStateDX.cpp" />
-    <ClCompile Include="CPPs\CSampleStateOGL.cpp" />
-    <ClCompile Include="CPPs\CSwapChainDX.cpp" />
-    <ClCompile Include="CPPs\CTexturesDX.cpp" />
-    <ClCompile Include="CPPs\CTexturesOGL.cpp" />
-    <ClCompile Include="CPPs\CVertexBufferDX.cpp" />
-    <ClCompile Include="CPPs\CVertexBufferOGL.cpp" />
     <ClCompile Include="CPPs\glad.c" />
     <ClCompile Include="CPPs\Main.cpp" />
-    <ClCompile Include="Includes\CBufferDX.cpp" />
-    <ClCompile Include="Includes\CBufferOGL.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Includes\CBuffer.h" />
-    <ClInclude Include="Includes\CBufferDX.h" />
-    <ClInclude Include="Includes\CBufferOGL.h" />
     <ClInclude Include="Includes\CGraphicApi.h" />
-    <ClInclude Include="Includes\CGraphicApiDX.h" />
-    <ClInclude Include="Includes\CGraphicApiOGL.h" />
-    <ClInclude Include="Includes\CInputLayout.h" />
-    <ClInclude Include="Includes\CInputLayoutDX.h" />
-    <ClInclude Include="Includes\CInputLayoutOGL.h" />
-    <ClInclude Include="Includes\CPixelShaderDX.h" />
-    <ClInclude Include="Includes\CRenderTarget.h" />
-    <ClInclude Include="Includes\CRenderTargetDX.h" />
-    <ClInclude Include="Includes\CRenderTargetOGL.h" />
-    <ClInclude Include="Includes\CRenderTargetView.h" />
-    <ClInclude Include="Includes\CRenderTargetViewDX.h" />
-    <ClInclude Include="Includes\CRenderTargetViewOGL.h" />
-    <ClInclude Include="Includes\CSampleState.h" />
-    <ClInclude Include="Includes\CSampleStateDX.h" />
-    <ClInclude Include="Includes\CSampleStateOGL.h" />
-    <ClInclude Include="Includes\CShader.h" />
-    <ClInclude Include="Includes\CShaderDX.h" />
-    <ClInclude Include="Includes\CShaderOGL.h" />
-    <ClInclude Include="Includes\CSwapChain.h" />
-    <ClInclude Include="Includes\CSwapChainDX.h" />
-    <ClInclude Include="Includes\CSwapChainOGL.h" />
-    <ClInclude Include="Includes\CTextures.h" />
-    <ClInclude Include="Includes\CTexturesDX.h" />
-    <ClInclude Include="Includes\CTexturesOGL.h" />
-    <ClInclude Include="Includes\CVertexBuffer.h" />
-    <ClInclude Include="Includes\CVertexBufferDX.h" />
-    <ClInclude Include="Includes\CVertexBufferOGL.h" />
     <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

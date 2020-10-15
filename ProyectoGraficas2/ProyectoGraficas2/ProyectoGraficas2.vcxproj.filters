@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Archivos de origen\GraphicApi">
-      <UniqueIdentifier>{0064f43f-2ec0-44c0-8e6e-bfbcfec41cf0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Archivos de encabezado\GraphicApi">
       <UniqueIdentifier>{ac9320dc-f4e2-408c-ad24-8f4606615cbb}</UniqueIdentifier>
     </Filter>
@@ -39,142 +36,13 @@
     <ClCompile Include="CPPs\Main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="CPPs\CGraphicApi.cpp">
-      <Filter>Archivos de origen\GraphicApi</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CGraphicApiDX.cpp">
-      <Filter>Archivos de origen\GraphicApi</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CGraphicApiOGL.cpp">
-      <Filter>Archivos de origen\GraphicApi</Filter>
-    </ClCompile>
     <ClCompile Include="CPPs\glad.c">
       <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Includes\CBufferDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
-    </ClCompile>
-    <ClCompile Include="Includes\CBufferOGL.cpp">
-      <Filter>Archivos de origen\ClassOGL</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CTexturesDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CTexturesOGL.cpp">
-      <Filter>Archivos de origen\ClassOGL</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CVertexBufferDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CVertexBufferOGL.cpp">
-      <Filter>Archivos de origen\ClassOGL</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CInputLayoutDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CSampleStateDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CSampleStateOGL.cpp">
-      <Filter>Archivos de origen\ClassOGL</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CSwapChainDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\CGraphicApi.h">
       <Filter>Archivos de encabezado\GraphicApi</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CGraphicApiDX.h">
-      <Filter>Archivos de encabezado\GraphicApi</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CGraphicApiOGL.h">
-      <Filter>Archivos de encabezado\GraphicApi</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CBuffer.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CRenderTarget.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CRenderTargetView.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CShader.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CSwapChain.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexBuffer.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CInputLayout.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CInputLayoutDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CRenderTargetDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CRenderTargetViewDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CShaderDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CSwapChainDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexBufferDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CBufferDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CBufferOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CInputLayoutOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CRenderTargetOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CRenderTargetViewOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CShaderOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CSwapChainOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexBufferOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CTexturesDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CTexturesOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CTextures.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CSampleState.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CSampleStateDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CSampleStateOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CPixelShaderDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
     <ClInclude Include="Includes\stb_image.h">
       <Filter>Archivos de encabezado</Filter>
