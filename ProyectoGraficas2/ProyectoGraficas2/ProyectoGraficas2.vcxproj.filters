@@ -39,6 +39,12 @@
     <ClCompile Include="CPPs\glad.c">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="CPPs\CGraphicApiDX.cpp">
+      <Filter>Archivos de origen\ClassDX</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CGraphicApiOGL.cpp">
+      <Filter>Archivos de origen\ClassOGL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\CGraphicApi.h">
@@ -46,6 +52,12 @@
     </ClInclude>
     <ClInclude Include="Includes\stb_image.h">
       <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CGraphicApiDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CGraphicApiOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

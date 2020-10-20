@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -157,11 +157,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CPPs\CGraphicApiDX.cpp" />
+    <ClCompile Include="CPPs\CGraphicApiOGL.cpp" />
     <ClCompile Include="CPPs\glad.c" />
     <ClCompile Include="CPPs\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\CGraphicApi.h" />
+    <ClInclude Include="Includes\CGraphicApiDX.h" />
+    <ClInclude Include="Includes\CGraphicApiOGL.h" />
     <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

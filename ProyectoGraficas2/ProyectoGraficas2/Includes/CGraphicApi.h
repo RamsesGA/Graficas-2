@@ -9,58 +9,79 @@
 class CGraphicApi {
 
 	private:
-	
+		///
+		///Métodos
+		/// 
+
+		///
+		/// Funciones internas
+		/// 
+
+		virtual bool MainInit() = 0;
+
+		virtual bool InitWindow() = 0;
+
+		virtual bool InitDevice() = 0;
+
 	public:
 		///
 		///Métodos
 		/// 
+		
+		///Constructor
 		CGraphicApi() = default;
+		///Destructor
 		~CGraphicApi() = default;
 
-		virtual void Init() = 0;
-
-		virtual void Update() = 0;
-
-		virtual void Exit() = 0;
-	
 		///
-		/// Create
+		/// Funciones para el usuario
+		/// 
+		
+		///
+		/// C R E A T E
 		/// 
 
-		virtual bool InitWindow() = 0;
+		virtual bool CreatePixelShader() = 0;
 
+		virtual bool CreateVertexShader() = 0;
 
-		/*
-		Vamos por pasos:
-		Primero pasa a una función llamada wWinMain, recibe de parámetrop lo siguiente:
+		virtual bool CreateVertexBuffer() = 0;
 
-		HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow
+		virtual bool CreateIndexBuffer() = 0;
 
-		después de eso, va a entrar en una condición de chequeo para el init window,
-		en el init window recibe de parámetro lo siguiente:
+		virtual bool CreateConstBuffNeverChanges() = 0;
 
-		HINSTANCE hInstance, int nCmdShow
+		virtual bool CreateConstBuffChangeOnResize() = 0;
 
-		ahí adentro lo que más destáca es el uso de:
+		virtual bool CreateConstBuffChangeEveryFrame() = 0;
 
-		WNDCLASSEX
+		virtual bool CreateTexture2D() = 0;
 
-		donde ahí rellena doce campos, y pasa a generar la pantalla, antes de salir, manda a llamar una función
-		WndProc, donde recibe estos parámetros
+		virtual bool CreateInputLayout() = 0;
 
-		HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
+		virtual bool CreateSamplerState() = 0;
 
-		aquí adentro tiene un switch donde dice WM PAINT o WM DESTROY, pero terminó en el
-		default que tiene llamado DefWindowProc, que regresa esos parámetros.
+		///
+		/// S E T´s
+		/// 
 
-		Nos regresamos a la función anteriror y termina finalmente por llamar una función definida como
-		ShowWindow, por lo tanto ya podemos ver una venta.
+		virtual bool SetPixelShader() = 0;
 
-		Regresdamos a la condición donde teníamos el InitWindow
+		virtual bool SetVertexShader() = 0;
 
-		Y de ahí pasamos al Device...
+		virtual bool SetVertexBuffer() = 0;
 
+		virtual bool SetIndexBuffer() = 0;
+					 
+		virtual bool SetConstBuffNeverChanges() = 0;
+					 
+		virtual bool SetConstBuffChangeOnResize() = 0;
+					 
+		virtual bool SetConstBuffChangeEveryFrame() = 0;
+		
+		virtual bool SetTexture2D() = 0;
 
+		virtual bool SetInputLayout() = 0;
 
-		*/
+		virtual bool SetSamplerState() = 0;
 };
