@@ -1,5 +1,12 @@
 #pragma once
 #include <string>
+#include "glm/glm.hpp"
+
+struct SimpleVertex{
+
+	glm::vec3 Pos;
+	glm::vec2 Tex;
+};
 
 /// <summary>
 /// Clase padre donde podremos añadir 
@@ -41,9 +48,9 @@ class CGraphicApi {
 		/// C R E A T E
 		/// 
 
-		virtual bool CreatePixelShader() = 0;
+		virtual bool CreatePixelShader(std::wstring _namePS) = 0;
 
-		virtual bool CreateVertexShader() = 0;
+		virtual bool CreateVertexShader(std::wstring _nameVS) = 0;
 
 		virtual bool CreateVertexBuffer() = 0;
 

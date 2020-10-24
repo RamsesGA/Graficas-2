@@ -1,5 +1,10 @@
 #pragma once
 #include "CGraphicApi.h"
+#include "CPixelShaderDX.h"
+#include "CVertexShaderDX.h"
+#include "CBufferDX.h"
+
+
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <d3dcompiler.h>
@@ -12,33 +17,44 @@ class CGraphicApiDX : public CGraphicApi{
 		/// 
 
 		///
+		/// Mi abstracción 
+		/// 
+		
+		CPixelShaderDX m_ps;
+		CVertexShaderDX m_vs;
+		CBufferDX m_IB;
+		CBufferDX m_VB;
+		CBufferDX m_cbNeverChangesBuffer;
+		CBufferDX m_cbChangeOnResizeBuffer;
+		CBufferDX m_cbChangesEveryFrameBuffer;
+
+
+		///
 		/// Propios de DX
 		/// 
 		 
 		UINT m_width;
 		UINT m_height;
 
-		HINSTANCE m_hInst;
 		HWND m_hWnd;
+		HINSTANCE m_hInst;
 
-		std::vector<D3D_DRIVER_TYPE> m_driverType;
-		D3D_FEATURE_LEVEL m_featureLevel;
-		IDXGISwapChain* m_pSwapChain;
+		ID3DBlob* m_pPSBlob;
+		ID3DBlob* m_pVSBlob;
 		ID3D11Device* m_pd3dDevice;
+		IDXGISwapChain* m_pSwapChain;
+		D3D_FEATURE_LEVEL m_featureLevel;
+		ID3D11DeviceContext* m_pImmediateContext;
+		std::vector<D3D_DRIVER_TYPE> m_driverType;
 
 
-		ID3D11Buffer* m_pCBNeverChangesoverride;
-		ID3D11Buffer* m_pCBChangeOnResizeoverride;
-		ID3D11Buffer* m_pCBChangesEveryFrameoverride;
-		ID3D11Buffer* m_pVertexBufferoverride;
-		ID3D11Buffer* m_pIndexBufferoverride;
+
+		
 		ID3D11Texture2D* m_pDepthStenciloverride;
 		ID3D11InputLayout* m_pVertexLayoutoverride;
 		ID3D11SamplerState* m_pSamplerLinearoverride;
-		ID3D11VertexShader* m_pVertexShaderoverride;
-		ID3D11PixelShader* m_pPixelShaderoverride;
+		
 
-		ID3D11DeviceContext* m_pImmediateContext;
 		ID3D11ShaderResourceView* m_pTextureRVoverride;
 		ID3D11DepthStencilView* m_pDepthStencilViewoverride;
 		ID3D11RenderTargetView* m_pRenderTargetViewoverride;
@@ -53,8 +69,11 @@ class CGraphicApiDX : public CGraphicApi{
 		///Destructor
 		~CGraphicApiDX() = default;
 
+		HRESULT CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint,
+									  LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
+
 		///
-		/// Herencia 
+		/// H E R E N C I A
 		/// 
 		
 		/// <summary>
@@ -80,13 +99,13 @@ class CGraphicApiDX : public CGraphicApi{
 		/// pixel shader de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreatePixelShader()override;
+		bool CreatePixelShader(std::wstring _namePS)override;
 		/// <summary>
 		/// Función para generar el
 		/// vertex shader de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateVertexShader()override;
+		bool CreateVertexShader(std::wstring _nameVS)override;
 		/// <summary>
 		/// Función para generar el
 		/// vertex buffer de DX
@@ -135,6 +154,10 @@ class CGraphicApiDX : public CGraphicApi{
 		/// </summary>
 		/// <returns></returns>
 		bool CreateSamplerState()override;
+
+		///
+		/// S E T´s 
+		/// 
 
 		/// <summary>
 		/// Función para guardar la
@@ -196,9 +219,4 @@ class CGraphicApiDX : public CGraphicApi{
 		/// </summary>
 		/// <returns></returns>
 		bool SetSamplerState()override;
-		
-
-		
-
-		
 };
