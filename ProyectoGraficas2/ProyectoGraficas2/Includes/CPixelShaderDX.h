@@ -14,6 +14,7 @@ class CPixelShaderDX : public CPixelShader {
 		/// pixel shader
 		/// </summary>
 		ID3D11PixelShader* m_pPixelShader;
+		ID3DBlob* m_pPSBlob;
 
 
 		///
@@ -24,4 +25,6 @@ class CPixelShaderDX : public CPixelShader {
 		CPixelShaderDX() = default;
 		///Destructor
 		~CPixelShaderDX() = default;
+
+		friend class CGraphicApiDX;
 };

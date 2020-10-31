@@ -14,6 +14,8 @@ class CVertexShaderDX : public CVertexShader {
 		/// vertex shader
 		/// </summary>
 		ID3D11VertexShader* m_pVertexShader;
+		ID3DBlob* m_pVSBlob;
+
 
 		///
 		/// Métodos

@@ -100,7 +100,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;d3d11.lib;d3dcompiler.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,7 +134,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;d3d11.lib;d3dcompiler.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -163,9 +163,23 @@
     <ClCompile Include="CPPs\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Includes\CConstantBuffer.h" />
+    <ClInclude Include="Includes\CConstantBufferDX.h" />
     <ClInclude Include="Includes\CGraphicApi.h" />
     <ClInclude Include="Includes\CGraphicApiDX.h" />
     <ClInclude Include="Includes\CGraphicApiOGL.h" />
+    <ClInclude Include="Includes\CIndexBuffer.h" />
+    <ClInclude Include="Includes\CIndexBufferDX.h" />
+    <ClInclude Include="Includes\CPixelShader.h" />
+    <ClInclude Include="Includes\CPixelShaderDX.h" />
+    <ClInclude Include="Includes\CSamplerState.h" />
+    <ClInclude Include="Includes\CSamplerStateDX.h" />
+    <ClInclude Include="Includes\CTexture.h" />
+    <ClInclude Include="Includes\CTextureDX.h" />
+    <ClInclude Include="Includes\CVertexBuffer.h" />
+    <ClInclude Include="Includes\CVertexBufferDX.h" />
+    <ClInclude Include="Includes\CVertexShader.h" />
+    <ClInclude Include="Includes\CVertexShaderDX.h" />
     <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

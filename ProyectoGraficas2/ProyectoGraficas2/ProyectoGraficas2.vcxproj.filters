@@ -59,5 +59,47 @@
     <ClInclude Include="Includes\CGraphicApiOGL.h">
       <Filter>Archivos de encabezado\ClassOGL</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\CPixelShader.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CPixelShaderDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexShader.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexShaderDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CConstantBuffer.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CConstantBufferDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CIndexBuffer.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CIndexBufferDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexBuffer.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexBufferDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CTexture.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CTextureDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CSamplerState.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CSamplerStateDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
 #pragma once
 #include "CGraphicApi.h"
-#include "CPixelShaderDX.h"
-#include "CVertexShaderDX.h"
-#include "CBufferDX.h"
+#include "CPixelShader.h"
+#include "CVertexShader.h"
+#include "CConstantBuffer.h"
+#include "CTexture.h"
 
 
 #include <d3d11.h>
@@ -15,20 +16,7 @@ class CGraphicApiDX : public CGraphicApi{
 		///
 		/// Miembros
 		/// 
-
-		///
-		/// Mi abstracción 
-		/// 
 		
-		CPixelShaderDX m_ps;
-		CVertexShaderDX m_vs;
-		CBufferDX m_IB;
-		CBufferDX m_VB;
-		CBufferDX m_cbNeverChangesBuffer;
-		CBufferDX m_cbChangeOnResizeBuffer;
-		CBufferDX m_cbChangesEveryFrameBuffer;
-
-
 		///
 		/// Propios de DX
 		/// 
@@ -37,10 +25,9 @@ class CGraphicApiDX : public CGraphicApi{
 		UINT m_height;
 
 		HWND m_hWnd;
+
 		HINSTANCE m_hInst;
 
-		ID3DBlob* m_pPSBlob;
-		ID3DBlob* m_pVSBlob;
 		ID3D11Device* m_pd3dDevice;
 		IDXGISwapChain* m_pSwapChain;
 		D3D_FEATURE_LEVEL m_featureLevel;
@@ -59,7 +46,6 @@ class CGraphicApiDX : public CGraphicApi{
 		ID3D11DepthStencilView* m_pDepthStencilViewoverride;
 		ID3D11RenderTargetView* m_pRenderTargetViewoverride;
 		
-
 		///
 		/// Métodos
 		/// 
@@ -99,61 +85,56 @@ class CGraphicApiDX : public CGraphicApi{
 		/// pixel shader de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreatePixelShader(std::wstring _namePS)override;
+		CPixelShader* CreatePixelShader(std::wstring _namePS,
+										std::string _entryPoint)override;
 		/// <summary>
 		/// Función para generar el
 		/// vertex shader de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateVertexShader(std::wstring _nameVS)override;
+		CVertexShader* CreateVertexShader(std::wstring _nameVS, 
+										  std::string _entryPoint)override;
 		/// <summary>
 		/// Función para generar el
 		/// vertex buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateVertexBuffer()override;
+		CVertexBuffer* CreateVertexBuffer(unsigned int _bufferSize,
+										  std::vector <SimpleVertex> _simpleVertex)override;
 		/// <summary>
 		/// Función para generar el
 		/// Index buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateIndexBuffer()override;
+		CIndexBuffer* CreateIndexBuffer(unsigned int _bufferSize,
+										std::vector <unsigned int> _simpleIndex)override;
 		/// <summary>
-		/// Función para generar el
-		/// buffer never changes de DX
+		/// Función para generar los
+		/// Constant Buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateConstBuffNeverChanges()override;
-		/// <summary>
-		/// Función para generar el
-		/// buffer Change on resize de DX
-		/// </summary>
-		/// <returns></returns>
-		bool CreateConstBuffChangeOnResize()override;
-		/// <summary>
-		/// Función para generar el
-		/// buffer de change every frame de DX
-		/// </summary>
-		/// <returns></returns>
-		bool CreateConstBuffChangeEveryFrame()override;
+		CConstantBuffer* CreateConstantBuffer(unsigned int _bufferSize)override;
 		/// <summary>
 		/// Función para generar la
 		/// textura 2D de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateTexture2D()override;
+		CTexture* CreateTexture(unsigned int _width,
+								unsigned int _height,
+								unsigned int _bindFlags,
+								TEXTURE_FORMAT _textureFormat)override;
+		/// <summary>
+		/// Función para generar el
+		/// sampler state de DX
+		/// </summary>
+		/// <returns></returns>
+		CSamplerState* CreateSamplerState()override;
 		/// <summary>
 		/// Función para generar el
 		/// Input layout de DX
 		/// </summary>
 		/// <returns></returns>
 		bool CreateInputLayout()override;
-		/// <summary>
-		/// Función para generar el
-		/// sampler state de DX
-		/// </summary>
-		/// <returns></returns>
-		bool CreateSamplerState()override;
 
 		///
 		/// S E T´s 
@@ -164,59 +145,50 @@ class CGraphicApiDX : public CGraphicApi{
 		/// información del pixel shader de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetPixelShader()override;
+		void SetPixelShader(CPixelShader * _pixelShader)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del vertex shader de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetVertexShader()override;
+		void SetVertexShader(CVertexShader * _vertexShader)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del vertex buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetVertexBuffer()override;
+		void SetVertexBuffer(CVertexBuffer* _vertexBuffer)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del index buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetIndexBuffer()override;
+		void SetIndexBuffer(CIndexBuffer* _indexBuffer)override;
 		/// <summary>
 		/// Función para guardar la
-		/// información del buffer never changes de DX
+		/// información de los Constant Buffers de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetConstBuffNeverChanges()override;
-		/// <summary>
-		/// Función para guardar la
-		/// información del buffer change on resize de DX
-		/// </summary>
-		/// <returns></returns>
-		bool SetConstBuffChangeOnResize()override;
-		/// <summary>
-		/// Función para guardar la
-		/// información del buffer change every frame de DX
-		/// </summary>
-		/// <returns></returns>
-		bool SetConstBuffChangeEveryFrame()override;
+		void SetConstantBuffer(CConstantBuffer* _constantBuffer,
+							   unsigned int _startSlot,
+							   unsigned int _numBuffers)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información de la textura 2D de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetTexture2D()override;
-		/// <summary>
-		/// Función para guardar la
-		/// información del input layout de DX
-		/// </summary>
-		/// <returns></returns>
-		bool SetInputLayout()override;
+		void SetTexture(CTexture* _texture)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del sampler state de DX
 		/// </summary>
 		/// <returns></returns>
-		bool SetSamplerState()override;
+		void SetSamplerState(unsigned int _startSlot,
+							 std::vector<CSamplerState*>& _samplerState)override;
+		/// <summary>
+		/// Función para guardar la
+		/// información del input layout de DX
+		/// </summary>
+		/// <returns></returns>
+		void SetInputLayout()override;
 };

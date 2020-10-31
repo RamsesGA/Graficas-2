@@ -1,4 +1,12 @@
 #include "..\Includes\CGraphicApiDX.h"
+#include "..\Includes\CPixelShaderDX.h"
+#include "..\Includes\CVertexShaderDX.h"
+#include "..\Includes\CVertexBufferDX.h"
+#include "..\Includes\CIndexBufferDX.h"
+#include "..\Includes\CConstantBufferDX.h"
+#include "..\Includes\CTextureDX.h"
+#include "..\Includes\CSamplerStateDX.h"
+
 #include <iostream>
 #include <vector>
 
@@ -6,6 +14,7 @@
 /// Funciones fuera de herencia
 /// 
 
+/// 
 LRESULT CALLBACK WndProc(HWND hWnd,
                          UINT message,
                          WPARAM wParam,
@@ -32,6 +41,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,
     return 0;
 }
 
+/// 
 HRESULT CGraphicApiDX::CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint,
                                              LPCSTR szShaderModel, ID3DBlob** ppBlobOut){
    
@@ -198,148 +208,328 @@ bool CGraphicApiDX::InitDevice() {
 }
 
 /// 
-bool CGraphicApiDX::CreatePixelShader(std::wstring _namePS){
+CPixelShader* CGraphicApiDX::CreatePixelShader(std::wstring _namePS,
+                                               std::string _entryPoint){
 
-    m_pPSBlob = NULL;
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto pixelShader = new CPixelShaderDX();
+
+    ///Asignamos datos a las variables
+    pixelShader->m_pPSBlob = NULL;
     HRESULT hr = S_OK;
     const WCHAR* namePS = _namePS.c_str();
 
-    hr = CompileShaderFromFile(namePS, "PS", "ps_4_0", &m_pPSBlob);
+    ///Compilamos el shader recibido
+    hr = CompileShaderFromFile(namePS, _entryPoint.c_str(), "ps_4_0", &pixelShader->m_pPSBlob);
 
+    ///Checamos que todo salga bien, si no mandamos un error
     if (FAILED(hr)){
 
-        MessageBox(NULL,
+        MessageBox(
+            NULL,
             L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", 
             L"Error", 
             MB_OK);
-        return false;
+        return nullptr;
     }
 
-    hr = m_pd3dDevice->CreatePixelShader(m_pPSBlob->GetBufferPointer(), m_pPSBlob->GetBufferSize(),
-                                         NULL, &m_ps.m_pPixelShader);
-    m_pPSBlob->Release();
+    ///Creamos el pixel shader con la función de DX
+    hr = m_pd3dDevice->CreatePixelShader(pixelShader->m_pPSBlob->GetBufferPointer(), 
+                                         pixelShader->m_pPSBlob->GetBufferSize(),
+                                         NULL, &pixelShader->m_pPixelShader);
 
+    pixelShader->m_pPSBlob->Release();
+
+    ///Finalmente regresamos el dato en caso
+    ///de no obtener un error
     if (FAILED(hr)) {
 
-        return false;
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
     }
     else {
 
-        return true;
+        return pixelShader;
     }
 }
 
 /// 
-bool CGraphicApiDX::CreateVertexShader(std::wstring _nameVS){
+CVertexShader* CGraphicApiDX::CreateVertexShader(std::wstring _nameVS, 
+                                                 std::string _entryPoint){
 
-    m_pVSBlob = NULL;
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto vertexShader = new CVertexShaderDX();
+
+    ///Asignamos datos a las variables
+    vertexShader->m_pVSBlob = NULL;
     HRESULT hr = S_OK;
     const WCHAR* nameVS = _nameVS.c_str();
 
-    // Compile the vertex shader
-    hr = CompileShaderFromFile(nameVS, "VS", "vs_4_0", &m_pVSBlob);
+    ///Compilamos el shader recibido
+    hr = CompileShaderFromFile(nameVS, _entryPoint.c_str(), "vs_4_0", &vertexShader->m_pVSBlob);
+
+    ///Checamos que todo salga bien, si no mandamos un error
     if (FAILED(hr)){
 
-        MessageBox
-        (   NULL,
+        MessageBox(   
+            NULL,
             L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", 
             L"Error", 
             MB_OK);
-        return false;
+        return nullptr;
     }
 
-    // Create the vertex shader
-    hr = m_pd3dDevice->CreateVertexShader(m_pVSBlob->GetBufferPointer(), m_pVSBlob->GetBufferSize(), 
-                                          NULL, &m_vs.m_pVertexShader);
+    ///Creamos el vertex shader con la función de DX
+    hr = m_pd3dDevice->CreateVertexShader(vertexShader->m_pVSBlob->GetBufferPointer(), 
+                                          vertexShader->m_pVSBlob->GetBufferSize(),
+                                          NULL, &vertexShader->m_pVertexShader);
+
+    vertexShader->m_pVSBlob->Release();
+
+    ///Finalmente regresamos el dato en caso
+    ///de no obtener un error
     if (FAILED(hr)){
 
-        m_pVSBlob->Release();
-        return false;
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
     }
     else {
 
-        return true;
+        return vertexShader;
     }
 }
 
-/// /// 
-bool CGraphicApiDX::CreateVertexBuffer(){
+///
+CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(unsigned int _bufferSize,
+                                                 std::vector <SimpleVertex> _simpleVertex){
 
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto vertexBuffer = new CVertexBufferDX();
+
+    ///Asignamos datos a la variable
     HRESULT hr = S_OK;
+    
+    ///Rellenamos el descriptor de buffer
+    CD3D11_BUFFER_DESC bd(sizeof(unsigned int) * _bufferSize,
+                          D3D11_BIND_VERTEX_BUFFER);
 
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 24;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-
+    ///Generamos una variable descriptor
     D3D11_SUBRESOURCE_DATA InitData;
+
+    ///Limpiamos la memoria y dejamos
+    ///definido todo en 0
     ZeroMemory(&InitData, sizeof(InitData));
-    ///TODO: Pasar a vector
-    InitData.pSysMem;
 
+    ///Asignamos datos a las variables
+    InitData.pSysMem = _simpleVertex.data();
+
+    ///Creamos el buffer
     hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, 
-                                    &m_VB.m_pVertexBuffer);
+                                    &vertexBuffer->m_pVertexBuffer);
 
+    ///Finalmente regresamos el dato en caso
+    ///de no obtener un error
     if (FAILED(hr)) {
 
-        return false;
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
     }
     else {
 
-        return true;
+        return vertexBuffer;
     }
 }
 
-/// /// 
-bool CGraphicApiDX::CreateIndexBuffer(){
+///
+CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(unsigned int _bufferSize,
+                                               std::vector <unsigned int> _simpleIndex){
 
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto indexBuffer = new CIndexBufferDX();
+
+    ///Asignamos datos a la variable
     HRESULT hr = S_OK;
 
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * 36;
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
+    ///Rellenamos el descriptor de buffer
+    CD3D11_BUFFER_DESC bd(sizeof(unsigned int) * _bufferSize,
+                          D3D11_BIND_INDEX_BUFFER);
 
+    ///Generamos una variable descriptor
     D3D11_SUBRESOURCE_DATA InitData;
+
+    ///Limpiamos la memoria y dejamos
+    ///definido todo en 0
     ZeroMemory(&InitData, sizeof(InitData));
-    ///TODO: Pasar a vector
-    InitData.pSysMem;
 
+    ///Asignamos datos a las variables
+    InitData.pSysMem = _simpleIndex.data();
+
+    ///Creamos el buffer
     hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, 
-                                    &m_IB.m_pIndexBuffer);
+                                    &indexBuffer->m_pIndexBuffer);
 
+    ///Finalmente regresamos el dato en caso
+    ///de no obtener un error
     if (FAILED(hr)) {
 
-        return false;
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
     }
     else {
 
-        return true;
+        return indexBuffer;
     }
 }
 
-bool CGraphicApiDX::CreateConstBuffNeverChanges(){
+///
+CConstantBuffer* CGraphicApiDX::CreateConstantBuffer(unsigned int _bufferSize){
 
-    return false;
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto constantBuffer = new CConstantBufferDX();
+
+    ///Asignamos datos a la variable
+    HRESULT hr = S_OK;
+
+    ///Rellenamos el descriptor de buffer
+    CD3D11_BUFFER_DESC bd(_bufferSize, D3D11_BIND_CONSTANT_BUFFER);
+
+    ///Creamos el buffer
+    hr = m_pd3dDevice->CreateBuffer(&bd, nullptr,
+                                    &constantBuffer->m_pConstantBuffer);
+
+    ///Finalmente regresamos el dato en caso
+    ///de no obtener un error
+    if (FAILED(hr)) {
+
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
+    }
+    else {
+
+        return constantBuffer;
+    }
 }
 
-bool CGraphicApiDX::CreateConstBuffChangeOnResize(){
+///
+CTexture* CGraphicApiDX::CreateTexture(unsigned int _width,
+                                       unsigned int _height,
+                                       unsigned int _bindFlags,
+                                       TEXTURE_FORMAT _textureFormat){
 
-    return false;
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto texture = new CTextureDX();
+
+    ///Asignamos datos a la variable
+    HRESULT hr = S_OK;
+
+    ///Rellenamos el descriptor de buffer
+    CD3D11_TEXTURE2D_DESC textureDesc((DXGI_FORMAT)_textureFormat, _width,
+                                      _height, _bindFlags);
+
+    ///Creamos la textura
+    hr = m_pd3dDevice->CreateTexture2D(&textureDesc, nullptr, &texture->m_pTexture);
+
+    ///Checamos que todo salga bien, si no mandamos un error
+    if (FAILED(hr)) {
+
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
+    }
+
+    ///Finalmente checamos el tipo de
+    ///bind flag que escogió el usuario
+    ///y lo creamos
+    switch (_bindFlags) {
+
+        case D3D11_BIND_SHADER_RESOURCE:
+        {
+            CD3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc(D3D11_SRV_DIMENSION_TEXTURE2D);
+            hr = m_pd3dDevice->CreateShaderResourceView(texture->m_pTexture,
+                                                        &shaderResourceViewDesc,
+                                                        &texture->m_pShaderResourceView);
+            break;
+        }
+        case D3D11_BIND_DEPTH_STENCIL:
+        {
+            CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+            hr = m_pd3dDevice->CreateDepthStencilView(texture->m_pTexture,
+                                                      &depthStencilDesc,
+                                                      &texture->m_pDepthStencilView);
+            break;
+        }
+        case D3D11_BIND_RENDER_TARGET:
+        {
+            CD3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc(D3D11_RTV_DIMENSION_TEXTURE2D);
+            hr = m_pd3dDevice->CreateRenderTargetView(texture->m_pTexture, 
+                                                      &renderTargetDesc,
+                                                      &texture->m_pRenderTargetView);
+            break;
+        }
+    }
 }
 
-bool CGraphicApiDX::CreateConstBuffChangeEveryFrame(){
+///
+CSamplerState* CGraphicApiDX::CreateSamplerState() {
 
-    return false;
-}
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    auto samplerState = new CSamplerStateDX();
 
-bool CGraphicApiDX::CreateTexture2D(){
+    ///Asignamos datos a la variable
+    HRESULT hr = S_OK;
 
-    return false;
+    ///Obtenemos los datos creados
+    ///del sampler state
+    CD3D11_SAMPLER_DESC samplerDesc;
+
+    hr = m_pd3dDevice->CreateSamplerState(&samplerDesc, 
+                                          &samplerState->m_pSamplerState);
+
+    ///Finalmente regresamos el dato en caso
+    ///de no obtener un error
+    if (FAILED(hr)) {
+
+        MessageBox(
+            NULL,
+            L"hr nulo",
+            L"Error",
+            MB_OK);
+        return nullptr;
+    }
+    else {
+
+        return samplerState;
+    }
 }
 
 bool CGraphicApiDX::CreateInputLayout(){
@@ -347,72 +537,100 @@ bool CGraphicApiDX::CreateInputLayout(){
     return false;
 }
 
-bool CGraphicApiDX::CreateSamplerState(){
-
-    return false;
-}
-
 ///
 /// Funciones de herencia
+/// 
+
 /// 
 /// S E T´s
 ///
 
 /// 
-bool CGraphicApiDX::SetPixelShader(){
+void CGraphicApiDX::SetPixelShader(CPixelShader* _pixelShader){
 
-    m_pImmediateContext->PSSetShader(m_ps.m_pPixelShader, NULL, 0);
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    ///Y hacemos un casteo reinterprete para convertir el puntero
+    auto pixelShader = reinterpret_cast<CPixelShaderDX*>(_pixelShader);
+
+    m_pImmediateContext->PSSetShader(pixelShader->m_pPixelShader, NULL, 0);
 }
 
 /// 
-bool CGraphicApiDX::SetVertexShader(){
+void CGraphicApiDX::SetVertexShader(CVertexShader* _vertexShader){
 
-    m_pImmediateContext->VSSetShader(m_vs.m_pVertexShader, NULL, 0);
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    ///Y hacemos un casteo reinterprete para convertir el puntero
+    auto vertexShader = reinterpret_cast<CVertexShaderDX*>(_vertexShader);
+
+    m_pImmediateContext->VSSetShader(vertexShader->m_pVertexShader, NULL, 0);
 }
 
 /// 
-bool CGraphicApiDX::SetVertexBuffer(){
+void CGraphicApiDX::SetVertexBuffer(CVertexBuffer* _vertexBuffer){
+
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    ///Y hacemos un casteo reinterprete para convertir el puntero
+    auto vertexBuffer = reinterpret_cast<CVertexBufferDX*>(_vertexBuffer);
 
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
     m_pImmediateContext->IASetVertexBuffers(0, 
-                                            1, &m_VB.m_pVertexBuffer, 
-                                            &stride, &offset);
+                                            1, 
+                                            &vertexBuffer->m_pVertexBuffer,
+                                            &stride, 
+                                            &offset);
 }
 
 /// 
-bool CGraphicApiDX::SetIndexBuffer(){
+void CGraphicApiDX::SetIndexBuffer(CIndexBuffer* _indexBuffer){
 
-    m_pImmediateContext->IASetIndexBuffer(m_IB.m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    ///Y hacemos un casteo reinterprete para convertir el puntero
+    auto indexBuffer = reinterpret_cast<CIndexBufferDX*>(_indexBuffer);
+
+    m_pImmediateContext->IASetIndexBuffer(indexBuffer->m_pIndexBuffer,
+                                          DXGI_FORMAT_R16_UINT, 
                                           0);
 }
 
-bool CGraphicApiDX::SetConstBuffNeverChanges(){
+void CGraphicApiDX::SetConstantBuffer(CConstantBuffer* _constantBuffer,
+                                      unsigned int _startSlot,
+                                      unsigned int _numBuffers){
 
-    return false;
+    ///Generamos una variable auto
+    ///para adaptar el tipo de dato que ocupamos
+    ///Y hacemos un casteo reinterprete para convertir el puntero
+    auto constantBuffer = reinterpret_cast<CConstantBufferDX*>(_constantBuffer);
+
+    m_pImmediateContext->VSSetConstantBuffers(_startSlot, _numBuffers,
+                                              &constantBuffer->m_pConstantBuffer);
 }
 
-bool CGraphicApiDX::SetConstBuffChangeOnResize(){
+void CGraphicApiDX::SetTexture(CTexture* _texture){
 
-    return false;
+    ///TODO: Cambiar los set
 }
 
-bool CGraphicApiDX::SetConstBuffChangeEveryFrame(){
+void CGraphicApiDX::SetSamplerState(unsigned int _startSlot,
+                                    std::vector<CSamplerState*>& _samplerState) {
 
-    return false;
+    for (unsigned int i = 0; i < _samplerState.size(); i++) {
+
+        ///Generamos una variable auto
+        ///para adaptar el tipo de dato que ocupamos
+        ///Y hacemos un casteo reinterprete para convertir el puntero
+        auto samplerState = reinterpret_cast<CSamplerStateDX*>(_samplerState[i]);
+
+        m_pImmediateContext->PSSetSamplers(_startSlot, 
+                                           _samplerState.size(), 
+                                           &samplerState->m_pSamplerState);
+    }
 }
 
-bool CGraphicApiDX::SetTexture2D(){
+void CGraphicApiDX::SetInputLayout(){
 
-    return false;
-}
-
-bool CGraphicApiDX::SetInputLayout(){
-
-    return false;
-}
-
-bool CGraphicApiDX::SetSamplerState(){
-
-    return false;
 }

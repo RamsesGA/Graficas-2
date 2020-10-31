@@ -1,14 +1,14 @@
 #pragma once
 
-class CBuffer {
+class CIndexBuffer {
 
 	public:
 		///
 		/// Métodos
 		/// 
-
+	
 		///Constructor
-		CBuffer() = default;
+		CIndexBuffer() = default;
 		///Destructor
-		~CBuffer() = default;
+		~CIndexBuffer() = default;
 };
