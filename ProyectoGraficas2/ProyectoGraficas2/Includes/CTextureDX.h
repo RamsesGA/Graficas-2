@@ -4,7 +4,7 @@
 
 class CTextureDX : public CTexture {
 
-	public:
+	protected:
 		///
 		/// Miembros
 		///
@@ -13,7 +13,9 @@ class CTextureDX : public CTexture {
 		ID3D11ShaderResourceView* m_pShaderResourceView;
 		ID3D11DepthStencilView* m_pDepthStencilView;
 		ID3D11RenderTargetView* m_pRenderTargetView;
+		ID3D11DepthStencilState* m_pDepthStencilState;
 
+	public:
 		/// 
 		/// Métodos
 		/// 
@@ -22,4 +24,6 @@ class CTextureDX : public CTexture {
 		CTextureDX() = default;
 		///Destructor
 		~CTextureDX() = default;
+
+friend class CGraphicApiDX;
 };

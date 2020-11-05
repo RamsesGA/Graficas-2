@@ -4,13 +4,14 @@
 
 class CConstantBufferDX : public CConstantBuffer {
 
-	public:
+	protected:
 		///
 		/// Miembros
 		/// 
 
 		ID3D11Buffer* m_pConstantBuffer;
 
+	public:
 		///
 		/// Métodos
 		/// 
@@ -19,4 +20,6 @@ class CConstantBufferDX : public CConstantBuffer {
 		CConstantBufferDX() = default;
 		///Destructor
 		~CConstantBufferDX() = default;
+
+friend class CGraphicApiDX;
 };

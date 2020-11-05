@@ -1,9 +1,19 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <windows.h>
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
-enum TEXTURE_FORMAT
+using TEXTURE_BIND_FLAG = enum
+{
+    TEXTURE_BIND_SHADER_RESOURCE = 0x8L,
+    TEXTURE_BIND_RENDER_TARGET = 0x20L,
+    TEXTURE_BIND_DEPTH_STENCIL = 0x40L,
+    TEXTURE_BIND_UNORDERED_ACCESS = 0x80L,
+};
+
+using TEXTURE_FORMAT = enum
 {
     TEXTURE_FORMAT_UNKNOWN = 0,
     TEXTURE_FORMAT_R32G32B32A32_TYPELESS = 1,
@@ -108,10 +118,72 @@ enum TEXTURE_FORMAT
     TEXTURE_FORMAT_FORCE_UINT = 0xffffffff
 };
 
+using PRIMITIVE_TOPOLOGY = enum
+{
+    PRIMITIVE_TOPOLOGY_UNDEFINED = 0,
+    PRIMITIVE_TOPOLOGY_POINTLIST = 1,
+    PRIMITIVE_TOPOLOGY_LINELIST = 2,
+    PRIMITIVE_TOPOLOGY_LINESTRIP = 3,
+    PRIMITIVE_TOPOLOGY_TRIANGLELIST = 4,
+    PRIMITIVE_TOPOLOGY_TRIANGLESTRIP = 5,
+    PRIMITIVE_TOPOLOGY_LINELIST_ADJ = 10,
+    PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ = 11,
+    PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ = 12,
+    PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ = 13,
+    PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST = 33,
+    PRIMITIVE_TOPOLOGY_2_CONTROL_POINT_PATCHLIST = 34,
+    PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST = 35,
+    PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST = 36,
+    PRIMITIVE_TOPOLOGY_5_CONTROL_POINT_PATCHLIST = 37,
+    PRIMITIVE_TOPOLOGY_6_CONTROL_POINT_PATCHLIST = 38,
+    PRIMITIVE_TOPOLOGY_7_CONTROL_POINT_PATCHLIST = 39,
+    PRIMITIVE_TOPOLOGY_8_CONTROL_POINT_PATCHLIST = 40,
+    PRIMITIVE_TOPOLOGY_9_CONTROL_POINT_PATCHLIST = 41,
+    PRIMITIVE_TOPOLOGY_10_CONTROL_POINT_PATCHLIST = 42,
+    PRIMITIVE_TOPOLOGY_11_CONTROL_POINT_PATCHLIST = 43,
+    PRIMITIVE_TOPOLOGY_12_CONTROL_POINT_PATCHLIST = 44,
+    PRIMITIVE_TOPOLOGY_13_CONTROL_POINT_PATCHLIST = 45,
+    PRIMITIVE_TOPOLOGY_14_CONTROL_POINT_PATCHLIST = 46,
+    PRIMITIVE_TOPOLOGY_15_CONTROL_POINT_PATCHLIST = 47,
+    PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST = 48,
+    PRIMITIVE_TOPOLOGY_17_CONTROL_POINT_PATCHLIST = 49,
+    PRIMITIVE_TOPOLOGY_18_CONTROL_POINT_PATCHLIST = 50,
+    PRIMITIVE_TOPOLOGY_19_CONTROL_POINT_PATCHLIST = 51,
+    PRIMITIVE_TOPOLOGY_20_CONTROL_POINT_PATCHLIST = 52,
+    PRIMITIVE_TOPOLOGY_21_CONTROL_POINT_PATCHLIST = 53,
+    PRIMITIVE_TOPOLOGY_22_CONTROL_POINT_PATCHLIST = 54,
+    PRIMITIVE_TOPOLOGY_23_CONTROL_POINT_PATCHLIST = 55,
+    PRIMITIVE_TOPOLOGY_24_CONTROL_POINT_PATCHLIST = 56,
+    PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST = 57,
+    PRIMITIVE_TOPOLOGY_26_CONTROL_POINT_PATCHLIST = 58,
+    PRIMITIVE_TOPOLOGY_27_CONTROL_POINT_PATCHLIST = 59,
+    PRIMITIVE_TOPOLOGY_28_CONTROL_POINT_PATCHLIST = 60,
+    PRIMITIVE_TOPOLOGY_29_CONTROL_POINT_PATCHLIST = 61,
+    PRIMITIVE_TOPOLOGY_30_CONTROL_POINT_PATCHLIST = 62,
+    PRIMITIVE_TOPOLOGY_31_CONTROL_POINT_PATCHLIST = 63,
+    PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST = 64
+};
+
 struct SimpleVertex{
 
 	glm::vec3 Pos;
 	glm::vec2 Tex;
+};
+
+struct CBNeverChanges{
+
+    glm::mat4x4 mView;
+};
+
+struct CBChangeOnResize{
+
+    glm::mat4x4 mProjection;
+};
+
+struct CBChangesEveryFrame{
+
+    glm::mat4x4 mWorld;
+    glm::vec4 vMeshColor;
 };
 
 class CPixelShader;
@@ -121,6 +193,7 @@ class CIndexBuffer;
 class CConstantBuffer;
 class CTexture;
 class CSamplerState;
+class CInputLayout;
 
 /// <summary>
 /// Clase padre donde podremos añadir 
@@ -129,87 +202,89 @@ class CSamplerState;
 /// </summary>
 class CGraphicApi {
 
-	private:
+	protected:
 		///
 		///Métodos
 		/// 
 
-		///
-		/// Funciones internas
-		/// 
-
-		virtual bool MainInit() = 0;
-
-		virtual bool InitWindow() = 0;
-
-		virtual bool InitDevice() = 0;
+        unsigned int m_width;
+        unsigned int m_height;
 
 	public:
 		///
 		///Métodos
 		/// 
 		
-		///Constructor
+        ///
+        /// Funciones para el usuario
+        /// 
+		
+        ///Constructor
 		CGraphicApi() = default;
 		///Destructor
 		~CGraphicApi() = default;
 
-		///
-		/// Funciones para el usuario
-		/// 
-		
+        virtual bool InitDevice() = 0;
+
 		///
 		/// C R E A T E
 		/// 
 
-		/// Cambiar el tipo de dato que regresan, un puntero
-		/// a ese tipo de clases
+		virtual CPixelShader* CreatePixelShader(const std::wstring& _namePSDX, 
+            const std::string& _entryPointDX) = 0;
 
+		virtual CVertexShader* CreateVertexShader(const std::wstring& _nameVSDX, 
+            const std::string& _entryPointDX) = 0;
 
-		virtual CPixelShader* CreatePixelShader(std::wstring _namePS,
-												std::string _entryPoint) = 0;
+		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex*>& _simpleVertexDX) = 0;
 
-		virtual CVertexShader* CreateVertexShader(std::wstring _nameVS, 
-												  std::string _entryPoint) = 0;
+		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int*>& _simpleIndexDX) = 0;
 
-		virtual CVertexBuffer* CreateVertexBuffer(unsigned int _bufferSize,
-												  std::vector <SimpleVertex> _simpleVertex) = 0;
+		virtual CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX) = 0;
 
-		virtual CIndexBuffer* CreateIndexBuffer(unsigned int _bufferSize,
-											   std::vector <unsigned int> _simpleIndex) = 0;
-
-		virtual CConstantBuffer* CreateConstantBuffer(unsigned int _bufferSize) = 0;
-
-		virtual CTexture* CreateTexture(unsigned int _width,
-										unsigned int _height,
-										unsigned int _bindFlags,
-										TEXTURE_FORMAT _textureFormat) = 0;
+		virtual CTexture* CreateTexture(const unsigned int _widthDX, 
+            const unsigned int _heightDX, 
+            const unsigned int _bindFlagsDX, 
+            TEXTURE_FORMAT _textureFormatDX) = 0;
 
         virtual CSamplerState* CreateSamplerState() = 0;
 
-		virtual bool CreateInputLayout() = 0;
-		
+		virtual CInputLayout* CreateInputLayout(CVertexShader& _vertexShaderDX) = 0;
 
 		///
 		/// S E T´s
 		/// 
 
-		virtual void SetPixelShader(CPixelShader* _pixelShader) = 0;
+		virtual void SetPixelShader(CPixelShader& _pixelShaderDX) = 0;
 
-		virtual void SetVertexShader(CVertexShader* _vertexShader) = 0;
+		virtual void SetVertexShader(CVertexShader& _vertexShaderDX) = 0;
 
-		virtual void SetVertexBuffer(CVertexBuffer* _vertexBuffer) = 0;
+		virtual void SetVertexBuffer(CVertexBuffer& _vertexBufferDX) = 0;
 
-		virtual void SetIndexBuffer(CIndexBuffer* _indexBuffer) = 0;
+		virtual void SetIndexBuffer(CIndexBuffer& _indexBufferDX) = 0;
 	
-		virtual void SetConstantBuffer(CConstantBuffer* _constantBuffer,
-                                       unsigned int _startSlot,
-                                       unsigned int _numBuffers);
+		virtual void SetConstantBuffer(CConstantBuffer& _constantBufferDX, 
+            const unsigned int _startSlotDX, 
+            const unsigned int _numBuffersDX) = 0;
 
-		virtual void SetTexture(CTexture* _texture) = 0;
+        virtual void SetSamplerState(const unsigned int _startSlotDX,
+            std::vector<CSamplerState*>& _samplerStateDX) = 0;
 
-        virtual void SetSamplerState(unsigned int _startSlot,
-                                     std::vector<CSamplerState*>& _samplerState) = 0;
+        virtual void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceViewDX,
+            const unsigned int _startSlotDX,
+            const unsigned int _numViewsDX) = 0;
 
-		virtual void SetInputLayout() = 0;
+        virtual void SetRenderTarget(std::vector <CTexture*>& _renderTargetDX,
+            CTexture& _depthStencilDX,
+            const unsigned int _numViewsDX) = 0;
+
+        virtual void SetDepthStencil(CTexture& _depthStencilDX,
+            const unsigned int _stencilRefDX) = 0;
+
+		virtual void SetInputLayout(CInputLayout& _vertexLayoutDX) = 0;
+
+        virtual void SetViewport(const unsigned int _numViewportsDX,
+            const unsigned int _widthDX, const unsigned int _heigthDX) = 0;
+
+        virtual void SetPrimitiveTopology(const unsigned int _topologyDX) = 0;
 };

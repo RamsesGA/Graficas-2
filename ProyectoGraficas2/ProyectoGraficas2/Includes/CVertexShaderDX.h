@@ -4,19 +4,15 @@
 
 class CVertexShaderDX : public CVertexShader {
 
-	public:
+	protected:
 		///
 		/// Miembros
 		/// 
 
-		/// <summary>
-		/// Miembro de DX para el
-		/// vertex shader
-		/// </summary>
 		ID3D11VertexShader* m_pVertexShader;
 		ID3DBlob* m_pVSBlob;
 
-
+	public:
 		///
 		/// Métodos
 		/// 
@@ -25,4 +21,6 @@ class CVertexShaderDX : public CVertexShader {
 		CVertexShaderDX() = default;
 		///Destructor
 		~CVertexShaderDX() = default;
+
+friend class CGraphicApiDX;
 };

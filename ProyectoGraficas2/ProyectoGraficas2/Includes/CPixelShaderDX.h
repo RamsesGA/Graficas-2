@@ -4,19 +4,15 @@
 
 class CPixelShaderDX : public CPixelShader {
 
-	public:
+	protected:
 		///
 		/// Miembros
 		/// 
 
-		/// <summary>
-		/// Miembro de DX
-		/// pixel shader
-		/// </summary>
 		ID3D11PixelShader* m_pPixelShader;
 		ID3DBlob* m_pPSBlob;
 
-
+	public:
 		///
 		/// Métodos
 		/// 
@@ -26,5 +22,5 @@ class CPixelShaderDX : public CPixelShader {
 		///Destructor
 		~CPixelShaderDX() = default;
 
-		friend class CGraphicApiDX;
+friend class CGraphicApiDX;
 };

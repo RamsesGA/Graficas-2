@@ -101,5 +101,11 @@
     <ClInclude Include="Includes\CSamplerStateDX.h">
       <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\CInputLayout.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CInputLayoutDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

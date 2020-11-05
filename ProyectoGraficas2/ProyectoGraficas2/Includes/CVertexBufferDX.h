@@ -4,12 +4,14 @@
 
 class CVertexBufferDX : public CVertexBuffer {
 
-	public:
+	protected:
 		///
 		/// Miembros
 		/// 
-		
+
 		ID3D11Buffer* m_pVertexBuffer;
+
+	public:
 		///
 		/// Métodos
 		/// 
@@ -18,4 +20,6 @@ class CVertexBufferDX : public CVertexBuffer {
 		CVertexBufferDX() = default;
 		///Destructor
 		~CVertexBufferDX() = default;
+
+friend class CGraphicApiDX;
 };

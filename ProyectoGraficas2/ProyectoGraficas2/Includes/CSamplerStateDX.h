@@ -4,13 +4,14 @@
 
 class CSamplerStateDX : public CSamplerState {
 
-	public:
+	protected:
 		///
 		/// Miembros
 		/// 
 
 		ID3D11SamplerState* m_pSamplerState;
 
+	public:
 		///
 		/// Métodos
 		/// 
@@ -19,4 +20,6 @@ class CSamplerStateDX : public CSamplerState {
 		CSamplerStateDX() = default;
 		///Destructor
 		~CSamplerStateDX() = default;
+
+friend class CGraphicApiDX;
 };

@@ -5,49 +5,32 @@
 #include "CConstantBuffer.h"
 #include "CTexture.h"
 
-
 #include <d3d11.h>
-#include <d3dx11.h>
 #include <d3dcompiler.h>
+#include <d3d11shader.h>
 
 class CGraphicApiDX : public CGraphicApi{
 
-	public:
+	private:
 		///
 		/// Miembros
 		/// 
-		
-		///
-		/// Propios de DX
-		/// 
-		 
-		UINT m_width;
-		UINT m_height;
 
 		HWND m_hWnd;
-
-		HINSTANCE m_hInst;
-
 		ID3D11Device* m_pd3dDevice;
 		IDXGISwapChain* m_pSwapChain;
-		D3D_FEATURE_LEVEL m_featureLevel;
 		ID3D11DeviceContext* m_pImmediateContext;
-		std::vector<D3D_DRIVER_TYPE> m_driverType;
 
+		CTexture* m_texture;
+		CTexture* m_depthStencil;
 
-
-		
-		ID3D11Texture2D* m_pDepthStenciloverride;
-		ID3D11InputLayout* m_pVertexLayoutoverride;
-		ID3D11SamplerState* m_pSamplerLinearoverride;
-		
-
-		ID3D11ShaderResourceView* m_pTextureRVoverride;
-		ID3D11DepthStencilView* m_pDepthStencilViewoverride;
-		ID3D11RenderTargetView* m_pRenderTargetViewoverride;
-		
+	public:
 		///
 		/// Métodos
+		/// 
+
+		///
+		/// Funciones para el usuario
 		/// 
 
 		///Constructor
@@ -55,25 +38,10 @@ class CGraphicApiDX : public CGraphicApi{
 		///Destructor
 		~CGraphicApiDX() = default;
 
-		HRESULT CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint,
-									  LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
-
 		///
 		/// H E R E N C I A
 		/// 
-		
-		/// <summary>
-		/// Función principal, aquí mandaré a crear
-		/// el init window y el device
-		/// </summary>
-		/// <returns></returns>
-		bool MainInit()override;
-		/// <summary>
-		/// Función para generar una 
-		/// ventana para DX
-		/// </summary>
-		/// <returns></returns>
-		bool InitWindow()override;
+
 		/// <summary>
 		/// Función para generar el
 		/// device de DX
@@ -85,44 +53,44 @@ class CGraphicApiDX : public CGraphicApi{
 		/// pixel shader de DX
 		/// </summary>
 		/// <returns></returns>
-		CPixelShader* CreatePixelShader(std::wstring _namePS,
-										std::string _entryPoint)override;
+		CPixelShader* CreatePixelShader(const std::wstring& _namePSDX, 
+			const std::string& _entryPointDX)override;
 		/// <summary>
 		/// Función para generar el
 		/// vertex shader de DX
 		/// </summary>
 		/// <returns></returns>
-		CVertexShader* CreateVertexShader(std::wstring _nameVS, 
-										  std::string _entryPoint)override;
+		CVertexShader* CreateVertexShader(const std::wstring& _nameVSDX, 
+			const std::string& _entryPointDX)override;
 		/// <summary>
 		/// Función para generar el
 		/// vertex buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		CVertexBuffer* CreateVertexBuffer(unsigned int _bufferSize,
-										  std::vector <SimpleVertex> _simpleVertex)override;
+		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex*>& _simpleVertexDX)override;
 		/// <summary>
 		/// Función para generar el
 		/// Index buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		CIndexBuffer* CreateIndexBuffer(unsigned int _bufferSize,
-										std::vector <unsigned int> _simpleIndex)override;
+		CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int*>& _simpleIndexDX)override;
 		/// <summary>
 		/// Función para generar los
 		/// Constant Buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		CConstantBuffer* CreateConstantBuffer(unsigned int _bufferSize)override;
+		CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX)override;
 		/// <summary>
-		/// Función para generar la
-		/// textura 2D de DX
+		/// Función para generar lo siguiente:
+		/// °ShaderResourceView
+		/// °DepthStencilView
+		/// °RenderTargetView
 		/// </summary>
 		/// <returns></returns>
-		CTexture* CreateTexture(unsigned int _width,
-								unsigned int _height,
-								unsigned int _bindFlags,
-								TEXTURE_FORMAT _textureFormat)override;
+		CTexture* CreateTexture(const unsigned int _widthDX, 
+			const unsigned int _heightDX, 
+			const unsigned int _bindFlagsDX, 
+			TEXTURE_FORMAT _textureFormatDX)override;
 		/// <summary>
 		/// Función para generar el
 		/// sampler state de DX
@@ -134,7 +102,7 @@ class CGraphicApiDX : public CGraphicApi{
 		/// Input layout de DX
 		/// </summary>
 		/// <returns></returns>
-		bool CreateInputLayout()override;
+		CInputLayout* CreateInputLayout(CVertexShader& _vertexShaderDX)override;
 
 		///
 		/// S E T´s 
@@ -145,50 +113,75 @@ class CGraphicApiDX : public CGraphicApi{
 		/// información del pixel shader de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetPixelShader(CPixelShader * _pixelShader)override;
+		void SetPixelShader(CPixelShader& _pixelShaderDX)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del vertex shader de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetVertexShader(CVertexShader * _vertexShader)override;
+		void SetVertexShader(CVertexShader& _vertexShaderDX)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del vertex buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetVertexBuffer(CVertexBuffer* _vertexBuffer)override;
+		void SetVertexBuffer(CVertexBuffer& _vertexBufferDX)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del index buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetIndexBuffer(CIndexBuffer* _indexBuffer)override;
+		void SetIndexBuffer(CIndexBuffer& _indexBufferDX)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información de los Constant Buffers de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetConstantBuffer(CConstantBuffer* _constantBuffer,
-							   unsigned int _startSlot,
-							   unsigned int _numBuffers)override;
-		/// <summary>
-		/// Función para guardar la
-		/// información de la textura 2D de DX
-		/// </summary>
-		/// <returns></returns>
-		void SetTexture(CTexture* _texture)override;
+		void SetConstantBuffer(CConstantBuffer& _constantBufferDX, 
+			const unsigned int _startSlotDX, 
+			const unsigned int _numBuffersDX)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del sampler state de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetSamplerState(unsigned int _startSlot,
-							 std::vector<CSamplerState*>& _samplerState)override;
+		void SetSamplerState(const unsigned int _startSlotDX, 
+			std::vector<CSamplerState*>& _samplerStateDX)override;
+		/// <summary>
+		/// Función para guardar la información
+		/// del shader resource view
+		/// </summary>
+		void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceViewDX,
+			const unsigned int _startSlotDX,
+			const unsigned int _numViewsDX)override;
+		/// <summary>
+		/// Función para guardar la información
+		/// del render target
+		/// </summary>
+		void SetRenderTarget(std::vector <CTexture*>& _renderTargetDX,
+			CTexture& _depthStencilDX,
+			const unsigned int _numViewsDX)override;
+		/// <summary>
+		/// Función para gaurdar la información
+		/// del depth stencil
+		/// </summary>
+		void SetDepthStencil(CTexture& _depthStencilDX,
+			const unsigned int _stencilRefDX)override;
 		/// <summary>
 		/// Función para guardar la
 		/// información del input layout de DX
 		/// </summary>
 		/// <returns></returns>
-		void SetInputLayout()override;
+		void SetInputLayout(CInputLayout& _vertexLayoutDX)override;
+		/// <summary>
+		/// Función para guardar la
+		/// información del viewport de DX
+		/// </summary>
+		void SetViewport(const unsigned int _numViewportsDX,
+			const unsigned int _widthDX, const unsigned int _heigthDX)override;
+		/// <summary>
+		/// Función para guardar la información
+		/// de la topología
+		/// </summary>
+		void SetPrimitiveTopology(const unsigned int _topologyDX)override;
 };
