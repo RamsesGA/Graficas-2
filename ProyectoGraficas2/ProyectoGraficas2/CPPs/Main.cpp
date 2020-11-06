@@ -24,7 +24,7 @@ HINSTANCE g_hInst;
 ///
 std::vector<SimpleVertex> g_pVertices;
 ///
-std::vector<unsigned int> g_pIndices;
+std::vector<uint32_t> g_pIndices;
 ///
 glm::mat4x4 g_world;
 glm::mat4x4 g_view;
@@ -146,35 +146,35 @@ void CreateSimpleVertex() {
 
     g_pVertices =
     {
-        { glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
 
-        { glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
 
-        { glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
 
-        { glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
 
-        { glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
 
-        { glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
     };
 }
 
@@ -235,6 +235,10 @@ void CreateCamera() {
 ///
 void Update() {
 
+    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
+    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
+    g_pGraphicApiDX->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
+
     ConstantBuffer1 newConstBuff1;
     newConstBuff1.mProjection = glm::transpose(g_projection);
     newConstBuff1.mView = glm::transpose(g_view);
@@ -262,10 +266,8 @@ void Render() {
     /// Render the cube
     ///
     g_pGraphicApiDX->SetYourVS(*g_pVertexShader);
-    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
-    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
+    
     g_pGraphicApiDX->SetYourPS(*g_pPixelShader);
-    g_pGraphicApiDX->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
     g_pGraphicApiDX->DrawIndex(36, 0, 0);
 
     ///

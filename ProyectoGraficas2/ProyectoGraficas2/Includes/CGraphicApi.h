@@ -166,7 +166,7 @@ using PRIMITIVE_TOPOLOGY = enum
 
 struct SimpleVertex{
 
-	glm::vec3 Pos;
+	glm::vec4 Pos;
 	glm::vec2 Tex;
 };
 
@@ -229,6 +229,8 @@ class CGraphicApi {
         virtual void SwapChainPresent(unsigned int _syncIntervalDX,
             unsigned int _flagsDX) = 0;
 
+        virtual CTexture* LoadTextureFromFile(const std::wstring _srcFile) = 0;
+
         ///
         /// U P D A T E´s
         /// 
@@ -263,7 +265,7 @@ class CGraphicApi {
 
 		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX) = 0;
 
-		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int>& _simpleIndexDX) = 0;
+		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX) = 0;
 
 		virtual CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX) = 0;
 

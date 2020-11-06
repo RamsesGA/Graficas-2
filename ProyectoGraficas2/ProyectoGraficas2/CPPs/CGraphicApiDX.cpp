@@ -160,6 +160,13 @@ void CGraphicApiDX::SwapChainPresent(unsigned int _syncIntervalDX,
     m_pSwapChain->Present(_syncIntervalDX, _flagsDX);
 }
 
+CTexture* CGraphicApiDX::LoadTextureFromFile(const std::wstring _srcFile){
+
+    HRESULT hr = S_OK;
+
+    return nullptr;
+}
+
 ///
 /// U P D A T E´s
 /// 
@@ -169,7 +176,7 @@ void CGraphicApiDX::UpdateConstantBuffer(const void* _srcData,
 
     auto constantBuffer = reinterpret_cast<CConstantBufferDX&>(_updateDataCB);
     m_pImmediateContext->UpdateSubresource(constantBuffer.m_pConstantBuffer, 0,
-        NULL, &_srcData,
+        nullptr, _srcData,
         0, 0);
 }
 
@@ -371,7 +378,7 @@ CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const std::vector <SimpleVertex
 }
 
 ///
-CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector <unsigned int>& _simpleIndexDX){
+CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX){
 
     ///Generamos una variable auto
     ///para adaptar el tipo de dato que ocupamos
@@ -381,18 +388,23 @@ CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector <unsigned int>&
     HRESULT hr = S_OK;
 
     ///Rellenamos el descriptor de buffer
-    CD3D11_BUFFER_DESC bd(sizeof(unsigned int) * _simpleIndexDX.size(),
-                          D3D11_BIND_INDEX_BUFFER);
+    D3D11_BUFFER_DESC bd;
+    ZeroMemory(&bd, sizeof(bd));
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.ByteWidth = sizeof(uint32_t) * _simpleIndexDX.size();
+    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bd.CPUAccessFlags = 0;
+    bd.MiscFlags = 0;
 
     ///Generamos una variable descriptor
     D3D11_SUBRESOURCE_DATA InitData;
-
     ///Limpiamos la memoria y dejamos
     ///definido todo en 0
     ZeroMemory(&InitData, sizeof(InitData));
-
     ///Asignamos datos a las variables
-    InitData.pSysMem = _simpleIndexDX.data();
+    InitData.pSysMem = &_simpleIndexDX[0];
+    InitData.SysMemPitch = 0;
+    InitData.SysMemSlicePitch = 0;
 
     ///Creamos el buffer
     hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, 
@@ -761,7 +773,7 @@ void CGraphicApiDX::SetIndexBuffer(CIndexBuffer& _indexBufferDX){
     auto indexBuffer = reinterpret_cast<CIndexBufferDX&>(_indexBufferDX);
 
     m_pImmediateContext->IASetIndexBuffer(indexBuffer.m_pIndexBuffer,
-                                          DXGI_FORMAT_R16_UINT, 
+                                          DXGI_FORMAT_R32_UINT, 
                                           0);
 }
 

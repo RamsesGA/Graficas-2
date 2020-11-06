@@ -59,6 +59,8 @@ class CGraphicApiDX : public CGraphicApi{
 		void SwapChainPresent(unsigned int _syncIntervalDX,
 			unsigned int _flagsDX)override;
 
+		CTexture* LoadTextureFromFile(const std::wstring _srcFile)override;
+
 		///
 		/// U P D A T E´s
 		/// 
@@ -111,7 +113,7 @@ class CGraphicApiDX : public CGraphicApi{
 		/// Index buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int>& _simpleIndexDX)override;
+		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX)override;
 		/// <summary>
 		/// Función para generar los
 		/// Constant Buffer de DX
