@@ -31,6 +31,9 @@
     <Filter Include="Archivos de origen\ClassOGL">
       <UniqueIdentifier>{0b535766-d081-4b51-bffd-9b80b21e2af2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de origen\Shaders">
+      <UniqueIdentifier>{fe4a6564-76a7-4275-807c-ac37b80ec8c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPPs\Main.cpp">
@@ -107,5 +110,10 @@
     <ClInclude Include="Includes\CInputLayoutDX.h">
       <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="CubeShader.fx">
+      <Filter>Archivos de origen\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

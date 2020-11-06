@@ -22,27 +22,45 @@ unsigned int g_height = 800;
 ///
 HINSTANCE g_hInst;
 ///
-std::vector<SimpleVertex*> g_pVertices;
+std::vector<SimpleVertex> g_pVertices;
 ///
-std::vector<unsigned int*> g_pIndices;
+std::vector<unsigned int> g_pIndices;
 ///
-glm::mat4x4 g_World;
-glm::mat4x4 g_View;
+glm::mat4x4 g_world;
+glm::mat4x4 g_view;
+glm::mat4x4 g_projection;
+///
+glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
 ///
 /// 
 /// 
-CGraphicApiDX* g_pGraphicApiDx = new CGraphicApiDX();
-std::vector<CTexture*> g_pRenderTargetView;
+CGraphicApiDX* g_pGraphicApiDX = new CGraphicApiDX();
+CTexture* g_pRenderTargetView = nullptr;
 CTexture* g_pDepthStencil = nullptr;
 CVertexShader* g_pVertexShader = nullptr;
 CInputLayout* g_pVertexLayout = nullptr;
 CPixelShader* g_pPixelShader = nullptr;
 CVertexBuffer* g_pVertexBuffer = nullptr;
 CIndexBuffer* g_pIndexBuffer = nullptr;
-CConstantBuffer* g_pCBNeverChanges = nullptr;
-CConstantBuffer* g_pCBChangeOnResize = nullptr;
-CConstantBuffer* g_pCBChangesEveryFrame = nullptr;
+CConstantBuffer* g_pConstantBuffer1 = nullptr;
+CConstantBuffer* g_pConstantBuffer2 = nullptr;
+
+///
+/// Struct
+/// 
+
+struct ConstantBuffer1 {
+
+    glm::mat4x4 mView;
+    glm::mat4x4 mProjection;
+};
+
+struct ConstantBuffer2 {
+
+    glm::mat4x4 mWorld;
+    glm::vec4 vMeshColor;
+};
 
 ///
 /// Funciones
@@ -96,26 +114,6 @@ void SetWndClassEx(WNDCLASSEX& _wcex, _In_ HINSTANCE& _hInstance) {
     _wcex.hIconSm = LoadIcon(_wcex.hInstance, IDI_APPLICATION);
 }
 
-///
-void TheWorld() {
-
-    ///Inicializamos la matriz de identidad
-    g_World = glm::mat4(1.0f);
-
-    // Initialize the view matrix
-    glm::vec3 Front = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 Right = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 Eye = glm::vec3(0.0f, 3.0f, -6.0f);
-    glm::vec3 LookAt = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
-    
-    int Far = 1000;
-    float Near = 0.01;
-    float FoV = 0.78539816339;
-
-    g_View;
-}
-
 ///Creación de la ventana
 HWND& CreateNewWindow() {
 
@@ -146,7 +144,7 @@ HWND& CreateNewWindow() {
 ///Creación del simple vertex
 void CreateSimpleVertex() {
 
-    SimpleVertex vertices[] =
+    g_pVertices =
     {
         { glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
         { glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
@@ -178,17 +176,12 @@ void CreateSimpleVertex() {
         { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
         { glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
     };
-
-    for (unsigned int i = 0; i < 120; i++) {
-
-        g_pVertices.push_back(&vertices[i]);
-    }
 }
 
 ///Creación del indices
 void CreateIndices() {
 
-    unsigned int indices[] =
+    g_pIndices =
     {
         3,1,0,
         2,1,3,
@@ -208,82 +201,78 @@ void CreateIndices() {
         22,20,21,
         23,20,22
     };
-
-    for (unsigned int i = 0; i < 36; i++) {
-
-        g_pIndices.push_back(&indices[i]);
-    }
 }
 
-///Función con todos los create
-void AllCreates() {
+///Creación de la camara para
+/// el mundo
+void CreateCamera() {
 
-    ///Creamos el render target view
-    g_pRenderTargetView.push_back(g_pGraphicApiDx->CreateTexture(g_width, g_height,
-        D3D11_BIND_RENDER_TARGET,
-        TEXTURE_FORMAT_R8G8B8A8_UNORM));
+    ///Inicializamos la matriz de identidad
+    g_world = glm::mat4(1.0f);
 
-    ///Creamos el depth stencil view
-    g_pDepthStencil = g_pGraphicApiDx->CreateTexture(g_width, g_height,
-        D3D11_BIND_DEPTH_STENCIL,
-        TEXTURE_FORMAT_D24_UNORM_S8_UINT);
+    /// Inicializamos los valores para camara
+    CameraDescriptor cameraDesc;
+    cameraDesc.s_eye = glm::vec3(0.0f, 3.0f, -6.0f);
+    cameraDesc.s_far = 1000.0f;
+    cameraDesc.s_foV = 0.78539816339f;
+    cameraDesc.s_height = g_height;
+    cameraDesc.s_lookAt = glm::vec3(0.0f, 1.0f, 0.0f);
+    cameraDesc.s_near = 0.01f;
+    cameraDesc.s_up = glm::vec3(0.0f, 1.0f, 0.0f);
+    cameraDesc.s_width = g_width;
 
-    ///Creamos el vertex shader
-    g_pVertexShader = g_pGraphicApiDx->CreateVertexShader
-    (std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes("CubeShader.fx"), "VS");
+    ///Inicializamos el punto de vista
+    g_view = glm::lookAtLH(cameraDesc.s_eye, 
+        cameraDesc.s_lookAt, 
+        cameraDesc.s_up);
 
-    ///Creamos el input layout
-    g_pVertexLayout = g_pGraphicApiDx->CreateInputLayout(*g_pVertexShader);
-
-    ///Creamos el pixel shader
-    g_pPixelShader = g_pGraphicApiDx->CreatePixelShader
-    (std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes("CubeShader.fx"), "PS");
-
-    ///Creamos el vertex buffer
-    CreateSimpleVertex();
-    g_pVertexBuffer = g_pGraphicApiDx->CreateVertexBuffer(g_pVertices);
-
-    ///Creamos el index buffer
-    CreateIndices();
-    g_pIndexBuffer = g_pGraphicApiDx->CreateIndexBuffer(g_pIndices);
-
-    ///Creamos los constant buffers
-
-    ///NeverChanges
-    g_pCBNeverChanges = g_pGraphicApiDx->CreateConstantBuffer(sizeof(CBNeverChanges));
-
-    ///NeverChanges
-    g_pCBChangeOnResize = g_pGraphicApiDx->CreateConstantBuffer(sizeof(CBChangeOnResize));
-
-    ///NeverChanges 
-    g_pCBChangesEveryFrame = g_pGraphicApiDx->CreateConstantBuffer(sizeof(CBChangesEveryFrame));
-
-    ///Creamos el sample state
-    g_pGraphicApiDx->CreateSamplerState();
-
-
+    ///Inicializamos la matriz de proyección
+    g_projection = glm::perspectiveFovLH(cameraDesc.s_foV, cameraDesc.s_width,
+        cameraDesc.s_height, cameraDesc.s_near, 
+        cameraDesc.s_far);
 }
 
-///Función con todos las guardados
-void AllSets() {
+///
+void Update() {
 
-    ///Guardamos los render targets
-    g_pGraphicApiDx->SetRenderTarget(g_pRenderTargetView, *g_pDepthStencil, 1);
+    ConstantBuffer1 newConstBuff1;
+    newConstBuff1.mProjection = glm::transpose(g_projection);
+    newConstBuff1.mView = glm::transpose(g_view);
+    g_pGraphicApiDX->UpdateConstantBuffer(&newConstBuff1, *g_pConstantBuffer1);
 
-    ///Guardamos un viewport
-    g_pGraphicApiDx->SetViewport(1, g_width, g_height);
+    ConstantBuffer2 cb;
+    cb.mWorld = glm::transpose(g_world);
+    cb.vMeshColor = g_vMeshColor;
+    g_pGraphicApiDX->UpdateConstantBuffer(&cb, *g_pConstantBuffer2);
+}
 
-    ///Guardamos el input layout
-    g_pGraphicApiDx->SetInputLayout(*g_pVertexLayout);
+void Render() {
 
-    ///Guardamos el vertex buffer
-    g_pGraphicApiDx->SetVertexBuffer(*g_pVertexBuffer);
+    ///
+    /// Clear the back buffer
+    ///
+    g_pRenderTargetView = g_pGraphicApiDX->ClearYourRenderTargetView(g_pGraphicApiDX->m_pBackBuffer);
 
-    ///Guardamos el index buffer
-    g_pGraphicApiDx->SetIndexBuffer(*g_pIndexBuffer);
+    ///
+    /// Clear the depth buffer to 1.0 (max depth)
+    ///
+    g_pDepthStencil = g_pGraphicApiDX->ClearYourDepthStencilView(g_pDepthStencil);
 
-    ///Guardamos la topología
-    g_pGraphicApiDx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    ///
+    /// Render the cube
+    ///
+    g_pGraphicApiDX->SetYourVS(*g_pVertexShader);
+    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
+    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
+    g_pGraphicApiDX->SetYourPS(*g_pPixelShader);
+    g_pGraphicApiDX->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
+    g_pGraphicApiDX->DrawIndex(36, 0, 0);
+
+    ///
+    /// Present our back buffer to our front buffer
+    ///
+
+    g_pGraphicApiDX->SwapChainPresent(0, 0);
 }
 
 /// 
@@ -332,41 +321,85 @@ int CALLBACK WinMain(
     ShowWindow(hWnd, _nCmdShow);
 
     ///Mandamos la ventana a la API
-    g_pGraphicApiDx->InitDevice();
+    g_pGraphicApiDX->InitDevice(hWnd);
 
-    AllCreates();
+    ///Generamos el mundo y su camara
+    CreateCamera();
 
-    AllSets();
+    ///
+    /// C R E A T E´s
+    ///
+    
+    ///Creamos el render target view
+    ///g_pRenderTargetView = g_pGraphicApiDX->CreateTexture(g_width, g_height,
+    ///    D3D11_BIND_RENDER_TARGET,
+    ///    TEXTURE_FORMAT_R8G8B8A8_UNORM);
 
-   
+    ///Creamos el depth stencil view
+    g_pDepthStencil = g_pGraphicApiDX->CreateTexture(g_width, g_height,
+        D3D11_BIND_DEPTH_STENCIL,
+        TEXTURE_FORMAT_D24_UNORM_S8_UINT);
 
+    ///Creamos el vertex shader
+    g_pVertexShader = g_pGraphicApiDX->CreateVertexShader
+    (L"CubeShader.fx", "VS");
 
+    ///Creamos el input layout
+    g_pVertexLayout = g_pGraphicApiDX->CreateInputLayout(*g_pVertexShader);
 
+    ///Creamos el pixel shader
+    g_pPixelShader = g_pGraphicApiDX->CreatePixelShader
+    (L"CubeShader.fx", "PS");
 
+    ///Creamos el vertex buffer
+    CreateSimpleVertex();
+    g_pVertexBuffer = g_pGraphicApiDX->CreateVertexBuffer(g_pVertices);
 
+    ///Creamos el index buffer
+    CreateIndices();
+    g_pIndexBuffer = g_pGraphicApiDX->CreateIndexBuffer(g_pIndices);
 
+    ///Creamos los constant buffers para el shader
 
+    ///ConstantBuffer1
+    g_pConstantBuffer1 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer1));
+    ///ConstantBuffer2
+    g_pConstantBuffer2 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer2));
 
+    ///Guardamos los render targets
+    g_pGraphicApiDX->SetRenderTarget(*g_pGraphicApiDX->m_pBackBuffer, *g_pDepthStencil);
+    ///Guardamos un viewport
+    g_pGraphicApiDX->SetViewport(1, g_width, g_height);
+    ///Guardamos el input layout
+    g_pGraphicApiDX->SetInputLayout(*g_pVertexLayout);
+    ///Guardamos el vertex buffer
+    g_pGraphicApiDX->SetVertexBuffer(*g_pVertexBuffer);
+    ///Guardamos el index buffer
+    g_pGraphicApiDX->SetIndexBuffer(*g_pIndexBuffer);
+    ///Guardamos la topología
+    g_pGraphicApiDX->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
-
-
-
-
-
-
-
-
+    ///
+    /// 
+    /// 
 
     ///Actualizamos la ventana
     UpdateWindow(hWnd);
-
     ///Main message loop:
-    MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0)) {
+    MSG msg = { 0 };
+    while (WM_QUIT != msg.message){
 
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
+
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        else{
+
+            Update();
+
+            Render();
+        }
     }
 
     return (int)msg.wParam;

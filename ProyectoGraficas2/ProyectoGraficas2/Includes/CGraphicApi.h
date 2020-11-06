@@ -170,20 +170,16 @@ struct SimpleVertex{
 	glm::vec2 Tex;
 };
 
-struct CBNeverChanges{
+struct CameraDescriptor {
 
-    glm::mat4x4 mView;
-};
-
-struct CBChangeOnResize{
-
-    glm::mat4x4 mProjection;
-};
-
-struct CBChangesEveryFrame{
-
-    glm::mat4x4 mWorld;
-    glm::vec4 vMeshColor;
+    float s_width;
+    float s_height;
+    float s_near;
+    float s_far;
+    float s_foV;
+    glm::vec3 s_eye;
+    glm::vec3 s_lookAt;
+    glm::vec3 s_up;
 };
 
 class CPixelShader;
@@ -224,10 +220,39 @@ class CGraphicApi {
 		///Destructor
 		~CGraphicApi() = default;
 
-        virtual bool InitDevice() = 0;
+        virtual bool InitDevice(HWND& _hWnd) = 0;
+
+        virtual void DrawIndex(unsigned int _indexCountDX,
+            unsigned int _startIndexLocationDX,
+            unsigned int _baseVertexLocationDX) = 0;
+
+        virtual void SwapChainPresent(unsigned int _syncIntervalDX,
+            unsigned int _flagsDX) = 0;
+
+        ///
+        /// U P D A T E´s
+        /// 
+
+        virtual void UpdateConstantBuffer(const void* _srcDataDX, 
+            CConstantBuffer& _updateDataCBDX) = 0;
+
+        ///
+        /// C L E A R´s
+        /// 
+
+        virtual CTexture* ClearYourRenderTargetView(CTexture* _renderTargetDX) = 0;
+
+        virtual CTexture* ClearYourDepthStencilView(CTexture* _depthStencilDX) = 0;
+
+        virtual void CleanUpDevices(std::vector<CTexture*> _renderTargetView, CTexture* _depthStencilView,
+            CVertexShader* _vertexShaderDX, CInputLayout* _vertexLayoutDX,
+            CPixelShader* _pixelShaderDX, CVertexBuffer* _vertexBufferDX,
+            CIndexBuffer* _indexBufferDX, CConstantBuffer* _neverChangesDX,
+            CConstantBuffer* _changeOnResizeDX, CConstantBuffer* _changesEveryFrameDX,
+            CSamplerState* _samplerDX) = 0;
 
 		///
-		/// C R E A T E
+		/// C R E A T E´s
 		/// 
 
 		virtual CPixelShader* CreatePixelShader(const std::wstring& _namePSDX, 
@@ -236,9 +261,9 @@ class CGraphicApi {
 		virtual CVertexShader* CreateVertexShader(const std::wstring& _nameVSDX, 
             const std::string& _entryPointDX) = 0;
 
-		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex*>& _simpleVertexDX) = 0;
+		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX) = 0;
 
-		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int*>& _simpleIndexDX) = 0;
+		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int>& _simpleIndexDX) = 0;
 
 		virtual CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX) = 0;
 
@@ -274,9 +299,8 @@ class CGraphicApi {
             const unsigned int _startSlotDX,
             const unsigned int _numViewsDX) = 0;
 
-        virtual void SetRenderTarget(std::vector <CTexture*>& _renderTargetDX,
-            CTexture& _depthStencilDX,
-            const unsigned int _numViewsDX) = 0;
+        virtual void SetRenderTarget(CTexture& _renderTargetDX,
+            CTexture& _depthStencilDX) = 0;
 
         virtual void SetDepthStencil(CTexture& _depthStencilDX,
             const unsigned int _stencilRefDX) = 0;
@@ -287,4 +311,20 @@ class CGraphicApi {
             const unsigned int _widthDX, const unsigned int _heigthDX) = 0;
 
         virtual void SetPrimitiveTopology(const unsigned int _topologyDX) = 0;
+
+        virtual void SetYourVS(CVertexShader& _vertexShaderDX) = 0;
+
+        virtual void SetYourVSConstantBuffers(CConstantBuffer* _constantBufferDX,
+            const unsigned int _startSlotDX,
+            const unsigned int _numBuffersDX) = 0;
+
+        virtual void SetYourPS(CPixelShader& _pixelShaderDX) = 0;
+
+        virtual void SetYourPSConstantBuffers(CConstantBuffer* _constantBufferDX,
+            const unsigned int _startSlotDX,
+            const unsigned int _numBuffersDX) = 0;
+
+        virtual void SetYourPSSampler(CSamplerState& _samplerDX,
+            const unsigned int _startSlotDX,
+            const unsigned int _numSamplersDX) = 0;
 };

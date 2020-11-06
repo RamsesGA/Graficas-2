@@ -181,6 +181,11 @@
     <ClInclude Include="Includes\CVertexShaderDX.h" />
     <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="CubeShader.fx">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS</EntryPointName>
+    </FxCompile>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

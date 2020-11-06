@@ -21,10 +21,13 @@ class CGraphicApiDX : public CGraphicApi{
 		IDXGISwapChain* m_pSwapChain;
 		ID3D11DeviceContext* m_pImmediateContext;
 
-		CTexture* m_texture;
-		CTexture* m_depthStencil;
+		CTexture* m_pDepthStencil;
 
 	public:
+
+		CTexture* m_pBackBuffer;
+
+		
 		///
 		/// Métodos
 		/// 
@@ -47,7 +50,42 @@ class CGraphicApiDX : public CGraphicApi{
 		/// device de DX
 		/// </summary>
 		/// <returns></returns>
-		bool InitDevice()override;
+		bool InitDevice(HWND& _hWnd)override;
+
+		void DrawIndex(unsigned int _indexCountDX,
+			unsigned int _startIndexLocationDX,
+			unsigned int _baseVertexLocationDX)override;
+
+		void SwapChainPresent(unsigned int _syncIntervalDX,
+			unsigned int _flagsDX)override;
+
+		///
+		/// U P D A T E´s
+		/// 
+		
+		void UpdateConstantBuffer(const void* _srcDataDX, 
+			CConstantBuffer& _updateDataCBDX)override;
+
+		///
+		/// C L E A R´s
+		/// 
+
+		CTexture* ClearYourRenderTargetView(CTexture* _renderTargetDX)override;
+
+		CTexture* ClearYourDepthStencilView(CTexture* _depthStencilDX)override;
+
+		void CleanUpDevices(std::vector<CTexture*> _renderTargetView, CTexture* _depthStencilView,
+			CVertexShader* _vertexShaderDX, CInputLayout* _vertexLayoutDX,
+			CPixelShader* _pixelShaderDX, CVertexBuffer* _vertexBufferDX,
+			CIndexBuffer* _indexBufferDX, CConstantBuffer* _neverChangesDX,
+			CConstantBuffer* _changeOnResizeDX, CConstantBuffer* _changesEveryFrameDX,
+			CSamplerState* _samplerDX)override;
+
+		///
+		/// C R E A T E´s 
+		/// 
+
+
 		/// <summary>
 		/// Función para generar el
 		/// pixel shader de DX
@@ -67,13 +105,13 @@ class CGraphicApiDX : public CGraphicApi{
 		/// vertex buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex*>& _simpleVertexDX)override;
+		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX)override;
 		/// <summary>
 		/// Función para generar el
 		/// Index buffer de DX
 		/// </summary>
 		/// <returns></returns>
-		CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int*>& _simpleIndexDX)override;
+		CIndexBuffer* CreateIndexBuffer(const std::vector <unsigned int>& _simpleIndexDX)override;
 		/// <summary>
 		/// Función para generar los
 		/// Constant Buffer de DX
@@ -158,9 +196,8 @@ class CGraphicApiDX : public CGraphicApi{
 		/// Función para guardar la información
 		/// del render target
 		/// </summary>
-		void SetRenderTarget(std::vector <CTexture*>& _renderTargetDX,
-			CTexture& _depthStencilDX,
-			const unsigned int _numViewsDX)override;
+		void SetRenderTarget(CTexture& _renderTargetDX,
+			CTexture& _depthStencilDX)override;
 		/// <summary>
 		/// Función para gaurdar la información
 		/// del depth stencil
@@ -184,4 +221,20 @@ class CGraphicApiDX : public CGraphicApi{
 		/// de la topología
 		/// </summary>
 		void SetPrimitiveTopology(const unsigned int _topologyDX)override;
+
+		void SetYourVS(CVertexShader& _vertexShaderDX)override;
+
+		void SetYourVSConstantBuffers(CConstantBuffer* _constantBufferDX,
+			const unsigned int _startSlotDX,
+			const unsigned int _numBuffersDX)override;
+
+		void SetYourPS(CPixelShader& _pixelShaderDX)override;
+
+		void SetYourPSConstantBuffers(CConstantBuffer* _constantBufferDX,
+			const unsigned int _startSlotDX,
+			const unsigned int _numBuffersDX)override;
+
+		void SetYourPSSampler(CSamplerState& _samplerDX,
+			const unsigned int _startSlotDX,
+			const unsigned int _numSamplersDX)override;
 };
