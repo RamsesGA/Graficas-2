@@ -5,6 +5,11 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+/// <summary>
+/// Enum con todos los números
+/// con el tipo de bind flag
+/// para DX
+/// </summary>
 using TEXTURE_BIND_FLAG = enum
 {
     TEXTURE_BIND_SHADER_RESOURCE = 0x8L,
@@ -12,7 +17,11 @@ using TEXTURE_BIND_FLAG = enum
     TEXTURE_BIND_DEPTH_STENCIL = 0x40L,
     TEXTURE_BIND_UNORDERED_ACCESS = 0x80L,
 };
-
+/// <summary>
+/// Enum con todos los números
+/// con el tipo de formato
+/// para DX
+/// </summary>
 using TEXTURE_FORMAT = enum
 {
     TEXTURE_FORMAT_UNKNOWN = 0,
@@ -117,7 +126,11 @@ using TEXTURE_FORMAT = enum
     TEXTURE_FORMAT_BC7_UNORM_SRGB = 99,
     TEXTURE_FORMAT_FORCE_UINT = 0xffffffff
 };
-
+/// <summary>
+/// Enum con todas los números
+/// con el tipo de topología
+/// para DX
+/// </summary>
 using PRIMITIVE_TOPOLOGY = enum
 {
     PRIMITIVE_TOPOLOGY_UNDEFINED = 0,
@@ -163,13 +176,19 @@ using PRIMITIVE_TOPOLOGY = enum
     PRIMITIVE_TOPOLOGY_31_CONTROL_POINT_PATCHLIST = 63,
     PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST = 64
 };
-
+/// <summary>
+/// Estructura con los datos
+/// para el vertex buffer
+/// </summary>
 struct SimpleVertex{
 
 	glm::vec4 Pos;
 	glm::vec2 Tex;
 };
-
+/// <summary>
+/// Estructura con los datos
+/// para la creación de una camara
+/// </summary>
 struct CameraDescriptor {
 
     float s_width;
@@ -182,6 +201,10 @@ struct CameraDescriptor {
     glm::vec3 s_up;
 };
 
+/// <summary>
+/// Instancias de las clases
+/// abstraidas
+/// </summary>
 class CPixelShader;
 class CVertexShader;
 class CVertexBuffer;
@@ -200,20 +223,24 @@ class CGraphicApi {
 
 	protected:
 		///
-		///Métodos
+		/// M I E M B R O S
 		/// 
 
+        /// <summary>
+        /// Miembro para guardar la
+        /// anchura de la pantalla
+        /// </summary>
         unsigned int m_width;
+        /// <summary>
+        /// Miembro para guarda la
+        /// altura de la pantalla
+        /// </summary>
         unsigned int m_height;
 
 	public:
 		///
-		///Métodos
+		/// M É T O D O S
 		/// 
-		
-        ///
-        /// Funciones para el usuario
-        /// 
 		
         ///Constructor
 		CGraphicApi() = default;
@@ -229,7 +256,13 @@ class CGraphicApi {
         virtual void SwapChainPresent(unsigned int _syncIntervalDX,
             unsigned int _flagsDX) = 0;
 
-        virtual CTexture* LoadTextureFromFile(const std::wstring _srcFile) = 0;
+        virtual CTexture* LoadTextureFromFile(const std::string _srcFile) = 0;
+
+        virtual CTexture* GetDefaultBackBuffer() = 0;
+
+        virtual void BindOGL() = 0;
+
+        virtual void UnbindOGL() = 0;
 
         ///
         /// U P D A T E´s
@@ -257,75 +290,210 @@ class CGraphicApi {
 		/// C R E A T E´s
 		/// 
 
+		/// <summary>
+        /// Función para generar el
+        /// pixel shader o fragment shader
+		/// </summary>
+		/// <param name="_namePSDX"></param>
+		/// <param name="_entryPointDX"></param>
+		/// <param name="_fragmentSrcOGL"></param>
+		/// <returns></returns>
 		virtual CPixelShader* CreatePixelShader(const std::wstring& _namePSDX, 
-            const std::string& _entryPointDX) = 0;
-
+            const std::string& _entryPointDX,
+            const std::string& _fragmentSrcOGL) = 0;
+		/// <summary>
+        /// Función para generar el
+        /// vertex shader o vertex resource
+		/// </summary>
+		/// <param name="_nameVSDX"></param>
+		/// <param name="_entryPointDX"></param>
+		/// <param name="_vertexSrcOGL"></param>
+		/// <returns></returns>
 		virtual CVertexShader* CreateVertexShader(const std::wstring& _nameVSDX, 
-            const std::string& _entryPointDX) = 0;
-
+            const std::string& _entryPointDX,
+            const std::string& _vertexSrcOGL) = 0;
+		/// <summary>
+        /// Función para generar el
+        /// vertex buffer
+		/// </summary>
+		/// <param name="_simpleVertexDX"></param>
+		/// <returns></returns>
 		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX) = 0;
-
+		/// <summary>
+        /// Función para generar el
+        /// index buffer
+		/// </summary>
+		/// <param name="_simpleIndexDX"></param>
+		/// <returns></returns>
 		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX) = 0;
-
+		/// <summary>
+        /// Función para generar los
+        /// constant buffer
+		/// </summary>
+		/// <param name="_bufferSizeDX"></param>
+		/// <returns></returns>
 		virtual CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX) = 0;
-
+		/// <summary>
+        /// Función para generar lo siguiente:
+        /// °ShaderResourceView
+        /// °DepthStencilView
+        /// °RenderTargetView
+		/// </summary>
+		/// <param name="_widthDX"></param>
+		/// <param name="_heightDX"></param>
+		/// <param name="_bindFlagsDX"></param>
+		/// <param name="_textureFormatDX"></param>
+		/// <returns></returns>
 		virtual CTexture* CreateTexture(const unsigned int _widthDX, 
             const unsigned int _heightDX, 
             const unsigned int _bindFlagsDX, 
             TEXTURE_FORMAT _textureFormatDX) = 0;
-
+        /// <summary>
+        /// Función para generar el
+        /// sampler state
+        /// </summary>
+        /// <returns></returns>
         virtual CSamplerState* CreateSamplerState() = 0;
-
+		/// <summary>
+        /// Función para generar el
+        /// input layout
+		/// </summary>
+		/// <param name="_vertexShaderDX"></param>
+		/// <returns></returns>
 		virtual CInputLayout* CreateInputLayout(CVertexShader& _vertexShaderDX) = 0;
 
 		///
 		/// S E T´s
 		/// 
 
+		/// <summary>
+        /// Función para guardar la
+        /// información del pixel shader
+		/// </summary>
+		/// <param name="_pixelShaderDX"></param>
 		virtual void SetPixelShader(CPixelShader& _pixelShaderDX) = 0;
-
+		/// <summary>
+        /// Función para guardar la
+        /// información del vertex shader
+		/// </summary>
+		/// <param name="_vertexShaderDX"></param>
 		virtual void SetVertexShader(CVertexShader& _vertexShaderDX) = 0;
-
+		/// <summary>
+        /// Función para guardar la
+        /// información del vertex buffer
+		/// </summary>
+		/// <param name="_vertexBufferDX"></param>
 		virtual void SetVertexBuffer(CVertexBuffer& _vertexBufferDX) = 0;
-
+		/// <summary>
+        /// Función para guardar la
+        /// información del index buffer
+		/// </summary>
+		/// <param name="_indexBufferDX"></param>
 		virtual void SetIndexBuffer(CIndexBuffer& _indexBufferDX) = 0;
-	
+		/// <summary>
+        /// Función para guardar la
+        /// información de los constant buffers
+		/// </summary>
+		/// <param name="_constantBufferDX"></param>
+		/// <param name="_startSlotDX"></param>
+		/// <param name="_numBuffersDX"></param>
 		virtual void SetConstantBuffer(CConstantBuffer& _constantBufferDX, 
             const unsigned int _startSlotDX, 
             const unsigned int _numBuffersDX) = 0;
-
+        /// <summary>
+        /// Función para guardar la
+        /// información del sampler state
+        /// </summary>
+        /// <param name="_startSlotDX"></param>
+        /// <param name="_samplerStateDX"></param>
         virtual void SetSamplerState(const unsigned int _startSlotDX,
             std::vector<CSamplerState*>& _samplerStateDX) = 0;
-
+        /// <summary>
+        /// Función para guardar la información
+        /// del shader resource view
+        /// </summary>
+        /// <param name="_shaderResourceViewDX"></param>
+        /// <param name="_startSlotDX"></param>
+        /// <param name="_numViewsDX"></param>
         virtual void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceViewDX,
             const unsigned int _startSlotDX,
             const unsigned int _numViewsDX) = 0;
-
+        /// <summary>
+        /// Función para guardar la información
+        /// del render target
+        /// </summary>
+        /// <param name="_renderTargetDX"></param>
+        /// <param name="_depthStencilDX"></param>
         virtual void SetRenderTarget(CTexture& _renderTargetDX,
             CTexture& _depthStencilDX) = 0;
-
+        /// <summary>
+        /// Función para gaurdar la información
+        /// del depth stencil
+        /// </summary>
+        /// <param name="_depthStencilDX"></param>
+        /// <param name="_stencilRefDX"></param>
         virtual void SetDepthStencil(CTexture& _depthStencilDX,
             const unsigned int _stencilRefDX) = 0;
-
+		/// <summary>
+        /// Función para guardar la
+        /// información del input layout
+		/// </summary>
+		/// <param name="_vertexLayoutDX"></param>
 		virtual void SetInputLayout(CInputLayout& _vertexLayoutDX) = 0;
-
+        /// <summary>
+        /// Función para guardar la
+        /// información del viewport
+        /// </summary>
+        /// <param name="_numViewportsDX"></param>
+        /// <param name="_widthDX"></param>
+        /// <param name="_heigthDX"></param>
         virtual void SetViewport(const unsigned int _numViewportsDX,
             const unsigned int _widthDX, const unsigned int _heigthDX) = 0;
-
+        /// <summary>
+        /// Función para guardar la información
+        /// de la topología
+        /// </summary>
+        /// <param name="_topologyDX"></param>
         virtual void SetPrimitiveTopology(const unsigned int _topologyDX) = 0;
-
+        /// <summary>
+        /// Función para mandar a llamar
+        /// VSSetShader
+        /// </summary>
+        /// <param name="_vertexShaderDX"></param>
         virtual void SetYourVS(CVertexShader& _vertexShaderDX) = 0;
-
+        /// <summary>
+        /// Función para mandar a llamar
+        /// VSSetConstantBuffers
+        /// </summary>
+        /// <param name="_constantBufferDX"></param>
+        /// <param name="_startSlotDX"></param>
+        /// <param name="_numBuffersDX"></param>
         virtual void SetYourVSConstantBuffers(CConstantBuffer* _constantBufferDX,
             const unsigned int _startSlotDX,
             const unsigned int _numBuffersDX) = 0;
-
+        /// <summary>
+        /// Función para mandar a llamar
+        /// PSSetShader
+        /// </summary>
+        /// <param name="_pixelShaderDX"></param>
         virtual void SetYourPS(CPixelShader& _pixelShaderDX) = 0;
-
+        /// <summary>
+        /// Función para mandar a llamar
+        /// PSSetConstantBuffers
+        /// </summary>
+        /// <param name="_constantBufferDX"></param>
+        /// <param name="_startSlotDX"></param>
+        /// <param name="_numBuffersDX"></param>
         virtual void SetYourPSConstantBuffers(CConstantBuffer* _constantBufferDX,
             const unsigned int _startSlotDX,
             const unsigned int _numBuffersDX) = 0;
-
+        /// <summary>
+        /// Función para mandar a llamar
+        /// PSSetSamplers
+        /// </summary>
+        /// <param name="_samplerDX"></param>
+        /// <param name="_startSlotDX"></param>
+        /// <param name="_numSamplersDX"></param>
         virtual void SetYourPSSampler(CSamplerState& _samplerDX,
             const unsigned int _startSlotDX,
             const unsigned int _numSamplersDX) = 0;

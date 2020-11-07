@@ -9,7 +9,8 @@
 #include <locale>
 
 ///
-/// Global variables
+/// V A R I A B L E S
+/// G L O B A L E S
 ///
 
 ///The main window class name.
@@ -19,23 +20,19 @@ static TCHAR g_szTitle[] = _T("Windows - KriegerFS-");
 ///Tamaño de pantalla
 unsigned int g_width = 1000;
 unsigned int g_height = 800;
-///
+
 HINSTANCE g_hInst;
-///
+
 std::vector<SimpleVertex> g_pVertices;
-///
 std::vector<uint32_t> g_pIndices;
-///
+
 glm::mat4x4 g_world;
 glm::mat4x4 g_view;
 glm::mat4x4 g_projection;
-///
+
 glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
-///
-/// 
-/// 
-CGraphicApiDX* g_pGraphicApiDX = new CGraphicApiDX();
+CGraphicApi* g_pGraphicApiDX = new CGraphicApiDX();
 CTexture* g_pRenderTargetView = nullptr;
 CTexture* g_pDepthStencil = nullptr;
 CVertexShader* g_pVertexShader = nullptr;
@@ -47,7 +44,7 @@ CConstantBuffer* g_pConstantBuffer1 = nullptr;
 CConstantBuffer* g_pConstantBuffer2 = nullptr;
 
 ///
-/// Struct
+/// S T R U C T´s
 /// 
 
 struct ConstantBuffer1 {
@@ -63,11 +60,18 @@ struct ConstantBuffer2 {
 };
 
 ///
-/// Funciones
+/// F U N C I O N E S
 ///
 
-///Manejar los mensajes que la aplicación 
+/// <summary>
+/// Manejar los mensajes que la aplicación 
 /// recibe de Windows cuando ocurren eventos.
+/// </summary>
+/// <param name="_hWnd"></param>
+/// <param name="_message"></param>
+/// <param name="_wParam"></param>
+/// <param name="_lParam"></param>
+/// <returns></returns>
 LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message,
     WPARAM _wParam, LPARAM _lParam) {
 
@@ -95,9 +99,12 @@ LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message,
 
     return 0;
 }
-
-///Guardamos información de la ventana
-///del typedef "WNDCLASSEX"
+/// <summary>
+/// Guardamos información de la ventana
+/// del typedef "WNDCLASSEX"
+/// </summary>
+/// <param name="_wcex"></param>
+/// <param name="_hInstance"></param>
 void SetWndClassEx(WNDCLASSEX& _wcex, _In_ HINSTANCE& _hInstance) {
 
     _wcex.cbSize = sizeof(WNDCLASSEX);
@@ -113,8 +120,10 @@ void SetWndClassEx(WNDCLASSEX& _wcex, _In_ HINSTANCE& _hInstance) {
     _wcex.lpszClassName = g_szWindowClass;
     _wcex.hIconSm = LoadIcon(_wcex.hInstance, IDI_APPLICATION);
 }
-
-///Creación de la ventana
+/// <summary>
+/// Creación de la ventana
+/// </summary>
+/// <returns></returns>
 HWND& CreateNewWindow() {
 
     HWND hWnd = CreateWindow(
@@ -140,8 +149,9 @@ HWND& CreateNewWindow() {
 
     return hWnd;
 }
-
-///Creación del simple vertex
+/// <summary>
+/// Creación del simple vertex
+/// </summary>
 void CreateSimpleVertex() {
 
     g_pVertices =
@@ -177,8 +187,9 @@ void CreateSimpleVertex() {
         { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
     };
 }
-
-///Creación del indices
+/// <summary>
+/// Creación del indices
+/// </summary>
 void CreateIndices() {
 
     g_pIndices =
@@ -202,9 +213,10 @@ void CreateIndices() {
         23,20,22
     };
 }
-
-///Creación de la camara para
-/// el mundo
+/// <summary>
+/// Creación de la camara 
+/// para el mundo
+/// </summary>
 void CreateCamera() {
 
     ///Inicializamos la matriz de identidad
@@ -231,13 +243,11 @@ void CreateCamera() {
         cameraDesc.s_height, cameraDesc.s_near, 
         cameraDesc.s_far);
 }
-
-///
+/// <summary>
+/// Función para almacenar todas las funciones
+/// con descripción de "UPDATE"
+/// </summary>
 void Update() {
-
-    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
-    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
-    g_pGraphicApiDX->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
 
     ConstantBuffer1 newConstBuff1;
     newConstBuff1.mProjection = glm::transpose(g_projection);
@@ -249,13 +259,29 @@ void Update() {
     cb.vMeshColor = g_vMeshColor;
     g_pGraphicApiDX->UpdateConstantBuffer(&cb, *g_pConstantBuffer2);
 }
-
+/// <summary>
+/// Función para guardar valores y generar
+/// información para la pantalla
+/// </summary>
 void Render() {
+
+    ///Guardamos los render targets
+    g_pGraphicApiDX->SetRenderTarget(*g_pRenderTargetView, *g_pDepthStencil);
+    ///Guardamos un viewport
+    g_pGraphicApiDX->SetViewport(1, g_width, g_height);
+    ///Guardamos el input layout
+    g_pGraphicApiDX->SetInputLayout(*g_pVertexLayout);
+    ///Guardamos el vertex buffer
+    g_pGraphicApiDX->SetVertexBuffer(*g_pVertexBuffer);
+    ///Guardamos el index buffer
+    g_pGraphicApiDX->SetIndexBuffer(*g_pIndexBuffer);
+    ///Guardamos la topología
+    g_pGraphicApiDX->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     ///
     /// Clear the back buffer
     ///
-    g_pRenderTargetView = g_pGraphicApiDX->ClearYourRenderTargetView(g_pGraphicApiDX->m_pBackBuffer);
+    g_pRenderTargetView = g_pGraphicApiDX->ClearYourRenderTargetView(g_pRenderTargetView);
 
     ///
     /// Clear the depth buffer to 1.0 (max depth)
@@ -266,7 +292,9 @@ void Render() {
     /// Render the cube
     ///
     g_pGraphicApiDX->SetYourVS(*g_pVertexShader);
-    
+    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
+    g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
+    g_pGraphicApiDX->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
     g_pGraphicApiDX->SetYourPS(*g_pPixelShader);
     g_pGraphicApiDX->DrawIndex(36, 0, 0);
 
@@ -276,7 +304,67 @@ void Render() {
 
     g_pGraphicApiDX->SwapChainPresent(0, 0);
 }
+/// <summary>
+/// Función donde generamos el proyecto
+/// en DirectX
+/// </summary>
+/// <param name="_hWnd"></param>
+void DXProyect(HWND _hWnd) {
 
+    ///Mandamos la ventana a la API
+    g_pGraphicApiDX->InitDevice(_hWnd);
+
+    ///Generamos el mundo y su camara
+    CreateCamera();
+
+    ///
+    /// C R E A T E´s
+    ///
+
+    ///Creamos el render target view
+    g_pRenderTargetView = g_pGraphicApiDX->GetDefaultBackBuffer();
+
+    ///Creamos el depth stencil view
+    g_pDepthStencil = g_pGraphicApiDX->CreateTexture(g_width, g_height,
+        D3D11_BIND_DEPTH_STENCIL,
+        TEXTURE_FORMAT_D24_UNORM_S8_UINT);
+
+    ///Creamos el vertex shader
+    g_pVertexShader = g_pGraphicApiDX->CreateVertexShader
+    (L"CubeShader.fx", "VS", "");
+
+    ///Creamos el input layout
+    g_pVertexLayout = g_pGraphicApiDX->CreateInputLayout(*g_pVertexShader);
+
+    ///Creamos el pixel shader
+    g_pPixelShader = g_pGraphicApiDX->CreatePixelShader
+    (L"CubeShader.fx", "PS", "");
+
+    ///Creamos el vertex buffer
+    CreateSimpleVertex();
+    g_pVertexBuffer = g_pGraphicApiDX->CreateVertexBuffer(g_pVertices);
+
+    ///Creamos el index buffer
+    CreateIndices();
+    g_pIndexBuffer = g_pGraphicApiDX->CreateIndexBuffer(g_pIndices);
+
+    ///Creamos los constant buffers para el shader
+    g_pConstantBuffer1 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer1));
+    g_pConstantBuffer2 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer2));
+}
+/// <summary>
+/// Función donde se generará el proyecto
+/// para OpenGL
+/// </summary>
+/// <param name="_hWnd"></param>
+void OGLProyect(HWND _hWnd) {
+
+
+}
+
+///
+/// F U N C I Ó N
+/// P R I N C I P A L
 /// 
 int CALLBACK WinMain(
     _In_ HINSTANCE _hInstance,
@@ -322,68 +410,11 @@ int CALLBACK WinMain(
     ///_nCmdShow: the fourth parameter from WinMain
     ShowWindow(hWnd, _nCmdShow);
 
-    ///Mandamos la ventana a la API
-    g_pGraphicApiDX->InitDevice(hWnd);
+    ///Proyecto en Direct X
+    DXProyect(hWnd);
 
-    ///Generamos el mundo y su camara
-    CreateCamera();
-
-    ///
-    /// C R E A T E´s
-    ///
-    
-    ///Creamos el render target view
-    ///g_pRenderTargetView = g_pGraphicApiDX->CreateTexture(g_width, g_height,
-    ///    D3D11_BIND_RENDER_TARGET,
-    ///    TEXTURE_FORMAT_R8G8B8A8_UNORM);
-
-    ///Creamos el depth stencil view
-    g_pDepthStencil = g_pGraphicApiDX->CreateTexture(g_width, g_height,
-        D3D11_BIND_DEPTH_STENCIL,
-        TEXTURE_FORMAT_D24_UNORM_S8_UINT);
-
-    ///Creamos el vertex shader
-    g_pVertexShader = g_pGraphicApiDX->CreateVertexShader
-    (L"CubeShader.fx", "VS");
-
-    ///Creamos el input layout
-    g_pVertexLayout = g_pGraphicApiDX->CreateInputLayout(*g_pVertexShader);
-
-    ///Creamos el pixel shader
-    g_pPixelShader = g_pGraphicApiDX->CreatePixelShader
-    (L"CubeShader.fx", "PS");
-
-    ///Creamos el vertex buffer
-    CreateSimpleVertex();
-    g_pVertexBuffer = g_pGraphicApiDX->CreateVertexBuffer(g_pVertices);
-
-    ///Creamos el index buffer
-    CreateIndices();
-    g_pIndexBuffer = g_pGraphicApiDX->CreateIndexBuffer(g_pIndices);
-
-    ///Creamos los constant buffers para el shader
-
-    ///ConstantBuffer1
-    g_pConstantBuffer1 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer1));
-    ///ConstantBuffer2
-    g_pConstantBuffer2 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer2));
-
-    ///Guardamos los render targets
-    g_pGraphicApiDX->SetRenderTarget(*g_pGraphicApiDX->m_pBackBuffer, *g_pDepthStencil);
-    ///Guardamos un viewport
-    g_pGraphicApiDX->SetViewport(1, g_width, g_height);
-    ///Guardamos el input layout
-    g_pGraphicApiDX->SetInputLayout(*g_pVertexLayout);
-    ///Guardamos el vertex buffer
-    g_pGraphicApiDX->SetVertexBuffer(*g_pVertexBuffer);
-    ///Guardamos el index buffer
-    g_pGraphicApiDX->SetIndexBuffer(*g_pIndexBuffer);
-    ///Guardamos la topología
-    g_pGraphicApiDX->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    ///
-    /// 
-    /// 
+    ///Proyecto en OpenGL
+    //OGLProyect(hWnd);
 
     ///Actualizamos la ventana
     UpdateWindow(hWnd);
@@ -403,6 +434,5 @@ int CALLBACK WinMain(
             Render();
         }
     }
-
     return (int)msg.wParam;
 }
