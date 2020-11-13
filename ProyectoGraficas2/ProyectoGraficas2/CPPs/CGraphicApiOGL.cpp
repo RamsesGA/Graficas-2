@@ -1,4 +1,11 @@
 #include "..\Includes\CGraphicApiOGL.h"
+#include "..\Includes\CVertexBufferOGL.h"
+#include "..\Includes\CVertexShaderOGL.h"
+#include "..\Includes\CPixelShaderOGL.h"
+#include "..\Includes\CIndexBufferOGL.h"
+#include "..\Includes\CTextureOGL.h"
+#include "..\Includes\CSamplerStateOGL.h"
+
 #include <iostream>
 
 ///
@@ -12,16 +19,10 @@ bool CGraphicApiOGL::InitDevice(HWND& _hWnd){
 
 void CGraphicApiOGL::DrawIndex(unsigned int _indexCountDX, 
 	unsigned int _startIndexLocationDX, 
-	unsigned int _baseVertexLocationDX){
-
-
-}
+	unsigned int _baseVertexLocationDX){}
 
 void CGraphicApiOGL::SwapChainPresent(unsigned int _syncIntervalDX, 
-	unsigned int _flagsDX){
-
-
-}
+	unsigned int _flagsDX){}
 
 CTexture* CGraphicApiOGL::LoadTextureFromFile(const std::string _srcFile){return nullptr;}
 
@@ -42,10 +43,7 @@ void CGraphicApiOGL::UnbindOGL(){
 /// 
 
 void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcDataDX, 
-	CConstantBuffer& _updateDataCBDX){
-
-
-}
+	CConstantBuffer& _updateDataCBDX){}
 
 ///
 /// C L E A R´s
@@ -74,9 +72,11 @@ void CGraphicApiOGL::CleanUpDevices(std::vector<CTexture*> _renderTargetView,
 /// C R E A T E´s 
 ///
 
-CPixelShader* CGraphicApiOGL::CreatePixelShader(const std::wstring& _namePSDX, 
+CPixelShader* CGraphicApiOGL::CreatePixelShader(const std::wstring& _namePSDX,
 	const std::string& _entryPointDX,
-	const std::string& _fragmentSrcOGL){
+	const std::string& _fragmentSrcOGL) {
+
+	auto PS = new CPixelShaderOGL();
 
 	// Create an empty fragment shader handle
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -146,15 +146,19 @@ CPixelShader* CGraphicApiOGL::CreatePixelShader(const std::wstring& _namePSDX,
 		return nullptr;
 	}
 
+	PS->m_fragmentShader = &fragmentShader;
+
 	// Always detach shaders after a successful link.
 	glDetachShader(program, fragmentShader);
 
-	return nullptr;
+	return PS;
 }
 
 CVertexShader* CGraphicApiOGL::CreateVertexShader(const std::wstring& _nameVSDX, 
 	const std::string& _entryPointDX,
 	const std::string& _vertexSrcOGL){
+
+	auto VS = new CVertexShaderOGL();
 
 	// Create an empty vertex shader handle
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -224,22 +228,52 @@ CVertexShader* CGraphicApiOGL::CreateVertexShader(const std::wstring& _nameVSDX,
 		return nullptr;
 	}
 
+	VS->m_vertexShader = &vertexShader;
+
 	// Always detach shaders after a successful link.
 	glDetachShader(program, vertexShader);
 
-	return nullptr;
+	return VS;
 }
 
-CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertexDX){
+CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertexDX,
+	const unsigned int _numBufferObjectsOGL, unsigned int _vertexBufferObjectOGL){
 
+	auto VBO = new CVertexBufferOGL();
+	VBO->m_vertexBufferObject = &_vertexBufferObjectOGL;
 
-	return nullptr;
+	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
+	glGenBuffers(_numBufferObjectsOGL, VBO->m_vertexBufferObject);
+
+	///Enlazamos VBO para la matriz de vértices
+	glBindBuffer(GL_ARRAY_BUFFER, *VBO->m_vertexBufferObject);
+
+	///Copiamos los datos en el objeto de búfer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_simpleVertexDX), &_simpleVertexDX, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
+	return VBO;
 }
 
-CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndexDX){
+CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndexDX,
+	const unsigned int _numBufferObjectsOGL, unsigned int _indexBufferObjectOGL){
 
+	auto PBO = new CIndexBufferOGL();
+	PBO->m_indexBufferObject = &_indexBufferObjectOGL;
 
-	return nullptr;
+	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
+	glGenBuffers(_numBufferObjectsOGL, PBO->m_indexBufferObject);
+
+	///Enlazamos VBO para la matriz de vértices
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *PBO->m_indexBufferObject);
+
+	///Copiamos los datos en el objeto de búfer
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_simpleIndexDX), &_simpleIndexDX, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	return PBO;
 }
 
 CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _bufferSizeDX){
@@ -250,8 +284,10 @@ CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _buffer
 
 CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _widthDX, 
 	const unsigned int _heightDX, const unsigned int _bindFlagsDX, 
-	TEXTURE_FORMAT _textureFormatDX){
+	TEXTURE_FORMAT _textureFormatDX,
+	const std::string _fileNameOGL){
 
+	auto tex = new CTextureOGL();
 
 	unsigned int texture;
 
@@ -271,12 +307,14 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _widthDX,
 	// load and generate the texture
 	int width, height, nrChannels;
 
-	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(_fileNameOGL.c_str(), &width, &height, &nrChannels, 0);
 
 	if (data){
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		tex->m_texture = &texture;
+		tex->m_data = data;
 	}
 	else{
 
@@ -284,13 +322,31 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _widthDX,
 	}
 
 	stbi_image_free(data);
-	return nullptr;
+	return tex;
 }
 
-CSamplerState* CGraphicApiOGL::CreateSamplerState(){
+CSamplerState* CGraphicApiOGL::CreateSamplerState() {
 
+	auto samplerState = new CSamplerStateOGL();
 
-	return nullptr;
+	GLuint sampler_state = 0;
+	glGenSamplers(1, &sampler_state);
+	glSamplerParameteri(sampler_state, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glSamplerParameteri(sampler_state, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glSamplerParameteri(sampler_state, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glSamplerParameteri(sampler_state, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	GLuint texture_unit = 0;
+	glBindSampler(texture_unit, sampler_state);
+
+	samplerState->m_samplerState = &sampler_state;
+	samplerState->m_textureUnit = &texture_unit;
+
+	glBindSampler(texture_unit, 0);
+
+	glDeleteSamplers(1, &sampler_state);
+
+	return samplerState;
 }
 
 CInputLayout* CGraphicApiOGL::CreateInputLayout(CVertexShader& _vertexShaderDX){

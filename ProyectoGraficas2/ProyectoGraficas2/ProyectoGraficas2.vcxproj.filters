@@ -110,6 +110,24 @@
     <ClInclude Include="Includes\CInputLayoutDX.h">
       <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\CVertexBufferOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexShaderOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CPixelShaderOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CIndexBufferOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CTextureOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CSamplerStateOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CubeShader.fx">

@@ -318,14 +318,16 @@ class CGraphicApi {
 		/// </summary>
 		/// <param name="_simpleVertexDX"></param>
 		/// <returns></returns>
-		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX) = 0;
+		virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX,
+            const unsigned int _numBufferObjectsOGL, unsigned int _vertexBufferObjectOGL) = 0;
 		/// <summary>
         /// Función para generar el
         /// index buffer
 		/// </summary>
 		/// <param name="_simpleIndexDX"></param>
 		/// <returns></returns>
-		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX) = 0;
+		virtual CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX,
+            const unsigned int _numBufferObjectsOGL, unsigned int _indexBufferObjectOGL) = 0;
 		/// <summary>
         /// Función para generar los
         /// constant buffer
@@ -344,10 +346,11 @@ class CGraphicApi {
 		/// <param name="_bindFlagsDX"></param>
 		/// <param name="_textureFormatDX"></param>
 		/// <returns></returns>
-		virtual CTexture* CreateTexture(const unsigned int _widthDX, 
-            const unsigned int _heightDX, 
-            const unsigned int _bindFlagsDX, 
-            TEXTURE_FORMAT _textureFormatDX) = 0;
+        virtual CTexture* CreateTexture(const unsigned int _widthDX,
+            const unsigned int _heightDX,
+            const unsigned int _bindFlagsDX,
+            TEXTURE_FORMAT _textureFormatDX,
+            const std::string _fileNameOGL) = 0;
         /// <summary>
         /// Función para generar el
         /// sampler state

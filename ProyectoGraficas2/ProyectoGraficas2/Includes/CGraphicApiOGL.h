@@ -87,16 +87,19 @@ class CGraphicApiOGL : public CGraphicApi {
 			const std::string& _entryPointDX,
 			const std::string& _vertexSrcOGL)override;
 		
-		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX)override;
+		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX,
+			const unsigned int _numBufferObjectsOGL, unsigned int _vertexBufferObjectOGL)override;
 		
-		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX)override;
+		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX,
+			const unsigned int _numBufferObjectsOGL, unsigned int _indexBufferObjectOGL)override;
 		
 		CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX)override;
 		
 		CTexture* CreateTexture(const unsigned int _widthDX,
 			const unsigned int _heightDX,
 			const unsigned int _bindFlagsDX,
-			TEXTURE_FORMAT _textureFormatDX)override;
+			TEXTURE_FORMAT _textureFormatDX,
+			const std::string _fileNameOGL)override;
 		
 		CSamplerState* CreateSamplerState()override;
 	
