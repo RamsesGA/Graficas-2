@@ -1,5 +1,6 @@
 #include "..\Includes\CGraphicApi.h"
 #include "..\Includes\CGraphicApiDX.h"
+#include "..\Includes\CGraphicApiOGL.h"
 
 #include <windows.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 #include <tchar.h>
 #include <codecvt>
 #include <locale>
+#include <iostream>
 
 ///
 /// V A R I A B L E S
@@ -33,13 +35,19 @@ glm::mat4x4 g_projection;
 glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
 CGraphicApi* g_pGraphicApiDX = new CGraphicApiDX();
+CGraphicApi* g_pGraphicApiOGL = new CGraphicApiOGL();
+
 CTexture* g_pRenderTargetView = nullptr;
 CTexture* g_pDepthStencil = nullptr;
-CVertexShader* g_pVertexShader = nullptr;
+
 CInputLayout* g_pVertexLayout = nullptr;
-CPixelShader* g_pPixelShader = nullptr;
+
+CShaders* g_pBothShaders = nullptr;
+
 CVertexBuffer* g_pVertexBuffer = nullptr;
+
 CIndexBuffer* g_pIndexBuffer = nullptr;
+
 CConstantBuffer* g_pConstantBuffer1 = nullptr;
 CConstantBuffer* g_pConstantBuffer2 = nullptr;
 
@@ -217,7 +225,7 @@ void CreateIndices() {
 /// Creación de la camara 
 /// para el mundo
 /// </summary>
-void CreateCamera() {
+void DXCreateCamera() {
 
     ///Inicializamos la matriz de identidad
     g_world = glm::mat4(1.0f);
@@ -291,11 +299,11 @@ void Render() {
     ///
     /// Render the cube
     ///
-    g_pGraphicApiDX->SetYourVS(*g_pVertexShader);
+    g_pGraphicApiDX->SetYourVS(*g_pBothShaders);
     g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
     g_pGraphicApiDX->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
     g_pGraphicApiDX->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
-    g_pGraphicApiDX->SetYourPS(*g_pPixelShader);
+    g_pGraphicApiDX->SetYourPS(*g_pBothShaders);
     g_pGraphicApiDX->DrawIndex(36, 0, 0);
 
     ///
@@ -315,7 +323,7 @@ void DXProyect(HWND _hWnd) {
     g_pGraphicApiDX->InitDevice(_hWnd);
 
     ///Generamos el mundo y su camara
-    CreateCamera();
+    DXCreateCamera();
 
     ///
     /// C R E A T E´s
@@ -323,34 +331,66 @@ void DXProyect(HWND _hWnd) {
 
     ///Creamos el render target view
     g_pRenderTargetView = g_pGraphicApiDX->GetDefaultBackBuffer();
+    if (nullptr == g_pRenderTargetView) {
+
+        std::cout << "Error g_pRenderTargetView NULL\n";
+    }
 
     ///Creamos el depth stencil view
     g_pDepthStencil = g_pGraphicApiDX->CreateTexture(g_width, g_height,
         D3D11_BIND_DEPTH_STENCIL,
-        TEXTURE_FORMAT_D24_UNORM_S8_UINT);
+        TEXTURE_FORMAT_D24_UNORM_S8_UINT,
+        "");
+    if (nullptr == g_pDepthStencil) {
 
-    ///Creamos el vertex shader
-    g_pVertexShader = g_pGraphicApiDX->CreateVertexShader
-    (L"CubeShader.fx", "VS", "");
+        std::cout << "Error g_pDepthStencil NULL\n";
+    }
+
+    ///Creamos el vertex shader y pixel shader
+    g_pBothShaders = g_pGraphicApiDX->CreateVertexAndPixelShader(L"CubeShader.fx", "VS", 
+        "",
+        L"CubeShader.fx", "PS",
+        "");
+    if (nullptr == g_pBothShaders) {
+
+        std::cout << "Error g_BothShaders NULL\n";
+    }
 
     ///Creamos el input layout
-    g_pVertexLayout = g_pGraphicApiDX->CreateInputLayout(*g_pVertexShader);
+    g_pVertexLayout = g_pGraphicApiDX->CreateInputLayout(*g_pBothShaders);
+    if (nullptr == g_pVertexLayout) {
 
-    ///Creamos el pixel shader
-    g_pPixelShader = g_pGraphicApiDX->CreatePixelShader
-    (L"CubeShader.fx", "PS", "");
+        std::cout << "Error g_pVertexLayout NULL\n";
+    }
 
     ///Creamos el vertex buffer
     CreateSimpleVertex();
-    g_pVertexBuffer = g_pGraphicApiDX->CreateVertexBuffer(g_pVertices);
+    g_pVertexBuffer = g_pGraphicApiDX->CreateVertexBuffer(g_pVertices, 0);
+    if (nullptr == g_pVertexBuffer) {
+
+        std::cout << "Error g_pVertexBuffer NULL\n";
+    }
 
     ///Creamos el index buffer
     CreateIndices();
-    g_pIndexBuffer = g_pGraphicApiDX->CreateIndexBuffer(g_pIndices);
+    g_pIndexBuffer = g_pGraphicApiDX->CreateIndexBuffer(g_pIndices, 0);
+    if (nullptr == g_pIndexBuffer) {
+
+        std::cout << "Error g_pIndexBuffer NULL\n";
+    }
 
     ///Creamos los constant buffers para el shader
     g_pConstantBuffer1 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer1));
+    if (nullptr == g_pConstantBuffer1) {
+
+        std::cout << "Error g_pConstantBuffer1 NULL\n";
+    }
+
     g_pConstantBuffer2 = g_pGraphicApiDX->CreateConstantBuffer(sizeof(ConstantBuffer2));
+    if (nullptr == g_pConstantBuffer2) {
+
+        std::cout << "Error g_pConstantBuffer1 NULL\n";
+    }
 }
 /// <summary>
 /// Función donde se generará el proyecto
@@ -359,6 +399,8 @@ void DXProyect(HWND _hWnd) {
 /// <param name="_hWnd"></param>
 void OGLProyect(HWND _hWnd) {
 
+    ///Mandamos la ventana a la API
+    g_pGraphicApiOGL->InitDevice(_hWnd);
 
 }
 
@@ -411,10 +453,10 @@ int CALLBACK WinMain(
     ShowWindow(hWnd, _nCmdShow);
 
     ///Proyecto en Direct X
-    DXProyect(hWnd);
+    //DXProyect(hWnd);
 
     ///Proyecto en OpenGL
-    //OGLProyect(hWnd);
+    OGLProyect(hWnd);
 
     ///Actualizamos la ventana
     UpdateWindow(hWnd);
@@ -429,9 +471,9 @@ int CALLBACK WinMain(
         }
         else{
 
-            Update();
+            //Update();
 
-            Render();
+            //Render();
         }
     }
     return (int)msg.wParam;

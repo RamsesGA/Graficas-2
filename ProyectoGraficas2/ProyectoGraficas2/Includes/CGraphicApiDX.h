@@ -1,9 +1,12 @@
 #pragma once
+
+
 #include "CGraphicApi.h"
-#include "CPixelShader.h"
-#include "CVertexShader.h"
 #include "CConstantBuffer.h"
 #include "CTexture.h"
+#include "CShaders.h"
+#include "CVertexBuffer.h"
+#include "CIndexBuffer.h"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -63,119 +66,117 @@ class CGraphicApiDX : public CGraphicApi{
 
 		bool InitDevice(HWND& _hWnd)override;
 
-		void DrawIndex(unsigned int _indexCountDX,
-			unsigned int _startIndexLocationDX,
-			unsigned int _baseVertexLocationDX)override;
+		void DrawIndex(unsigned int _indexCount,
+			unsigned int _startIndexLocation,
+			unsigned int _baseVertexLocation)override;
 
-		void SwapChainPresent(unsigned int _syncIntervalDX,
-			unsigned int _flagsDX)override;
+		void SwapChainPresent(unsigned int _syncInterval,
+			unsigned int _flags)override;
 
 		CTexture* LoadTextureFromFile(const std::string _srcFile)override;
 
 		CTexture* GetDefaultBackBuffer()override;
-
-		void BindOGL()override;
 
 		void UnbindOGL()override;
 
 		///
 		/// U P D A T E큦
 		/// 
-		
-		void UpdateConstantBuffer(const void* _srcDataDX, 
-			CConstantBuffer& _updateDataCBDX)override;
+
+
+		void UpdateConstantBuffer(const void* _srcData,
+			CConstantBuffer& _updateDataCB)override;
 
 		///
 		/// C L E A R큦
 		/// 
 
-		CTexture* ClearYourRenderTargetView(CTexture* _renderTargetDX)override;
 
-		CTexture* ClearYourDepthStencilView(CTexture* _depthStencilDX)override;
+		CTexture* ClearYourRenderTargetView(CTexture* _renderTarget)override;
 
-		void CleanUpDevices(std::vector<CTexture*> _renderTargetView, CTexture* _depthStencilView,
-			CVertexShader* _vertexShaderDX, CInputLayout* _vertexLayoutDX,
-			CPixelShader* _pixelShaderDX, CVertexBuffer* _vertexBufferDX,
-			CIndexBuffer* _indexBufferDX, CConstantBuffer* _neverChangesDX,
-			CConstantBuffer* _changeOnResizeDX, CConstantBuffer* _changesEveryFrameDX,
-			CSamplerState* _samplerDX)override;
+		CTexture* ClearYourDepthStencilView(CTexture* _depthStencil)override;
+
+		void CleanUpDevices()override;
 
 		///
 		/// C R E A T E큦 
 		/// 
 
-		CPixelShader* CreatePixelShader(const std::wstring& _namePSDX, 
-			const std::string& _entryPointDX,
-			const std::string& _fragmentSrcOGL)override;
-		
-		CVertexShader* CreateVertexShader(const std::wstring& _nameVSDX, 
-			const std::string& _entryPointDX,
-			const std::string& _vertexSrcOGL)override;
-		
-		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertexDX)override;
-		
-		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t>& _simpleIndexDX)override;
-		
-		CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSizeDX)override;
-		
-		CTexture* CreateTexture(const unsigned int _widthDX, 
-			const unsigned int _heightDX, 
-			const unsigned int _bindFlagsDX, 
-			TEXTURE_FORMAT _textureFormatDX)override;
-		
+		CShaders* CreateVertexAndPixelShader(const std::wstring& _nameVS,
+			const std::string& _entryPointVS,
+			const std::string& _vertexSrc,
+			const std::wstring& _namePS,
+			const std::string& _entryPointPS,
+			const std::string& _fragmentSrc)override;
+
+		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertex,
+			unsigned int _vertexBufferObject)override;
+
+		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t> & _simpleIndex,
+			unsigned int _indexBufferObject)override;
+
+		CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSize)override;
+
+		CTexture* CreateTexture(const unsigned int _width,
+			const unsigned int _height,
+			const unsigned int _bindFlags,
+			TEXTURE_FORMAT _textureFormat,
+			const std::string _fileName)override;
+
 		CSamplerState* CreateSamplerState()override;
-		
-		CInputLayout* CreateInputLayout(CVertexShader& _vertexShaderDX)override;
+
+		CInputLayout* CreateInputLayout(CShaders & _vertexShader)override;
 
 		///
 		/// S E T큦 
 		/// 
 
-		void SetPixelShader(CPixelShader& _pixelShaderDX)override;
-		
-		void SetVertexShader(CVertexShader& _vertexShaderDX)override;
-		
-		void SetVertexBuffer(CVertexBuffer& _vertexBufferDX)override;
-		
-		void SetIndexBuffer(CIndexBuffer& _indexBufferDX)override;
-		
-		void SetConstantBuffer(CConstantBuffer& _constantBufferDX, 
-			const unsigned int _startSlotDX, 
-			const unsigned int _numBuffersDX)override;
-		
-		void SetSamplerState(const unsigned int _startSlotDX, 
-			std::vector<CSamplerState*>& _samplerStateDX)override;
-		
-		void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceViewDX,
-			const unsigned int _startSlotDX,
-			const unsigned int _numViewsDX)override;
-		
-		void SetRenderTarget(CTexture& _renderTargetDX,
-			CTexture& _depthStencilDX)override;
-		
-		void SetDepthStencil(CTexture& _depthStencilDX,
-			const unsigned int _stencilRefDX)override;
-		
-		void SetInputLayout(CInputLayout& _vertexLayoutDX)override;
-		
-		void SetViewport(const unsigned int _numViewportsDX,
-			const unsigned int _widthDX, const unsigned int _heigthDX)override;
-		
-		void SetPrimitiveTopology(const unsigned int _topologyDX)override;
 
-		void SetYourVS(CVertexShader& _vertexShaderDX)override;
+		void SetPixelShader(CShaders& _pixelShader)override;
 
-		void SetYourVSConstantBuffers(CConstantBuffer* _constantBufferDX,
-			const unsigned int _startSlotDX,
-			const unsigned int _numBuffersDX)override;
+		void SetVertexShader(CShaders& _vertexShader)override;
 
-		void SetYourPS(CPixelShader& _pixelShaderDX)override;
+		void SetVertexBuffer(CVertexBuffer& _vertexBuffer)override;
 
-		void SetYourPSConstantBuffers(CConstantBuffer* _constantBufferDX,
-			const unsigned int _startSlotDX,
-			const unsigned int _numBuffersDX)override;
+		void SetIndexBuffer(CIndexBuffer& _indexBuffer)override;
 
-		void SetYourPSSampler(CSamplerState& _samplerDX,
-			const unsigned int _startSlotDX,
-			const unsigned int _numSamplersDX)override;
+		void SetConstantBuffer(CConstantBuffer& _constantBuffer,
+			const unsigned int _startSlot,
+			const unsigned int _numBuffers)override;
+
+		void SetSamplerState(const unsigned int _startSlot,
+			std::vector<CSamplerState*>& _samplerState)override;
+
+		void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceView,
+			const unsigned int _startSlot,
+			const unsigned int _numViews)override;
+
+		void SetRenderTarget(CTexture& _renderTarget,
+			CTexture& _depthStencil)override;
+
+		void SetDepthStencil(CTexture& _depthStencil,
+			const unsigned int _stencilRef)override;
+
+		void SetInputLayout(CInputLayout& _vertexLayout)override;
+
+		void SetViewport(const unsigned int _numViewports,
+			const unsigned int _width, const unsigned int _heigth)override;
+
+		void SetPrimitiveTopology(const unsigned int _topology)override;
+
+		void SetYourVS(CShaders& _vertexShader)override;
+
+		void SetYourVSConstantBuffers(CConstantBuffer* _constantBuffer,
+			const unsigned int _startSlot,
+			const unsigned int _numBuffers)override;
+
+		void SetYourPS(CShaders& _pixelShader)override;
+
+		void SetYourPSConstantBuffers(CConstantBuffer* _constantBuffer,
+			const unsigned int _startSlot,
+			const unsigned int _numBuffers)override;
+
+		void SetYourPSSampler(CSamplerState& _sampler,
+			const unsigned int _startSlot,
+			const unsigned int _numSamplers)override;
 };

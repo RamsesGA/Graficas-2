@@ -1,14 +1,16 @@
 #pragma once
-#include "CPixelShader.h"
+#include "CShaders.h"
 #include <d3d11.h>
 
-class CPixelShaderDX : public CPixelShader {
+class CShadersDX : public CShaders {
 
 	protected:
 		///
 		/// Miembros
 		/// 
 
+		ID3D11VertexShader* m_pVertexShader;
+		ID3DBlob* m_pVSBlob;
 		ID3D11PixelShader* m_pPixelShader;
 		ID3DBlob* m_pPSBlob;
 
@@ -18,9 +20,8 @@ class CPixelShaderDX : public CPixelShader {
 		/// 
 
 		///Constructor
-		CPixelShaderDX() = default;
-		///Destructor
-		~CPixelShaderDX() = default;
-
+		CShadersDX() = default;
+		///Destyructor
+		~CShadersDX() = default;
 friend class CGraphicApiDX;
 };

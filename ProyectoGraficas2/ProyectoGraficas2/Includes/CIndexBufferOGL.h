@@ -9,21 +9,21 @@
 /// </summary>
 class CIndexBufferOGL : public CIndexBuffer {
 
-	private:
+	protected:
 		///
 		/// Métodos
 		/// 
-
+	
 		unsigned int* m_indexBufferObject;
-
+	
 	public:
 		///
 		/// Miembros
 		///
-
+	
 		///Constructor
 		CIndexBufferOGL() = default;
 		///Destructor
 		~CIndexBufferOGL() = default;
-friend class CGraphicApiOGL;
+	friend class CGraphicApiOGL;
 };

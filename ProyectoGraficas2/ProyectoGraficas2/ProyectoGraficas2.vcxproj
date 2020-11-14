@@ -162,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="Includes\CConstantBuffer.h" />
     <ClInclude Include="Includes\CConstantBufferDX.h" />
+    <ClInclude Include="Includes\CConstantBufferOGL.h" />
     <ClInclude Include="Includes\CGraphicApi.h" />
     <ClInclude Include="Includes\CGraphicApiDX.h" />
     <ClInclude Include="Includes\CGraphicApiOGL.h" />
@@ -170,21 +171,18 @@
     <ClInclude Include="Includes\CIndexBufferOGL.h" />
     <ClInclude Include="Includes\CInputLayout.h" />
     <ClInclude Include="Includes\CInputLayoutDX.h" />
-    <ClInclude Include="Includes\CPixelShader.h" />
-    <ClInclude Include="Includes\CPixelShaderDX.h" />
-    <ClInclude Include="Includes\CPixelShaderOGL.h" />
     <ClInclude Include="Includes\CSamplerState.h" />
     <ClInclude Include="Includes\CSamplerStateDX.h" />
     <ClInclude Include="Includes\CSamplerStateOGL.h" />
+    <ClInclude Include="Includes\CShaders.h" />
+    <ClInclude Include="Includes\CShadersDX.h" />
+    <ClInclude Include="Includes\CShadersOGL.h" />
     <ClInclude Include="Includes\CTexture.h" />
     <ClInclude Include="Includes\CTextureDX.h" />
     <ClInclude Include="Includes\CTextureOGL.h" />
     <ClInclude Include="Includes\CVertexBuffer.h" />
     <ClInclude Include="Includes\CVertexBufferDX.h" />
     <ClInclude Include="Includes\CVertexBufferOGL.h" />
-    <ClInclude Include="Includes\CVertexShader.h" />
-    <ClInclude Include="Includes\CVertexShaderDX.h" />
-    <ClInclude Include="Includes\CVertexShaderOGL.h" />
     <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
   <ItemGroup>

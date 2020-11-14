@@ -3,7 +3,7 @@
 
 class CSamplerStateOGL : public CSamplerState {
 
-	private:
+	protected:
 		///
 		/// Miembros
 		/// 

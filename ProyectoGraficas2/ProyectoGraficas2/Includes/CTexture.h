@@ -4,7 +4,7 @@ class CTexture {
 
 	public:
 		///
-		/// Miembros
+		/// Métodos
 		/// 
 
 		///Constructor

@@ -8,9 +8,9 @@ class CIndexBufferDX : public CIndexBuffer {
 		///
 		/// Miembros
 		/// 
-
+	
 		ID3D11Buffer* m_pIndexBuffer;
-
+	
 	public:
 		///
 		/// Métodos
@@ -20,6 +20,6 @@ class CIndexBufferDX : public CIndexBuffer {
 		CIndexBufferDX() = default;
 		///Destructor
 		~CIndexBufferDX() = default;
-
+	
 friend class CGraphicApiDX;
 };

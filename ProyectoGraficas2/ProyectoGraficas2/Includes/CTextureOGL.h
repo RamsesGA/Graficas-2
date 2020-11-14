@@ -3,7 +3,7 @@
 
 class CTextureOGL : public CTexture{
 
-	private:
+	protected:
 		///
 		/// Métodos
 		/// 

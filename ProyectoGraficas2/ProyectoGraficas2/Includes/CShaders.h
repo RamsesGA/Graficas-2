@@ -1,15 +1,14 @@
 #pragma once
 
-class CPixelShader {
+class CShaders {
 
 	public:
-
 		///
 		/// Métodos
 		/// 
 
 		///Constructor
-		CPixelShader() = default;
+		CShaders() = default;
 		///Destructor
-		~CPixelShader() = default;
+		~CShaders() = default;
 };

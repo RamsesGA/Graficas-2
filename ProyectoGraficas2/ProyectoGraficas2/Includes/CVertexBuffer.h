@@ -6,7 +6,7 @@ class CVertexBuffer {
 		///
 		/// Métodos
 		/// 
-
+	
 		///Constructor
 		CVertexBuffer() = default;
 		///Destructor

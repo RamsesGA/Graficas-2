@@ -1,10 +1,11 @@
 #include "..\Includes\CGraphicApiOGL.h"
-#include "..\Includes\CVertexBufferOGL.h"
-#include "..\Includes\CVertexShaderOGL.h"
-#include "..\Includes\CPixelShaderOGL.h"
-#include "..\Includes\CIndexBufferOGL.h"
 #include "..\Includes\CTextureOGL.h"
 #include "..\Includes\CSamplerStateOGL.h"
+#include "..\Includes\CConstantBufferOGL.h"
+#include "..\Includes\CShadersOGL.h"
+#include "..\Includes\CVertexBufferOGL.h"
+#include "..\Includes\CIndexBufferOGL.h"
+#include "..\Includes\stb_image.h"
 
 #include <iostream>
 
@@ -14,24 +15,68 @@
 
 bool CGraphicApiOGL::InitDevice(HWND& _hWnd){
 
-	return false;
+	PIXELFORMATDESCRIPTOR pfd = {
+
+		sizeof(PIXELFORMATDESCRIPTOR),
+		1,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    // Flags
+		PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
+		32,                   // Colordepth of the framebuffer.
+		0, 0, 0, 0, 0, 0,
+		0,
+		0,
+		0,
+		0, 0, 0, 0,
+		24,                   // Number of bits for the depthbuffer
+		8,                    // Number of bits for the stencilbuffer
+		0,                    // Number of Aux buffers in the framebuffer.
+		PFD_MAIN_PLANE,
+		0,
+		0, 0, 0
+	};
+
+	m_HandleToDC = GetDC(_hWnd);
+
+	int pixelFormat = ChoosePixelFormat(m_HandleToDC, &pfd);
+
+	SetPixelFormat(m_HandleToDC, pixelFormat, &pfd);
+
+	m_renderingContext = wglCreateContext(m_HandleToDC);
+
+	wglMakeCurrent(m_HandleToDC, m_renderingContext);
+
+	if (!gladLoadGL()){
+
+		return false;
+	}
+	else {
+
+		RECT rc;
+
+		GetWindowRect(_hWnd, &rc);
+
+		m_width = rc.right - rc.left;
+		m_height = rc.bottom - rc.top;
+
+		SetViewport(1, m_width, m_height);
+
+		glEnable(GL_DEPTH_TEST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		return true;
+	}
 }
 
-void CGraphicApiOGL::DrawIndex(unsigned int _indexCountDX, 
-	unsigned int _startIndexLocationDX, 
-	unsigned int _baseVertexLocationDX){}
+void CGraphicApiOGL::DrawIndex(unsigned int _indexCount , 
+	unsigned int _startIndexLocation , 
+	unsigned int _baseVertexLocation ){}
 
-void CGraphicApiOGL::SwapChainPresent(unsigned int _syncIntervalDX, 
-	unsigned int _flagsDX){}
+void CGraphicApiOGL::SwapChainPresent(unsigned int _syncInterval , 
+	unsigned int _flags ){}
 
 CTexture* CGraphicApiOGL::LoadTextureFromFile(const std::string _srcFile){return nullptr;}
 
 CTexture* CGraphicApiOGL::GetDefaultBackBuffer(){return nullptr;}
-
-void CGraphicApiOGL::BindOGL(){
-
-	glUseProgram(m_rendererID);
-}
 
 void CGraphicApiOGL::UnbindOGL(){
 
@@ -42,139 +87,74 @@ void CGraphicApiOGL::UnbindOGL(){
 /// U P D A T E´s
 /// 
 
-void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcDataDX, 
-	CConstantBuffer& _updateDataCBDX){}
+void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcData , 
+	CConstantBuffer& _updateDataCB ){
+
+	auto UBO = reinterpret_cast<CConstantBufferOGL&>(_updateDataCB);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, *UBO.m_uniformBufferObject);
+
+	GLvoid* p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+
+	memcpy(p, &UBO.m_bufferSize, sizeof(UBO.m_bufferSize));
+
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+
+	unsigned int block_index; 
+	block_index = glGetUniformBlockIndex(*UBO.m_uniformBufferObject, "Shader data");
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, *UBO.m_uniformBufferObject);
+
+	glUniformBlockBinding(*UBO.m_uniformBufferObject, block_index, 0);
+}
 
 ///
 /// C L E A R´s
 /// 
 
-CTexture* CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTargetDX){
+CTexture* CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){
 
 
 	return nullptr;
 }
 
-CTexture* CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencilDX){
+CTexture* CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
 
 
 	return nullptr;
 }
 
-void CGraphicApiOGL::CleanUpDevices(std::vector<CTexture*> _renderTargetView, 
-	CTexture* _depthStencilView, CVertexShader* _vertexShaderDX, 
-	CInputLayout* _vertexLayoutDX, CPixelShader* _pixelShaderDX, 
-	CVertexBuffer* _vertexBufferDX, CIndexBuffer* _indexBufferDX, 
-	CConstantBuffer* _neverChangesDX, CConstantBuffer* _changeOnResizeDX, 
-	CConstantBuffer* _changesEveryFrameDX, CSamplerState* _samplerDX){}
+void CGraphicApiOGL::CleanUpDevices(){}
 
 ///
 /// C R E A T E´s 
 ///
 
-CPixelShader* CGraphicApiOGL::CreatePixelShader(const std::wstring& _namePSDX,
-	const std::string& _entryPointDX,
-	const std::string& _fragmentSrcOGL) {
+CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS, 
+	const std::string& _entryPointVS,
+	const std::string& _vertexSrc, const std::wstring& _namePS, 
+	const std::string& _entryPointPS, const std::string& _fragmentSrc){
 
-	auto PS = new CPixelShaderOGL();
-
-	// Create an empty fragment shader handle
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// Send the fragment shader source code to GL
-	// Note that std::string's .c_str is NULL character terminated.
-	const GLchar* source = _fragmentSrcOGL.c_str();
-	glShaderSource(fragmentShader, 1, &source, 0);
-
-	// Compile the fragment shader
-	glCompileShader(fragmentShader);
-
-	GLint isCompiled = 0;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-
-	if (GL_FALSE == isCompiled) {
-
-		GLint maxLength = 0;
-		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		// The maxLength includes the NULL character
-		std::vector<GLchar> infoLog(maxLength);
-		glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
-
-		// We don't need the shader anymore.
-		glDeleteShader(fragmentShader);
-
-		std::cout << "ERROR: compilación del fragment shader\n";
-
-		// Use the infoLog as you see fit.
-		return nullptr;
-	}
-
-	// Vertex and fragment shaders are successfully compiled.
-	// Now time to link them together into a program.
-	// Get a program object.
-	m_rendererID = glCreateProgram();
-	GLuint program = m_rendererID;
-
-	// Attach our shaders to our program
-	glAttachShader(program, fragmentShader);
-
-	// Link our program
-	glLinkProgram(program);
-
-	// Note the different functions here: glGetProgram* instead of glGetShader*.
-	GLint isLinked = 0;
-	glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
-
-	if (GL_FALSE == isLinked) {
-
-		GLint maxLength = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-
-		// The maxLength includes the NULL character
-		std::vector<GLchar> infoLog(maxLength);
-		glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-
-		// We don't need the program anymore.
-		glDeleteProgram(program);
-		// Don't leak shaders either.
-		glDeleteShader(fragmentShader);
-
-		std::cout << "ERROR: compilación del link shader\n";
-
-		// Use the infoLog as you see fit.
-		return nullptr;
-	}
-
-	PS->m_fragmentShader = &fragmentShader;
-
-	// Always detach shaders after a successful link.
-	glDetachShader(program, fragmentShader);
-
-	return PS;
-}
-
-CVertexShader* CGraphicApiOGL::CreateVertexShader(const std::wstring& _nameVSDX, 
-	const std::string& _entryPointDX,
-	const std::string& _vertexSrcOGL){
-
-	auto VS = new CVertexShaderOGL();
+	///Generamos el tipo de dato para ir guardando
+	/// los datos necesarios y entregarlo al usuario
+	auto shaders = new CShadersOGL();
 
 	// Create an empty vertex shader handle
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 	// Send the vertex shader source code to GL
 	// Note that std::string's .c_str is NULL character terminated.
-	const GLchar* source = _vertexSrcOGL.c_str();
+	const GLchar* source = (const GLchar*)_vertexSrc.c_str();
 	glShaderSource(vertexShader, 1, &source, 0);
 
 	// Compile the vertex shader
 	glCompileShader(vertexShader);
 
 	GLint isCompiled = 0;
+
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
 
-	if (GL_FALSE == isCompiled){
+	if (isCompiled == GL_FALSE){
 
 		GLint maxLength = 0;
 		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
@@ -186,20 +166,50 @@ CVertexShader* CGraphicApiOGL::CreateVertexShader(const std::wstring& _nameVSDX,
 		// We don't need the shader anymore.
 		glDeleteShader(vertexShader);
 
-		std::cout << "ERROR: compilación del vertex shader\n";
+		return nullptr;
+	}
 
-		// Use the infoLog as you see fit.
+	shaders->m_vertexShader = &vertexShader;
+
+	// Create an empty fragment shader handle
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	// Send the fragment shader source code to GL
+	// Note that std::string's .c_str is NULL character terminated.
+	source = (const GLchar*)_fragmentSrc.c_str();
+	glShaderSource(fragmentShader, 1, &source, 0);
+
+	// Compile the fragment shader
+	glCompileShader(fragmentShader);
+
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
+
+	if (isCompiled == GL_FALSE){
+
+		GLint maxLength = 0;
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		// The maxLength includes the NULL character
+		std::vector<GLchar> infoLog(maxLength);
+		glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
+
+		// We don't need the shader anymore.
+		glDeleteShader(fragmentShader);
+		// Either of them. Don't leak shaders.
+		glDeleteShader(vertexShader);
+
 		return nullptr;
 	}
 
 	// Vertex and fragment shaders are successfully compiled.
 	// Now time to link them together into a program.
 	// Get a program object.
-	m_rendererID = glCreateProgram();
-	GLuint program = m_rendererID;
+	shaders->m_rendererID = glCreateProgram();
+	GLuint program = shaders->m_rendererID;
 
 	// Attach our shaders to our program
 	glAttachShader(program, vertexShader);
+	glAttachShader(program, fragmentShader);
 
 	// Link our program
 	glLinkProgram(program);
@@ -208,7 +218,7 @@ CVertexShader* CGraphicApiOGL::CreateVertexShader(const std::wstring& _nameVSDX,
 	GLint isLinked = 0;
 	glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
 
-	if (GL_FALSE == isLinked){
+	if (isLinked == GL_FALSE){
 
 		GLint maxLength = 0;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
@@ -221,71 +231,79 @@ CVertexShader* CGraphicApiOGL::CreateVertexShader(const std::wstring& _nameVSDX,
 		glDeleteProgram(program);
 		// Don't leak shaders either.
 		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
 
-		std::cout << "ERROR: compilación del link shader\n";
-
-		// Use the infoLog as you see fit.
 		return nullptr;
 	}
 
-	VS->m_vertexShader = &vertexShader;
+	shaders->m_fragmentShader = &fragmentShader;
 
 	// Always detach shaders after a successful link.
 	glDetachShader(program, vertexShader);
+	glDetachShader(program, fragmentShader);
 
-	return VS;
+	return shaders;
 }
 
-CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertexDX,
-	const unsigned int _numBufferObjectsOGL, unsigned int _vertexBufferObjectOGL){
+CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertex, 
+	unsigned int _vertexBufferObject){
 
 	auto VBO = new CVertexBufferOGL();
-	VBO->m_vertexBufferObject = &_vertexBufferObjectOGL;
+	VBO->m_vertexBufferObject = &_vertexBufferObject;
 
 	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
-	glGenBuffers(_numBufferObjectsOGL, VBO->m_vertexBufferObject);
+	glGenBuffers(1, VBO->m_vertexBufferObject);
 
 	///Enlazamos VBO para la matriz de vértices
 	glBindBuffer(GL_ARRAY_BUFFER, *VBO->m_vertexBufferObject);
 
 	///Copiamos los datos en el objeto de búfer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(_simpleVertexDX), &_simpleVertexDX, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_simpleVertex), &_simpleVertex, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
+
 	return VBO;
 }
 
-CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndexDX,
-	const unsigned int _numBufferObjectsOGL, unsigned int _indexBufferObjectOGL){
+CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndex, 
+	unsigned int _indexBufferObject){
 
 	auto PBO = new CIndexBufferOGL();
-	PBO->m_indexBufferObject = &_indexBufferObjectOGL;
+
+	PBO->m_indexBufferObject = &_indexBufferObject;
 
 	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
-	glGenBuffers(_numBufferObjectsOGL, PBO->m_indexBufferObject);
+	glGenBuffers(1, PBO->m_indexBufferObject);
 
 	///Enlazamos VBO para la matriz de vértices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *PBO->m_indexBufferObject);
 
 	///Copiamos los datos en el objeto de búfer
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_simpleIndexDX), &_simpleIndexDX, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_simpleIndex), &_simpleIndex, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	return PBO;
 }
 
-CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _bufferSizeDX){
+CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _bufferSize ){
 
+	auto UBO = new CConstantBufferOGL();
+	UBO->m_bufferSize = &_bufferSize;
+	
+	///Generamos el buffer y lo inicializamos
+	glGenBuffers(1, UBO->m_uniformBufferObject);
+	glBindBuffer(GL_UNIFORM_BUFFER, *UBO->m_uniformBufferObject);
+	glBufferData(GL_UNIFORM_BUFFER, *UBO->m_bufferSize, &UBO->m_bufferSize, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	return nullptr;
+	return UBO;
 }
 
-CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _widthDX, 
-	const unsigned int _heightDX, const unsigned int _bindFlagsDX, 
-	TEXTURE_FORMAT _textureFormatDX,
-	const std::string _fileNameOGL){
+CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _width , 
+	const unsigned int _height , const unsigned int _bindFlags , 
+	TEXTURE_FORMAT _textureFormat ,
+	const std::string _fileName){
 
 	auto tex = new CTextureOGL();
 
@@ -307,7 +325,7 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _widthDX,
 	// load and generate the texture
 	int width, height, nrChannels;
 
-	unsigned char* data = stbi_load(_fileNameOGL.c_str(), &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(_fileName.c_str(), &width, &height, &nrChannels, 0);
 
 	if (data){
 
@@ -349,7 +367,7 @@ CSamplerState* CGraphicApiOGL::CreateSamplerState() {
 	return samplerState;
 }
 
-CInputLayout* CGraphicApiOGL::CreateInputLayout(CVertexShader& _vertexShaderDX){
+CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader ){
 
 
 	return nullptr;
@@ -359,96 +377,100 @@ CInputLayout* CGraphicApiOGL::CreateInputLayout(CVertexShader& _vertexShaderDX){
 /// S E T´s 
 ///
 
-void CGraphicApiOGL::SetPixelShader(CPixelShader& _pixelShaderDX){
+void CGraphicApiOGL::SetPixelShader(CShaders& _pixelShader ){
+
+	auto shader = reinterpret_cast<CShadersOGL&>(_pixelShader);
+
+	glUseProgram(shader.m_rendererID);
+}
+
+void CGraphicApiOGL::SetVertexShader(CShaders& _vertexShader ){
+
+	auto shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
+
+	glUseProgram(shader.m_rendererID);
+}
+
+void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer ){
 
 
 }
 
-void CGraphicApiOGL::SetVertexShader(CVertexShader& _vertexShaderDX){
+void CGraphicApiOGL::SetIndexBuffer(CIndexBuffer& _indexBuffer ){
 
 
 }
 
-void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBufferDX){
+void CGraphicApiOGL::SetConstantBuffer(CConstantBuffer& _constantBuffer , 
+	const unsigned int _startSlot , const unsigned int _numBuffers ){
 
 
 }
 
-void CGraphicApiOGL::SetIndexBuffer(CIndexBuffer& _indexBufferDX){
+void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlot , 
+	std::vector<CSamplerState*>& _samplerState ){
 
 
 }
 
-void CGraphicApiOGL::SetConstantBuffer(CConstantBuffer& _constantBufferDX, 
-	const unsigned int _startSlotDX, const unsigned int _numBuffersDX){
+void CGraphicApiOGL::SetShaderResourceView(std::vector<CTexture*>& _shaderResourceView , 
+	const unsigned int _startSlot , const unsigned int _numViews ){
 
 
 }
 
-void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlotDX, 
-	std::vector<CSamplerState*>& _samplerStateDX){
+void CGraphicApiOGL::SetRenderTarget(CTexture& _renderTarget , 
+	CTexture& _depthStencil ){
 
 
 }
 
-void CGraphicApiOGL::SetShaderResourceView(std::vector<CTexture*>& _shaderResourceViewDX, 
-	const unsigned int _startSlotDX, const unsigned int _numViewsDX){
+void CGraphicApiOGL::SetDepthStencil(CTexture& _depthStencil , 
+	const unsigned int _stencilRef ){
 
 
 }
 
-void CGraphicApiOGL::SetRenderTarget(CTexture& _renderTargetDX, 
-	CTexture& _depthStencilDX){
+void CGraphicApiOGL::SetInputLayout(CInputLayout& _vertexLayout ){
 
 
 }
 
-void CGraphicApiOGL::SetDepthStencil(CTexture& _depthStencilDX, 
-	const unsigned int _stencilRefDX){
+void CGraphicApiOGL::SetViewport(const unsigned int _numViewports , 
+	const unsigned int _width , const unsigned int _heigth ){
+
+	glViewport(0, 0, _width, _heigth);
+}
+
+void CGraphicApiOGL::SetPrimitiveTopology(const unsigned int _topology ){
 
 
 }
 
-void CGraphicApiOGL::SetInputLayout(CInputLayout& _vertexLayoutDX){
+void CGraphicApiOGL::SetYourVS(CShaders& _vertexShader ){
 
 
 }
 
-void CGraphicApiOGL::SetViewport(const unsigned int _numViewportsDX, 
-	const unsigned int _widthDX, const unsigned int _heigthDX){
+void CGraphicApiOGL::SetYourVSConstantBuffers(CConstantBuffer* _constantBuffer , 
+	const unsigned int _startSlot , const unsigned int _numBuffers ){
 
 
 }
 
-void CGraphicApiOGL::SetPrimitiveTopology(const unsigned int _topologyDX){
+void CGraphicApiOGL::SetYourPS(CShaders& _pixelShader ){
 
 
 }
 
-void CGraphicApiOGL::SetYourVS(CVertexShader& _vertexShaderDX){
+void CGraphicApiOGL::SetYourPSConstantBuffers(CConstantBuffer* _constantBuffer , 
+	const unsigned int _startSlot , const unsigned int _numBuffers ){
 
 
 }
 
-void CGraphicApiOGL::SetYourVSConstantBuffers(CConstantBuffer* _constantBufferDX, 
-	const unsigned int _startSlotDX, const unsigned int _numBuffersDX){
-
-
-}
-
-void CGraphicApiOGL::SetYourPS(CPixelShader& _pixelShaderDX){
-
-
-}
-
-void CGraphicApiOGL::SetYourPSConstantBuffers(CConstantBuffer* _constantBufferDX, 
-	const unsigned int _startSlotDX, const unsigned int _numBuffersDX){
-
-
-}
-
-void CGraphicApiOGL::SetYourPSSampler(CSamplerState& _samplerDX, 
-	const unsigned int _startSlotDX, const unsigned int _numSamplersDX){
+void CGraphicApiOGL::SetYourPSSampler(CSamplerState& _sampler , 
+	const unsigned int _startSlot , const unsigned int _numSamplers ){
 
 
 }

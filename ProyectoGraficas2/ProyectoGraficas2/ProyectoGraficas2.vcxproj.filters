@@ -53,43 +53,16 @@
     <ClInclude Include="Includes\CGraphicApi.h">
       <Filter>Archivos de encabezado\GraphicApi</Filter>
     </ClInclude>
-    <ClInclude Include="Includes\stb_image.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Includes\CGraphicApiDX.h">
       <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
     <ClInclude Include="Includes\CGraphicApiOGL.h">
       <Filter>Archivos de encabezado\ClassOGL</Filter>
     </ClInclude>
-    <ClInclude Include="Includes\CPixelShader.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CPixelShaderDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexShader.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexShaderDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
     <ClInclude Include="Includes\CConstantBuffer.h">
       <Filter>Archivos de encabezado\Class</Filter>
     </ClInclude>
     <ClInclude Include="Includes\CConstantBufferDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CIndexBuffer.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CIndexBufferDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexBuffer.h">
-      <Filter>Archivos de encabezado\Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexBufferDX.h">
       <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
     <ClInclude Include="Includes\CTexture.h">
@@ -110,23 +83,44 @@
     <ClInclude Include="Includes\CInputLayoutDX.h">
       <Filter>Archivos de encabezado\ClassDX</Filter>
     </ClInclude>
-    <ClInclude Include="Includes\CVertexBufferOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CVertexShaderOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CPixelShaderOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CIndexBufferOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
-    </ClInclude>
     <ClInclude Include="Includes\CTextureOGL.h">
       <Filter>Archivos de encabezado\ClassOGL</Filter>
     </ClInclude>
     <ClInclude Include="Includes\CSamplerStateOGL.h">
       <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CConstantBufferOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CShaders.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CShadersDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CShadersOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexBuffer.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexBufferDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CVertexBufferOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CIndexBuffer.h">
+      <Filter>Archivos de encabezado\Class</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CIndexBufferDX.h">
+      <Filter>Archivos de encabezado\ClassDX</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CIndexBufferOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\stb_image.h">
+      <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
