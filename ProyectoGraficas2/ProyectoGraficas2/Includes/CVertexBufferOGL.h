@@ -8,7 +8,8 @@ class CVertexBufferOGL : public CVertexBuffer {
 		/// Miembros 
 		/// 
 	
-		unsigned int* m_vertexBufferObject;
+		unsigned int m_vertexBufferObject;
+		unsigned int m_vertexBufferSize;
 	
 	public:
 		///

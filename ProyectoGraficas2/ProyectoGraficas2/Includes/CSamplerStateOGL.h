@@ -8,8 +8,7 @@ class CSamplerStateOGL : public CSamplerState {
 		/// Miembros
 		/// 
 
-		unsigned int* m_samplerState;
-		unsigned int* m_textureUnit;
+		unsigned int m_samplerState;
 
 	public:
 		///

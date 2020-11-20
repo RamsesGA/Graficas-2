@@ -103,17 +103,12 @@ class CGraphicApiDX : public CGraphicApi{
 		/// 
 
 		CShaders* CreateVertexAndPixelShader(const std::wstring& _nameVS,
-			const std::string& _entryPointVS,
-			const std::string& _vertexSrc,
-			const std::wstring& _namePS,
-			const std::string& _entryPointPS,
-			const std::string& _fragmentSrc)override;
+			const std::string& _entryPointVS, const std::wstring& _namePS,
+			const std::string& _entryPointPS)override;
 
-		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertex,
-			unsigned int _vertexBufferObject)override;
+		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertex)override;
 
-		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t> & _simpleIndex,
-			unsigned int _indexBufferObject)override;
+		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t> & _simpleIndex)override;
 
 		CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSize)override;
 
@@ -140,12 +135,14 @@ class CGraphicApiDX : public CGraphicApi{
 
 		void SetIndexBuffer(CIndexBuffer& _indexBuffer)override;
 
-		void SetConstantBuffer(CConstantBuffer& _constantBuffer,
+		void SetConstantBuffer(bool _isVertex,
+			CConstantBuffer & _constantBuffer,
 			const unsigned int _startSlot,
 			const unsigned int _numBuffers)override;
 
 		void SetSamplerState(const unsigned int _startSlot,
-			std::vector<CSamplerState*>& _samplerState)override;
+			std::vector<CSamplerState*>& _samplerState,
+			CTexture & _texture)override;
 
 		void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceView,
 			const unsigned int _startSlot,
@@ -179,4 +176,6 @@ class CGraphicApiDX : public CGraphicApi{
 		void SetYourPSSampler(CSamplerState& _sampler,
 			const unsigned int _startSlot,
 			const unsigned int _numSamplers)override;
+
+		void SetShaders(CShaders& _shaders)override;
 };

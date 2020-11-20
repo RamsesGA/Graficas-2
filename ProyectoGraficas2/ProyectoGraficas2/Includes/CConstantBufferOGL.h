@@ -8,8 +8,8 @@ class CConstantBufferOGL : public CConstantBuffer {
 		/// Miembros
 		/// 
 
-		unsigned int* m_uniformBufferObject;
-		const unsigned int* m_bufferSize;
+		unsigned int m_uniformBufferObject;
+		const unsigned int m_bufferSize;
 
 	public:
 		///

@@ -215,10 +215,9 @@ void CGraphicApiDX::CleanUpDevices(){}
 /// C R E A T E´s 
 /// 
 
-CShaders* CGraphicApiDX::CreateVertexAndPixelShader(const std::wstring& _nameVS, 
-    const std::string& _entryPointVS,
-    const std::string& _vertexSrc, const std::wstring& _namePS, 
-    const std::string& _entryPointPS, const std::string& _fragmentSrc){
+CShaders* CGraphicApiDX::CreateVertexAndPixelShader(const std::wstring& _nameVS,
+    const std::string& _entryPointVS, const std::wstring& _namePS,
+    const std::string& _entryPointPS){
 
     ///Generamos una variable auto
    ///para adaptar el tipo de dato que ocupamos
@@ -279,8 +278,7 @@ CShaders* CGraphicApiDX::CreateVertexAndPixelShader(const std::wstring& _nameVS,
     return shaders;
 }
 
-CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertex, 
-    unsigned int _vertexBufferObject){
+CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertex){
 
     ///Generamos una variable auto
     ///para adaptar el tipo de dato que ocupamos
@@ -319,8 +317,7 @@ CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const std::vector<SimpleVertex>
     }
 }
 
-CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndex, 
-    unsigned int _indexBufferObject){
+CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndex){
 
     ///Generamos una variable auto
     ///para adaptar el tipo de dato que ocupamos
@@ -364,7 +361,7 @@ CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector<uint32_t>& _sim
     }
 }
 
-CConstantBuffer* CGraphicApiDX::CreateConstantBuffer(const unsigned int _bufferSizeDX){
+CConstantBuffer* CGraphicApiDX::CreateConstantBuffer(const unsigned int _bufferSize){
 
     ///Generamos una variable auto
     ///para adaptar el tipo de dato que ocupamos
@@ -374,7 +371,7 @@ CConstantBuffer* CGraphicApiDX::CreateConstantBuffer(const unsigned int _bufferS
     HRESULT hr = S_OK;
 
     ///Rellenamos el descriptor de buffer
-    CD3D11_BUFFER_DESC bd(_bufferSizeDX, D3D11_BIND_CONSTANT_BUFFER);
+    CD3D11_BUFFER_DESC bd(_bufferSize, D3D11_BIND_CONSTANT_BUFFER);
 
     ///Creamos el buffer
     hr = m_pd3dDevice->CreateBuffer(&bd, nullptr,
@@ -724,18 +721,28 @@ void CGraphicApiDX::SetIndexBuffer(CIndexBuffer& _indexBufferDX){
                                           0);
 }
 
-void CGraphicApiDX::SetConstantBuffer(CConstantBuffer& _constantBufferDX,
-    const unsigned int _startSlotDX,
-    const unsigned int _numBuffersDX){
+void CGraphicApiDX::SetConstantBuffer(bool _isVertex,
+    CConstantBuffer& _constantBuffer,
+    const unsigned int _startSlot,
+    const unsigned int _numBuffers){
 
-    auto constantBuffer = reinterpret_cast<CConstantBufferDX&>(_constantBufferDX);
+    auto constantBuffer = reinterpret_cast<CConstantBufferDX&>(_constantBuffer);
 
-    m_pImmediateContext->VSSetConstantBuffers(_startSlotDX, _numBuffersDX,
-                                              &constantBuffer.m_pConstantBuffer);
+    if (true == _isVertex) {
+
+        m_pImmediateContext->VSSetConstantBuffers(_startSlot, _numBuffers,
+            &constantBuffer.m_pConstantBuffer);
+    }
+    else {
+
+        m_pImmediateContext->PSSetConstantBuffers(_startSlot, _numBuffers,
+            &constantBuffer.m_pConstantBuffer);
+    }
 }
 
 void CGraphicApiDX::SetSamplerState(const unsigned int _startSlotDX,
-    std::vector<CSamplerState*>& _samplerStateDX) {
+    std::vector<CSamplerState*>& _samplerStateDX,
+    CTexture& _texture) {
 
     for (unsigned int i = 0; i < _samplerStateDX.size(); i++) {
 
@@ -847,4 +854,14 @@ void CGraphicApiDX::SetYourPSSampler(CSamplerState& _samplerDX,
 
     m_pImmediateContext->PSSetSamplers(_startSlotDX, _numSamplersDX,
         &sampler.m_pSamplerState);
+}
+
+void CGraphicApiDX::SetShaders(CShaders& _shaders){
+
+    auto shaders = reinterpret_cast<CShadersDX&>(_shaders);
+
+    m_pImmediateContext->VSSetShader(shaders.m_pVertexShader, 
+        0, 0);
+    m_pImmediateContext->PSSetShader(shaders.m_pPixelShader,
+        0, 0);
 }

@@ -1,0 +1,14 @@
+#version 420 core
+
+layout(std140, binding = 1) uniform ConstantBuffer2
+{
+        mat4 World;
+        vec4 vMeshColor;
+}
+
+out vec4 FragColor;
+
+void main()
+{
+        FragColor = vMeshColor;
+}

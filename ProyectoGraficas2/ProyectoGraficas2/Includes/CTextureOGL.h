@@ -8,8 +8,16 @@ class CTextureOGL : public CTexture{
 		/// Métodos
 		/// 
 
-		unsigned int* m_texture;
-		unsigned char* m_data;
+		unsigned int m_texture;
+		unsigned char m_data;
+		/// <summary>
+		/// Puede ser mi render target view de DX
+		/// </summary>
+		unsigned int m_framebuffer;
+		/// <summary>
+		/// Puede ser mi depthStencil
+		/// </summary>
+		unsigned int m_renderBufferObject;
 
 	public:
 		///

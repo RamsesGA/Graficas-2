@@ -15,11 +15,11 @@ class CShadersOGL : public CShaders {
 		/// <summary>
 		/// 
 		/// </summary>
-		unsigned int* m_vertexShader;
+		unsigned int m_vertexShader;
 		/// <summary>
 		/// 
 		/// </summary>
-		unsigned int* m_fragmentShader;
+		unsigned int m_fragmentShader;
 	
 	public:
 		///

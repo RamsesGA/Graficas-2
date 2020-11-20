@@ -2,9 +2,6 @@
 #include "CIndexBuffer.h"
 
 /// <summary>
-/// También se le conoce como 
-/// PBO (Pixel Buffer Object)
-/// ó
 /// EBO (Element Buffer Object)
 /// </summary>
 class CIndexBufferOGL : public CIndexBuffer {
@@ -14,7 +11,8 @@ class CIndexBufferOGL : public CIndexBuffer {
 		/// Métodos
 		/// 
 	
-		unsigned int* m_indexBufferObject;
+		unsigned int m_indexBufferObject;
+		unsigned int m_indexBufferSize;
 	
 	public:
 		///
