@@ -5,6 +5,7 @@
 #include "..\Includes\CShadersOGL.h"
 #include "..\Includes\CVertexBufferOGL.h"
 #include "..\Includes\CIndexBufferOGL.h"
+#include "..\Includes\CInputLayoutOGL.h"
 #include "..\Includes\stb_image.h"
 
 #include <iostream>
@@ -395,7 +396,78 @@ CSamplerState* CGraphicApiOGL::CreateSamplerState() {
 
 CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 	
+	auto inputLayout = new CInputLayoutOGL();
+	auto shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
 
+	///Creamos el vertex array
+	glGenVertexArrays(1, &inputLayout->m_inputLayout);
+	///Ahora indicamos a OGL que lo vamos a usar
+	glBindVertexArray(inputLayout->m_inputLayout);
+
+	bool firstOffSet = true;
+	unsigned int offSet = 0;
+	unsigned int sizeComponent = 0;
+	int total = -1;
+
+	glGetProgramiv(shader.m_rendererID, GL_ACTIVE_ATTRIBUTES, &total);
+
+	for (unsigned int i = 0; i < total; ++i) {
+		
+		char name[100];
+
+		int num = -1;
+		int name_len = -1;
+
+		GLenum type = GL_ZERO;
+
+		glGetActiveUniform(shader.m_rendererID, GLuint(i), 
+			sizeof(name) - 1, &name_len, &num, 
+			&type, name);
+
+		name[name_len] = 0;
+
+		GLuint location = glGetAttribLocation(shader.m_rendererID, name);
+		
+		///Switch para obtener el tamaño del componente
+		/// y asiganr su offset correspondiente
+		switch (type){
+
+			case GL_FLOAT_VEC2:
+
+				sizeComponent = 2;
+				if (!firstOffSet) {
+
+					offSet += 8;
+				}
+				break;
+
+			case GL_FLOAT_VEC3:
+
+				sizeComponent = 3;
+				if (!firstOffSet) {
+
+					offSet += 12;
+				}
+				break;
+
+			case GL_FLOAT_VEC4:
+
+				sizeComponent = 4;
+				if (!firstOffSet) {
+
+					offSet += 16;
+				}
+				break;
+		}
+		
+		glVertexAttribFormat(location, sizeComponent,
+			type, false, offSet);
+
+		glVertexAttribBinding(location, 0);
+		glEnableVertexAttribArray(location);
+	}
+
+	return inputLayout;
 }
 
 ///
@@ -476,7 +548,9 @@ void CGraphicApiOGL::SetDepthStencil(CTexture& _depthStencil ,
 
 void CGraphicApiOGL::SetInputLayout(CInputLayout& _vertexLayout ){
 
+	auto inputLayout = reinterpret_cast<CInputLayoutOGL&>(_vertexLayout);
 
+	glBindVertexArray(inputLayout.m_inputLayout);
 }
 
 void CGraphicApiOGL::SetViewport(const unsigned int _numViewports , 
