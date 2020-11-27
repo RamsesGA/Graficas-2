@@ -9,7 +9,7 @@ class CConstantBufferOGL : public CConstantBuffer {
 		/// 
 
 		unsigned int m_uniformBufferObject;
-		const unsigned int m_bufferSize;
+		unsigned int m_bufferSize;
 
 	public:
 		///

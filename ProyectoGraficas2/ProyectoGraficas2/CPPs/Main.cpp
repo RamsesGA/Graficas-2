@@ -1,6 +1,7 @@
 #include "..\Includes\CGraphicApi.h"
 #include "..\Includes\CGraphicApiDX.h"
 #include "..\Includes\CGraphicApiOGL.h"
+#include "..\Includes\CCamera.h"
 
 #include <windows.h>
 #include <stdlib.h>
@@ -20,19 +21,28 @@ static TCHAR g_szWindowClass[] = _T("DesktopApp");
 ///The string that appears in the application's title bar.
 static TCHAR g_szTitle[] = _T("Windows - KriegerFS-");
 ///Tamaño de pantalla
-unsigned int g_width = 1000;
-unsigned int g_height = 800;
+unsigned int g_width = 800;
+unsigned int g_height = 600;
 
 HINSTANCE g_hInst;
 
 std::vector<SimpleVertex> g_pVertices;
 std::vector<uint32_t> g_pIndices;
 
-glm::mat4x4 g_world;
-glm::mat4x4 g_view;
-glm::mat4x4 g_projection;
-
 glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
+
+///
+/// C A M E R A
+/// 
+
+glm::mat4x4 g_world;
+CCamera g_mainCamera;
+
+
+///
+/// G R A P H I C
+/// A P I
+/// 
 
 CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
 //CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
@@ -85,28 +95,71 @@ LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message,
 
     PAINTSTRUCT ps;
     HDC hdc;
+    POINT Temp;
 
-    switch (_message)
-    {
+    switch (_message){
+
         case WM_PAINT:
             hdc = BeginPaint(_hWnd, &ps);
             EndPaint(_hWnd, &ps);
-
             break;
 
         case WM_DESTROY:
             PostQuitMessage(0);
+            break;
 
+        /// WM_KEYDOWN: A window receives keyboard 
+        /// input in the form of keystroke messages and character messages.
+        case WM_KEYDOWN: {
+            g_mainCamera.InputDetection(_wParam);
+            
+            ConstantBuffer1 cb;
+            cb.mView = g_mainCamera.GetView();
+            
+            g_pGraphicApi->UpdateConstantBuffer
+            (&cb, *g_pConstantBuffer1);
+            break;
+        }
+
+        /// WM_LBUTTONDOWN: Posted when the user presses 
+        /// the left mouse button while the cursor is in the client area of a window.
+        case WM_LBUTTONDOWN: {
+            GetCursorPos(&Temp);
+            g_mainCamera.SetOriginalMousePos(Temp.x, Temp.y);
+            g_mainCamera.SetClickPressed(true);
+            break;
+        }
+
+        case WM_MOUSEMOVE: {
+            if (g_mainCamera.GetClickPressed()){
+            
+                g_mainCamera.SetOriginalMousePos
+                (g_mainCamera.GetOriginalMousePos().x, g_mainCamera.GetOriginalMousePos().y);
+            
+                g_mainCamera.MouseRotation();
+            
+                ConstantBuffer1 cb;
+                cb.mView = g_mainCamera.GetView();
+                g_pGraphicApi->UpdateConstantBuffer
+                (&cb, *g_pConstantBuffer1);
+            }
+            break;
+        }
+
+        /// WM_LBUTTONUP: Posted when the user releases 
+        /// the left mouse button while the cursor is in the client area of a window.
+        case WM_LBUTTONUP:
+            g_mainCamera.SetClickPressed(false);
             break;
 
         default:
             return DefWindowProc(_hWnd, _message, _wParam, _lParam);
-
             break;
     }
 
     return 0;
 }
+
 /// <summary>
 /// Guardamos información de la ventana
 /// del typedef "WNDCLASSEX"
@@ -128,6 +181,7 @@ void SetWndClassEx(WNDCLASSEX& _wcex, _In_ HINSTANCE& _hInstance) {
     _wcex.lpszClassName = g_szWindowClass;
     _wcex.hIconSm = LoadIcon(_wcex.hInstance, IDI_APPLICATION);
 }
+
 /// <summary>
 /// Creación de la ventana
 /// </summary>
@@ -157,6 +211,7 @@ HWND& CreateNewWindow() {
 
     return hWnd;
 }
+
 /// <summary>
 /// Creación del simple vertex
 /// </summary>
@@ -164,37 +219,38 @@ void CreateSimpleVertex() {
 
     g_pVertices =
     {
-        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)  },
+        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f) },
 
-        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f)},
 
-        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f)},
+        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f)},
+        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f)},
+        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f) },
 
-        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f) },
+        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f) },
+        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)  },
 
-        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f)},
+        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f) },
+        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f)},
 
-        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
-        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
-        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
-        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f)},
+        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f) },
+        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)  },
+        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f) },
     };
 }
+
 /// <summary>
 /// Creación del indices
 /// </summary>
@@ -221,70 +277,51 @@ void CreateIndices() {
         23,20,22
     };
 }
-/// <summary>
-/// Creación de la camara 
-/// para el mundo
-/// </summary>
-void CreateCamera() {
+
+void InitCamera() {
 
     ///Inicializamos la matriz de identidad
     g_world = glm::mat4(1.0f);
 
-    /// Inicializamos los valores para camara
-    CameraDescriptor cameraDesc;
-    cameraDesc.s_eye = glm::vec3(0.0f, 3.0f, -6.0f);
-    cameraDesc.s_far = 1000.0f;
-    cameraDesc.s_foV = 0.78539816339f;
-    cameraDesc.s_height = g_height;
-    cameraDesc.s_lookAt = glm::vec3(0.0f, 1.0f, 0.0f);
-    cameraDesc.s_near = 0.01f;
-    cameraDesc.s_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    cameraDesc.s_width = g_width;
+    CameraDescriptor mainCamera;
+    mainCamera.s_lookAt = glm::vec3(0.0f, 1.0f, 0.0f);
+    mainCamera.s_eye = glm::vec3(0.0f, 3.0f, -6.0f);
+    mainCamera.s_up = glm::vec3(0.0f, 1.0f, 0.0f);
+    mainCamera.s_far = 1000.0f;
+    mainCamera.s_near = 0.01f;
+    mainCamera.s_foV = 0.78539816339f;
+    mainCamera.s_height = g_height;
+    mainCamera.s_width = g_width;
 
-    ///Inicializamos el punto de vista
-    g_view = glm::lookAtLH(cameraDesc.s_eye, 
-        cameraDesc.s_lookAt, 
-        cameraDesc.s_up);
-
-    ///Inicializamos la matriz de proyección
-    g_projection = glm::perspectiveFovLH(cameraDesc.s_foV, cameraDesc.s_width,
-        cameraDesc.s_height, cameraDesc.s_near, 
-        cameraDesc.s_far);
+    g_mainCamera.Init(mainCamera);
 }
+
 /// <summary>
 /// Función para almacenar todas las funciones
 /// con descripción de "UPDATE"
 /// </summary>
 void Update() {
 
-    ConstantBuffer1 newConstBuff1;
-    newConstBuff1.mProjection = glm::transpose(g_projection);
-    newConstBuff1.mView = glm::transpose(g_view);
-    g_pGraphicApi->UpdateConstantBuffer(&newConstBuff1, *g_pConstantBuffer1);
+    ConstantBuffer1 meshData;
+    meshData.mProjection = g_mainCamera.GetProjection();
+    meshData.mView = g_mainCamera.GetView();
+    g_pGraphicApi->UpdateConstantBuffer
+    (&meshData, *g_pConstantBuffer1);
 
     ConstantBuffer2 cb;
     cb.mWorld = glm::transpose(g_world);
     cb.vMeshColor = g_vMeshColor;
     g_pGraphicApi->UpdateConstantBuffer(&cb, *g_pConstantBuffer2);
 }
+
 /// <summary>
 /// Función para guardar valores y generar
 /// información para la pantalla
 /// </summary>
 void Render() {
 
-    ///Guardamos los render targets
-    g_pGraphicApi->SetRenderTarget(*g_pRenderTargetView, *g_pDepthStencil);
     ///Guardamos un viewport
     g_pGraphicApi->SetViewport(1, g_width, g_height);
-    ///Guardamos el input layout
-    g_pGraphicApi->SetInputLayout(*g_pVertexLayout);
-    ///Guardamos el vertex buffer
-    g_pGraphicApi->SetVertexBuffer(*g_pVertexBuffer);
-    ///Guardamos el index buffer
-    g_pGraphicApi->SetIndexBuffer(*g_pIndexBuffer);
-    ///Guardamos la topología
-    g_pGraphicApi->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     ///
     /// Clear the back buffer
@@ -299,11 +336,10 @@ void Render() {
     ///
     /// Render the cube
     ///
-    g_pGraphicApi->SetYourVS(*g_pBothShaders);
+    g_pGraphicApi->SetShaders(*g_pBothShaders);
     g_pGraphicApi->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
     g_pGraphicApi->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
     g_pGraphicApi->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
-    g_pGraphicApi->SetYourPS(*g_pBothShaders);
     g_pGraphicApi->DrawIndex(36, 0, 0);
 
     ///
@@ -312,6 +348,7 @@ void Render() {
 
     g_pGraphicApi->SwapChainPresent(0, 0);
 }
+
 /// <summary>
 /// Función donde generamos el proyecto
 /// </summary>
@@ -321,8 +358,7 @@ void Proyect(HWND _hWnd) {
     ///Mandamos la ventana a la API
     g_pGraphicApi->InitDevice(_hWnd);
 
-    ///Generamos el mundo y su camara
-    CreateCamera();
+    InitCamera();
 
     ///
     /// C R E A T E´s
@@ -330,34 +366,29 @@ void Proyect(HWND _hWnd) {
 
     ///Creamos el render target view
     g_pRenderTargetView = g_pGraphicApi->GetDefaultBackBuffer();
-    if (nullptr == g_pRenderTargetView) {
-
-        std::cout << "Error g_pRenderTargetView NULL\n";
-    }
 
     ///Creamos el depth stencil view
-    g_pDepthStencil = g_pGraphicApi->CreateTexture(g_width, g_height,
-        D3D11_BIND_DEPTH_STENCIL,
-        TEXTURE_FORMAT_D24_UNORM_S8_UINT,
-        "");
-    if (nullptr == g_pDepthStencil) {
-
-        std::cout << "Error g_pDepthStencil NULL\n";
-    }
+    g_pDepthStencil = g_pGraphicApi->GetDefaultDepthStencil();
 
     ///Creamos el vertex shader y pixel shader
-    g_pBothShaders = g_pGraphicApi->CreateVertexAndPixelShader(L"CubeShader.fx", "VS", 
-        L"CubeShader.fx", "PS");
+    g_pBothShaders = g_pGraphicApi->CreateVertexAndPixelShader(L"DX_CubeShader.fx", "VS", 
+        L"DX_CubeShader.fx", "PS");
     if (nullptr == g_pBothShaders) {
 
-        std::cout << "Error g_BothShaders NULL\n";
+        g_pBothShaders = g_pGraphicApi->CreateVertexAndPixelShader(L"OGL_VertexShader.txt", "main",
+            L"OGL_PixelShader.txt", "main");
+
+        if (nullptr == g_pBothShaders) {
+
+            exit(1);
+        }
     }
 
     ///Creamos el input layout
     g_pVertexLayout = g_pGraphicApi->CreateInputLayout(*g_pBothShaders);
     if (nullptr == g_pVertexLayout) {
 
-        std::cout << "Error g_pVertexLayout NULL\n";
+        exit(1);
     }
 
     ///Creamos el vertex buffer
@@ -365,7 +396,7 @@ void Proyect(HWND _hWnd) {
     g_pVertexBuffer = g_pGraphicApi->CreateVertexBuffer(g_pVertices);
     if (nullptr == g_pVertexBuffer) {
 
-        std::cout << "Error g_pVertexBuffer NULL\n";
+        exit(1);
     }
 
     ///Creamos el index buffer
@@ -373,21 +404,37 @@ void Proyect(HWND _hWnd) {
     g_pIndexBuffer = g_pGraphicApi->CreateIndexBuffer(g_pIndices);
     if (nullptr == g_pIndexBuffer) {
 
-        std::cout << "Error g_pIndexBuffer NULL\n";
+        exit(1);
     }
 
     ///Creamos los constant buffers para el shader
     g_pConstantBuffer1 = g_pGraphicApi->CreateConstantBuffer(sizeof(ConstantBuffer1));
     if (nullptr == g_pConstantBuffer1) {
 
-        std::cout << "Error g_pConstantBuffer1 NULL\n";
+        exit(1);
     }
 
     g_pConstantBuffer2 = g_pGraphicApi->CreateConstantBuffer(sizeof(ConstantBuffer2));
     if (nullptr == g_pConstantBuffer2) {
 
-        std::cout << "Error g_pConstantBuffer1 NULL\n";
+        exit(1);
     }
+
+    ///
+    /// F I R S T
+    /// S E T´s
+    /// 
+    
+    ///Guardamos el input layout
+    g_pGraphicApi->SetInputLayout(*g_pVertexLayout);
+    ///Guardamos los render targets
+    g_pGraphicApi->SetRenderTarget(g_pRenderTargetView, g_pDepthStencil);
+    ///Guardamos el vertex buffer
+    g_pGraphicApi->SetVertexBuffer(*g_pVertexBuffer);
+    ///Guardamos el index buffer
+    g_pGraphicApi->SetIndexBuffer(*g_pIndexBuffer);
+    ///Guardamos la topología
+    g_pGraphicApi->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 ///
@@ -438,16 +485,16 @@ int CALLBACK WinMain(
     ///_nCmdShow: the fourth parameter from WinMain
     ShowWindow(hWnd, _nCmdShow);
 
-    ///Proyecto en Direct X
     Proyect(hWnd);
 
     ///Actualizamos la ventana
     UpdateWindow(hWnd);
+
     ///Main message loop:
     MSG msg = { 0 };
     while (WM_QUIT != msg.message){
 
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)){
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);

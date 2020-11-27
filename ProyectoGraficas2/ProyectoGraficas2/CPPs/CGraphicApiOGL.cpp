@@ -41,6 +41,52 @@ std::string ReadShaderOGL(const std::wstring& _nameVS) {
 	}
 }
 
+bool AnalyzeVertexShaderOGL(const std::wstring& _nameVS) {
+
+	std::string bufferAnalyze;
+
+	for (unsigned int i = 0; i < _nameVS.size(); i++) {
+
+		bufferAnalyze += _nameVS[i];
+
+		if (('_' == bufferAnalyze[i]) &&
+			("OGL_" != bufferAnalyze)) {
+
+			return false;
+		}
+		else if (('_' == bufferAnalyze[i]) &&
+				("OGL_" == bufferAnalyze)) {
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool AnalyzePixelShaderOGL(const std::wstring& _namePS) {
+
+	std::string bufferAnalyze;
+
+	for (unsigned int i = 0; i < _namePS.size(); i++) {
+
+		bufferAnalyze += _namePS[i];
+
+		if (('_' == bufferAnalyze[i]) &&
+			("OGL_" != bufferAnalyze)) {
+
+			return false;
+		}
+		else if (('_' == bufferAnalyze[i]) &&
+				("OGL_" == bufferAnalyze)) {
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
 ///
 /// H E R E N C I A
 ///
@@ -95,6 +141,14 @@ bool CGraphicApiOGL::InitDevice(HWND& _hWnd){
 		glEnable(GL_DEPTH_TEST);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		GLuint detectError = glGetError();
+
+		if (detectError != 0) {
+
+			exit(1);
+		}
+
 		return true;
 	}
 }
@@ -105,6 +159,13 @@ void CGraphicApiOGL::DrawIndex(unsigned int _indexCount ,
 
 	glDrawElements(m_topology, _indexCount,
 		GL_UNSIGNED_INT, 0);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SwapChainPresent(unsigned int _syncInterval , 
@@ -113,6 +174,8 @@ void CGraphicApiOGL::SwapChainPresent(unsigned int _syncInterval ,
 CTexture* CGraphicApiOGL::LoadTextureFromFile(const std::string _srcFile){return nullptr;}
 
 CTexture* CGraphicApiOGL::GetDefaultBackBuffer(){return nullptr;}
+
+CTexture* CGraphicApiOGL::GetDefaultDepthStencil(){return nullptr;}
 
 void CGraphicApiOGL::UnbindOGL(){
 
@@ -130,28 +193,50 @@ void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcData ,
 	auto UBO = reinterpret_cast<CConstantBufferOGL&>(_updateDataCB);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO.m_uniformBufferObject);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO.m_bufferSize, _srcData);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
+	GLuint detectError = glGetError();
 
-	GLvoid* p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	if (detectError != 0) {
 
-	memcpy(p, _srcData, UBO.m_bufferSize);
-
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-
-	unsigned int block_index; 
-	block_index = glGetUniformBlockIndex(UBO.m_uniformBufferObject, "Shader data");
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO.m_uniformBufferObject);
-
-	glUniformBlockBinding(UBO.m_uniformBufferObject, block_index, 0);
+		exit(1);
+	}
 }
 
 ///
 /// C L E A R´s
 /// 
 
-CTexture* CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){return nullptr;}
+CTexture* CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){
+	
+	glClearColor(0.0f, 0.125f,
+		0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-CTexture* CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){return nullptr;}
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+
+	return _renderTarget;
+}
+
+CTexture* CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+
+	return _depthStencil;
+}
 
 void CGraphicApiOGL::CleanUpDevices(){}
 
@@ -166,6 +251,15 @@ CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS
 	const std::string& _entryPointVS, const std::wstring& _namePS, 
 	const std::string& _entryPointPS){
 
+	if (!(AnalyzeVertexShaderOGL(_nameVS))) {
+
+		return nullptr;
+	}
+	if (!(AnalyzePixelShaderOGL(_namePS))) {
+
+		return nullptr;
+	}
+
 	std::string VS_ShaderSrc = ReadShaderOGL(_nameVS);
 	std::string PS_ShaderSrc = ReadShaderOGL(_namePS);
 
@@ -179,7 +273,7 @@ CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS
 	// Send the vertex shader source code to GL
 	// Note that std::string's .c_str is NULL character terminated.
 	const GLchar* source = (const GLchar*)VS_ShaderSrc.c_str();
-	glShaderSource(vertexShader, 1, &source, 0);
+	glShaderSource(vertexShader, 1, &source, nullptr);
 
 	// Compile the vertex shader
 	glCompileShader(vertexShader);
@@ -212,7 +306,7 @@ CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS
 	// Send the fragment shader source code to GL
 	// Note that std::string's .c_str is NULL character terminated.
 	source = (const GLchar*)PS_ShaderSrc.c_str();
-	glShaderSource(fragmentShader, 1, &source, 0);
+	glShaderSource(fragmentShader, 1, &source, nullptr);
 
 	// Compile the fragment shader
 	glCompileShader(fragmentShader);
@@ -300,6 +394,13 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+
 	return VBO;
 }
 
@@ -320,6 +421,13 @@ CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _si
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+
 	return EBO;
 }
 
@@ -330,12 +438,19 @@ CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _buffer
 	///Generamos el buffer y lo inicializamos
 	glGenBuffers(1, &UBO->m_uniformBufferObject);
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO->m_uniformBufferObject);
-	glBufferData(GL_UNIFORM_BUFFER, _bufferSize, &UBO->m_bufferSize, GL_DYNAMIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, _bufferSize, nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
-	return UBO;
+	UBO->m_bufferSize = _bufferSize;
 
-	//return nullptr;
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+
+	return UBO;
 }
 
 CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _width , 
@@ -378,6 +493,14 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _width ,
 	}
 
 	stbi_image_free(data);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+
 	return tex;
 }
 
@@ -411,25 +534,26 @@ CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 
 	glGetProgramiv(shader.m_rendererID, GL_ACTIVE_ATTRIBUTES, &total);
 
-	for (unsigned int i = 0; i < total; ++i) {
+	for (unsigned int i = 0; i < total; i++) {
 		
 		char name[100];
+		memset(name, ' ', 100);
 
 		int num = -1;
 		int name_len = -1;
 
 		GLenum type = GL_ZERO;
 
-		glGetActiveUniform(shader.m_rendererID, GLuint(i), 
+		glGetActiveAttrib(shader.m_rendererID, GLuint(i), 
 			sizeof(name) - 1, &name_len, &num, 
 			&type, name);
 
 		name[name_len] = 0;
 
 		GLuint location = glGetAttribLocation(shader.m_rendererID, name);
-		
+
 		///Switch para obtener el tamaño del componente
-		/// y asiganr su offset correspondiente
+		/// y asignar su offset correspondiente
 		switch (type){
 
 			case GL_FLOAT_VEC2:
@@ -461,10 +585,24 @@ CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 		}
 		
 		glVertexAttribFormat(location, sizeComponent,
-			type, false, offSet);
+			GL_FLOAT, false, offSet);
+
+		GLuint detectError = glGetError();
+
+		if (detectError != 0) {
+
+			exit(1);
+		}
 
 		glVertexAttribBinding(location, 0);
 		glEnableVertexAttribArray(location);
+	}
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
 	}
 
 	return inputLayout;
@@ -479,6 +617,13 @@ void CGraphicApiOGL::SetPixelShader(CShaders& _pixelShader ){
 	auto shader = reinterpret_cast<CShadersOGL&>(_pixelShader);
 
 	glUseProgram(shader.m_rendererID);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetVertexShader(CShaders& _vertexShader ){
@@ -486,6 +631,13 @@ void CGraphicApiOGL::SetVertexShader(CShaders& _vertexShader ){
 	auto shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
 
 	glUseProgram(shader.m_rendererID);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer) {
@@ -493,6 +645,13 @@ void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer) {
 	auto vertex = reinterpret_cast<CVertexBufferOGL&>(_vertexBuffer);
 
 	glBindVertexBuffer(0, vertex.m_vertexBufferObject, 0, vertex.m_vertexBufferSize);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetIndexBuffer(CIndexBuffer& _indexBuffer){
@@ -500,6 +659,13 @@ void CGraphicApiOGL::SetIndexBuffer(CIndexBuffer& _indexBuffer){
 	auto index = reinterpret_cast<CIndexBufferOGL&>(_indexBuffer);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index.m_indexBufferObject);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetConstantBuffer(bool _isVertex,
@@ -510,6 +676,13 @@ void CGraphicApiOGL::SetConstantBuffer(bool _isVertex,
 	auto constantBuffer = reinterpret_cast<CConstantBufferOGL&>(_constantBuffer);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, constantBuffer.m_uniformBufferObject);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlot , 
@@ -520,6 +693,13 @@ void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlot ,
 	auto texture = reinterpret_cast<CTextureOGL&>(_texture);
 
 	glBindSampler(texture.m_texture, sampler.m_samplerState);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetShaderResourceView(std::vector<CTexture*>& _shaderResourceView,
@@ -530,17 +710,38 @@ void CGraphicApiOGL::SetShaderResourceView(std::vector<CTexture*>& _shaderResour
 	glActiveTexture(GL_TEXTURE0 + _startSlot);
 
 	glBindTexture(GL_TEXTURE_2D, resourceView.m_texture);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
-void CGraphicApiOGL::SetRenderTarget(CTexture& _renderTarget , 
-	CTexture& _depthStencil ){
+void CGraphicApiOGL::SetRenderTarget(CTexture* _renderTarget , 
+	CTexture* _depthStencil ){
 
-	auto renderTarget = reinterpret_cast<CTextureOGL&>(_renderTarget);
-	auto depthStencil = reinterpret_cast<CTextureOGL&>(_depthStencil);
+	if (nullptr == _renderTarget) {
 
-	glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.m_framebuffer);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH24_STENCIL8, 
-		GL_RENDERBUFFER, depthStencil.m_renderBufferObject);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+	else {
+
+		auto* renderTarget = reinterpret_cast<CTextureOGL*>(_renderTarget);
+		auto* depthStencil = reinterpret_cast<CTextureOGL*>(_depthStencil);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, renderTarget->m_framebuffer);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH24_STENCIL8,
+			GL_RENDERBUFFER, depthStencil->m_renderBufferObject);
+
+		GLuint detectError = glGetError();
+
+		if (detectError != 0) {
+
+			exit(1);
+		}
+	}
 }
 
 void CGraphicApiOGL::SetDepthStencil(CTexture& _depthStencil , 
@@ -551,12 +752,26 @@ void CGraphicApiOGL::SetInputLayout(CInputLayout& _vertexLayout ){
 	auto inputLayout = reinterpret_cast<CInputLayoutOGL&>(_vertexLayout);
 
 	glBindVertexArray(inputLayout.m_inputLayout);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetViewport(const unsigned int _numViewports , 
 	const unsigned int _width , const unsigned int _heigth ){
 
 	glViewport(0, 0, _width, _heigth);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetPrimitiveTopology(const unsigned int _topology ){
@@ -583,19 +798,26 @@ void CGraphicApiOGL::SetPrimitiveTopology(const unsigned int _topology ){
 			m_topology = GL_TRIANGLE_STRIP;
 			break;
 	}
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
 }
 
 void CGraphicApiOGL::SetShaders(CShaders& _shaders){
 
 	auto shaders = reinterpret_cast<CShadersOGL&>(_shaders);
-	
-	if (0 == shaders.m_rendererID) {
 
-		std::cout << "ERROR, rendererID vacio\n";
-	}
-	else {
+	glUseProgram(shaders.m_rendererID);
 
-		glUseProgram(shaders.m_rendererID);
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
 	}
 }
 

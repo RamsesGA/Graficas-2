@@ -34,6 +34,12 @@
     <Filter Include="Archivos de origen\Shaders">
       <UniqueIdentifier>{fe4a6564-76a7-4275-807c-ac37b80ec8c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de encabezado\LoadingModels">
+      <UniqueIdentifier>{d9a81bf3-0473-4c85-9f69-98cc91ccd54c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\LoadingModels">
+      <UniqueIdentifier>{9e86956c-bf8b-43e1-a153-fe922992c410}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPPs\Main.cpp">
@@ -47,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="CPPs\CGraphicApiOGL.cpp">
       <Filter>Archivos de origen\ClassOGL</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CCamera.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,10 +131,11 @@
     <ClInclude Include="Includes\stb_image.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="CubeShader.fx">
-      <Filter>Archivos de origen\Shaders</Filter>
-    </FxCompile>
+    <ClInclude Include="Includes\CInputLayoutOGL.h">
+      <Filter>Archivos de encabezado\ClassOGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CCamera.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

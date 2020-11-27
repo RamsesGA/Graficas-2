@@ -91,13 +91,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\include;$(SolutionDir)IncludeOGL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\include;$(SolutionDir)IncludeOGL;$(SolutionDir)/Assimp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;d3d11.lib;d3dcompiler.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN32\lib-vc2019;$(SolutionDir)/Assimp/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;d3d11.lib;d3dcompiler.lib;dxguid.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -128,7 +128,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\include;$(SolutionDir)IncludeOGL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)IncludeOGL\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;d3d11.lib;d3dcompiler.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -154,12 +154,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CPPs\CCamera.cpp" />
     <ClCompile Include="CPPs\CGraphicApiDX.cpp" />
     <ClCompile Include="CPPs\CGraphicApiOGL.cpp" />
     <ClCompile Include="CPPs\glad.c" />
     <ClCompile Include="CPPs\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Includes\CCamera.h" />
     <ClInclude Include="Includes\CConstantBuffer.h" />
     <ClInclude Include="Includes\CConstantBufferDX.h" />
     <ClInclude Include="Includes\CConstantBufferOGL.h" />
@@ -171,6 +173,7 @@
     <ClInclude Include="Includes\CIndexBufferOGL.h" />
     <ClInclude Include="Includes\CInputLayout.h" />
     <ClInclude Include="Includes\CInputLayoutDX.h" />
+    <ClInclude Include="Includes\CInputLayoutOGL.h" />
     <ClInclude Include="Includes\CSamplerState.h" />
     <ClInclude Include="Includes\CSamplerStateDX.h" />
     <ClInclude Include="Includes\CSamplerStateOGL.h" />
@@ -184,11 +187,6 @@
     <ClInclude Include="Includes\CVertexBufferDX.h" />
     <ClInclude Include="Includes\CVertexBufferOGL.h" />
     <ClInclude Include="Includes\stb_image.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="CubeShader.fx">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS</EntryPointName>
-    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -42,6 +42,52 @@ HRESULT CompileShaderFromFile(const std::wstring& szFileName, const std::string&
     return S_OK;
 }
 
+bool AnalyzeVertexShaderDX(const std::wstring& _nameVS){
+
+    std::string bufferAnalyze;
+
+    for (unsigned int i = 0; i < _nameVS.size(); i++) {
+
+        bufferAnalyze += _nameVS[i];
+
+        if (('_' == bufferAnalyze[i]) &&
+            ("DX_" != bufferAnalyze)) {
+
+            return false;
+        }
+        else if (('_' == bufferAnalyze[i]) &&
+                ("DX_" == bufferAnalyze)) {
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool AnalyzePixelShaderDX(const std::wstring& _namePS) {
+
+    std::string bufferAnalyze;
+
+    for (unsigned int i = 0; i < _namePS.size(); i++) {
+
+        bufferAnalyze += _namePS[i];
+
+        if (('_' == bufferAnalyze[i]) &&
+            ("DX_" != bufferAnalyze)) {
+
+            return false;
+        }
+        else if (('_' == bufferAnalyze[i]) &&
+                ("DX_" == bufferAnalyze)) {
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 ///
 /// H E R E N C I A
 ///
@@ -94,8 +140,8 @@ bool CGraphicApiDX::InitDevice(HWND& _hWnd) {
 
     for (UINT driverTypeIndex = 0; driverTypeIndex < driverTypes.size(); driverTypeIndex++) {
 
-        hr = D3D11CreateDeviceAndSwapChain(NULL, driverTypes[driverTypeIndex],
-                                           NULL, createDeviceFlags, 
+        hr = D3D11CreateDeviceAndSwapChain(nullptr, driverTypes[driverTypeIndex],
+                                           nullptr, createDeviceFlags, 
                                            featureLevels.data(), featureLevels.size(),
                                            D3D11_SDK_VERSION, &sd, 
                                            &m_pSwapChain, &m_pd3dDevice,
@@ -138,7 +184,62 @@ bool CGraphicApiDX::InitDevice(HWND& _hWnd) {
 
                 m_pBackBuffer = backBuffer;
 
-                return true;
+                auto* depthStencil = new CTextureDX();
+
+                //Textura del depth y hago el depth
+                D3D11_TEXTURE2D_DESC textureDesc;
+                ZeroMemory(&textureDesc, sizeof(textureDesc));
+                textureDesc.Width = m_width;
+                textureDesc.Height = m_height;
+                textureDesc.MipLevels = 1;
+                textureDesc.ArraySize = 1;
+                textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+                textureDesc.SampleDesc.Count = 1;
+                textureDesc.SampleDesc.Quality = 0;
+                textureDesc.Usage = D3D11_USAGE_DEFAULT;
+                textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+                textureDesc.CPUAccessFlags = 0;
+                textureDesc.MiscFlags = 0;
+
+                ///Creamos la textura
+                hr = m_pd3dDevice->CreateTexture2D(&textureDesc, nullptr, &depthStencil->m_pTexture);
+
+                if (FAILED(hr)) {
+
+                    delete backBuffer;
+                    delete depthStencil;
+                    return false;
+                }
+                else {
+
+                    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilDesc;
+                    ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+                    depthStencilDesc.Format = textureDesc.Format;
+                    depthStencilDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+                    depthStencilDesc.Texture2D.MipSlice = 0;
+
+                    hr = m_pd3dDevice->CreateDepthStencilView(depthStencil->m_pTexture,
+                        &depthStencilDesc,
+                        &depthStencil->m_pDepthStencilView);
+
+                    ///Checamos que todo salga bien, si no mandamos un error
+                    if (FAILED(hr)) {
+
+                        delete backBuffer;
+                        delete depthStencil;
+                        return false;
+                    }
+                    else {
+
+                        m_pImmediateContext->OMSetRenderTargets(1,
+                            &backBuffer->m_pRenderTargetView,
+                            depthStencil->m_pDepthStencilView);
+
+                        m_pDepthStencil = depthStencil;
+
+                        return true;
+                    }
+                }
             }
         }
     }
@@ -167,6 +268,11 @@ CTexture* CGraphicApiDX::LoadTextureFromFile(const std::string _srcFile){
 CTexture* CGraphicApiDX::GetDefaultBackBuffer(){
 
     return m_pBackBuffer;
+}
+
+CTexture* CGraphicApiDX::GetDefaultDepthStencil(){
+
+    return m_pDepthStencil;
 }
 
 void CGraphicApiDX::UnbindOGL(){}
@@ -222,6 +328,15 @@ CShaders* CGraphicApiDX::CreateVertexAndPixelShader(const std::wstring& _nameVS,
     ///Generamos una variable auto
    ///para adaptar el tipo de dato que ocupamos
     auto shaders = new CShadersDX();
+
+    if (!(AnalyzeVertexShaderDX(_nameVS))) {
+
+        return nullptr;
+    }
+    if (!(AnalyzePixelShaderDX(_namePS))) {
+
+        return nullptr;
+    }
 
     ///Asignamos datos a las variables
     shaders->m_pPSBlob = NULL;
@@ -767,13 +882,13 @@ void CGraphicApiDX::SetShaderResourceView(std::vector <CTexture*>& _shaderResour
     }
 }
 
-void CGraphicApiDX::SetRenderTarget(CTexture& _renderTargetDX,
-    CTexture& _depthStencilDX) {
+void CGraphicApiDX::SetRenderTarget(CTexture* _renderTargetDX,
+    CTexture* _depthStencilDX) {
 
-    auto depthStencil = reinterpret_cast<CTextureDX&>(_depthStencilDX);
-    auto renderTarget = reinterpret_cast<CTextureDX&>(_renderTargetDX);
-    m_pImmediateContext->OMSetRenderTargets(1, &renderTarget.m_pRenderTargetView,
-        depthStencil.m_pDepthStencilView);
+    auto* depthStencil = reinterpret_cast<CTextureDX*>(_depthStencilDX);
+    auto* renderTarget = reinterpret_cast<CTextureDX*>(_renderTargetDX);
+    m_pImmediateContext->OMSetRenderTargets(1, &renderTarget->m_pRenderTargetView,
+        depthStencil->m_pDepthStencilView);
 }
 
 void CGraphicApiDX::SetDepthStencil(CTexture& _depthStencilDX,

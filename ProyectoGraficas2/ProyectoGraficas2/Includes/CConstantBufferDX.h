@@ -4,14 +4,13 @@
 
 class CConstantBufferDX : public CConstantBuffer {
 
-	protected:
+	public:
 		///
 		/// Miembros
 		/// 
 
 		ID3D11Buffer* m_pConstantBuffer;
 
-	public:
 		///
 		/// Métodos
 		/// 

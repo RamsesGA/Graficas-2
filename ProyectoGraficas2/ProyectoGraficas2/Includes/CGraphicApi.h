@@ -17,6 +17,7 @@ using TEXTURE_BIND_FLAG = enum
     TEXTURE_BIND_DEPTH_STENCIL = 0x40L,
     TEXTURE_BIND_UNORDERED_ACCESS = 0x80L,
 };
+
 /// <summary>
 /// Enum con todos los números
 /// con el tipo de formato
@@ -125,6 +126,7 @@ using TEXTURE_FORMAT = enum
     TEXTURE_FORMAT_BC7_UNORM = 98,
     TEXTURE_FORMAT_BC7_UNORM_SRGB = 99,
 };
+
 /// <summary>
 /// Enum con todas los números
 /// con el tipo de topología
@@ -138,6 +140,7 @@ using PRIMITIVE_TOPOLOGY = enum
     PRIMITIVE_TOPOLOGY_TRIANGLELIST = 4,
     PRIMITIVE_TOPOLOGY_TRIANGLESTRIP = 5,
 };
+
 /// <summary>
 /// Estructura con los datos
 /// para el vertex buffer
@@ -145,22 +148,6 @@ using PRIMITIVE_TOPOLOGY = enum
 struct SimpleVertex{
 
 	glm::vec4 Pos;
-	glm::vec2 Tex;
-};
-/// <summary>
-/// Estructura con los datos
-/// para la creación de una camara
-/// </summary>
-struct CameraDescriptor {
-
-    float s_width;
-    float s_height;
-    float s_near;
-    float s_far;
-    float s_foV;
-    glm::vec3 s_eye;
-    glm::vec3 s_lookAt;
-    glm::vec3 s_up;
 };
 
 /// <summary>
@@ -221,6 +208,8 @@ class CGraphicApi {
 
         virtual CTexture* GetDefaultBackBuffer() = 0;
 
+        virtual CTexture* GetDefaultDepthStencil() = 0;
+
         virtual void UnbindOGL() = 0;
 
         ///
@@ -259,6 +248,7 @@ class CGraphicApi {
         virtual CShaders* CreateVertexAndPixelShader(const std::wstring& _nameVS,
             const std::string& _entryPointVS, const std::wstring& _namePS,
             const std::string& _entryPointPS) = 0;
+
         /// <summary>
         /// Función para generar el
         /// vertex buffer
@@ -267,6 +257,7 @@ class CGraphicApi {
         /// <param name="_vertexBufferObject"></param>
         /// <returns></returns>
         virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertex) = 0;
+
         /// <summary>
         /// Función para generar el
         /// index buffer
@@ -275,6 +266,7 @@ class CGraphicApi {
         /// <param name="_indexBufferObject"></param>
         /// <returns></returns>
         virtual CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t> & _simpleIndex) = 0;
+
 		/// <summary>
         /// Función para generar los
         /// constant buffer
@@ -282,6 +274,7 @@ class CGraphicApi {
 		/// <param name="_bufferSize "></param>
 		/// <returns></returns>
 		virtual CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSize) = 0;
+
 		/// <summary>
         /// Función para generar lo siguiente:
         /// °ShaderResourceView
@@ -298,12 +291,14 @@ class CGraphicApi {
             const unsigned int _bindFlags ,
             TEXTURE_FORMAT _textureFormat ,
             const std::string _fileName ) = 0;
+
         /// <summary>
         /// Función para generar el
         /// sampler state
         /// </summary>
         /// <returns></returns>
         virtual CSamplerState* CreateSamplerState() = 0;
+
 		/// <summary>
         /// Función para generar el
         /// input layout
@@ -322,24 +317,28 @@ class CGraphicApi {
 		/// </summary>
 		/// <param name="_pixelShader "></param>
 		virtual void SetPixelShader(CShaders& _pixelShader ) = 0;
+
 		/// <summary>
         /// Función para guardar la
         /// información del vertex shader
 		/// </summary>
 		/// <param name="_vertexShader "></param>
 		virtual void SetVertexShader(CShaders& _vertexShader ) = 0;
+
 		/// <summary>
         /// Función para guardar la
         /// información del vertex buffer
 		/// </summary>
 		/// <param name="_vertexBuffer "></param>
 		virtual void SetVertexBuffer(CVertexBuffer& _vertexBuffer ) = 0;
+
 		/// <summary>
         /// Función para guardar la
         /// información del index buffer
 		/// </summary>
 		/// <param name="_indexBuffer "></param>
 		virtual void SetIndexBuffer(CIndexBuffer& _indexBuffer ) = 0;
+
 		/// <summary>
         /// Función para guardar la
         /// información de los constant buffers
@@ -351,6 +350,7 @@ class CGraphicApi {
             CConstantBuffer& _constantBuffer, 
             const unsigned int _startSlot , 
             const unsigned int _numBuffers) = 0;
+
         /// <summary>
         /// Función para guardar la
         /// información del sampler state
@@ -360,6 +360,7 @@ class CGraphicApi {
         virtual void SetSamplerState(const unsigned int _startSlot ,
             std::vector<CSamplerState*>& _samplerState,
             CTexture& _texture) = 0;
+
         /// <summary>
         /// Función para guardar la información
         /// del shader resource view
@@ -370,14 +371,16 @@ class CGraphicApi {
         virtual void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceView ,
             const unsigned int _startSlot ,
             const unsigned int _numViews ) = 0;
+
         /// <summary>
         /// Función para guardar la información
         /// del render target
         /// </summary>
         /// <param name="_renderTarget "></param>
         /// <param name="_depthStencil "></param>
-        virtual void SetRenderTarget(CTexture& _renderTarget ,
-            CTexture& _depthStencil ) = 0;
+        virtual void SetRenderTarget(CTexture* _renderTarget,
+            CTexture* _depthStencil ) = 0;
+
         /// <summary>
         /// Función para gaurdar la información
         /// del depth stencil
@@ -386,12 +389,14 @@ class CGraphicApi {
         /// <param name="_stencilRef "></param>
         virtual void SetDepthStencil(CTexture& _depthStencil ,
             const unsigned int _stencilRef ) = 0;
+
 		/// <summary>
         /// Función para guardar la
         /// información del input layout
 		/// </summary>
 		/// <param name="_vertexLayout "></param>
 		virtual void SetInputLayout(CInputLayout& _vertexLayout ) = 0;
+
         /// <summary>
         /// Función para guardar la
         /// información del viewport
@@ -401,18 +406,21 @@ class CGraphicApi {
         /// <param name="_heigth "></param>
         virtual void SetViewport(const unsigned int _numViewports ,
             const unsigned int _width , const unsigned int _heigth ) = 0;
+
         /// <summary>
         /// Función para guardar la información
         /// de la topología
         /// </summary>
         /// <param name="_topology "></param>
         virtual void SetPrimitiveTopology(const unsigned int _topology ) = 0;
+
         /// <summary>
         /// Función para mandar a llamar
         /// VSSetShader
         /// </summary>
         /// <param name="_vertexShader "></param>
         virtual void SetYourVS(CShaders& _vertexShader ) = 0;
+
         /// <summary>
         /// Función para mandar a llamar
         /// VSSetConstantBuffers
@@ -423,12 +431,14 @@ class CGraphicApi {
         virtual void SetYourVSConstantBuffers(CConstantBuffer* _constantBuffer ,
             const unsigned int _startSlot ,
             const unsigned int _numBuffers ) = 0;
+
         /// <summary>
         /// Función para mandar a llamar
         /// PSSetShader
         /// </summary>
         /// <param name="_pixelShader "></param>
         virtual void SetYourPS(CShaders& _pixelShader ) = 0;
+
         /// <summary>
         /// Función para mandar a llamar
         /// PSSetConstantBuffers
@@ -439,6 +449,7 @@ class CGraphicApi {
         virtual void SetYourPSConstantBuffers(CConstantBuffer* _constantBuffer ,
             const unsigned int _startSlot ,
             const unsigned int _numBuffers ) = 0;
+
         /// <summary>
         /// Función para mandar a llamar
         /// PSSetSamplers
@@ -449,6 +460,7 @@ class CGraphicApi {
         virtual void SetYourPSSampler(CSamplerState& _sampler ,
             const unsigned int _startSlot ,
             const unsigned int _numSamplers ) = 0;
+
         /// <summary>
         /// Función para mandar a llamar program
         /// y link para OGL

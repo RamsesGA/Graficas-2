@@ -77,6 +77,8 @@ class CGraphicApiDX : public CGraphicApi{
 
 		CTexture* GetDefaultBackBuffer()override;
 
+		CTexture* GetDefaultDepthStencil()override;
+
 		void UnbindOGL()override;
 
 		///
@@ -148,8 +150,8 @@ class CGraphicApiDX : public CGraphicApi{
 			const unsigned int _startSlot,
 			const unsigned int _numViews)override;
 
-		void SetRenderTarget(CTexture& _renderTarget,
-			CTexture& _depthStencil)override;
+		void SetRenderTarget(CTexture* _renderTarget,
+			CTexture* _depthStencil)override;
 
 		void SetDepthStencil(CTexture& _depthStencil,
 			const unsigned int _stencilRef)override;
