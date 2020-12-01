@@ -208,8 +208,11 @@ void CCamera::Move(WPARAM _param){
 
 void CCamera::MouseRotation(){
 
+	glm::vec2 firstPos;
 	glm::vec2 secondPos;
-	float speedRot = 0.0020f;
+
+	float speedRot = 0.020f;
+	float speedAngule = 1.0f;
 
 	glm::mat4x4 Yaw =
 	{
@@ -227,56 +230,70 @@ void CCamera::MouseRotation(){
 		0,0,0,1
 	};
 
-	POINT temp;
-	GetCursorPos(&temp);
+	POINT Temp;
+	GetCursorPos(&Temp);
 
-	secondPos.x = temp.x;
-	secondPos.y = temp.y;
+	firstPos.x = Temp.x;
+	secondPos.y = Temp.y;
 
-	if (m_originalMousePos.x < m_originalMousePos.x) {
+	if (firstPos.x < m_originalMousePos.x) {
 
-		Yaw =
-		{
-			cosf(speedRot),		0,	sinf(speedRot),	0,
-			0,					1,	0,				0,
-			-sinf(speedRot),	0,	cosf(speedRot),	0,
-			0,					0,	0,				1
-		};
+		m_cameraDesc.s_lookAt -= m_right * speedRot;
+		m_cameraDesc.s_up = m_up;
+
+		CreateView();
 	}
 
-	if (m_originalMousePos.x > m_originalMousePos.x) {
+	if (firstPos.x > m_originalMousePos.x) {
 
-		Yaw =
-		{
-			cosf(-speedRot),		0,	sinf(-speedRot),	0,
-			0,						1,	0,					0,
-			-sinf(-speedRot),		0,	cosf(-speedRot),	0,
-			0,						0,	0,					1
-		};
+		m_cameraDesc.s_lookAt += m_right * speedRot;
+		m_cameraDesc.s_up = m_up;
+		CreateView();
 	}
 
-	if (secondPos.y < m_originalMousePos.y) {
+	if (secondPos.y < m_originalMousePos.y && m_angule < m_maxAngule) {
 
-		Pitch =
-		{
-			1,	0,				0,					0,
-			0,	cosf(speedRot),	-sinf(speedRot),	0,
-			0,	sinf(speedRot),	cosf(speedRot),		0,
-			0,	0,				0,					1
-		};
+		m_angule += speedAngule;
+
+		if (m_angule > m_maxAngule) {
+
+			m_angule = m_maxAngule;
+		}
+		else {
+
+			Pitch =
+			{
+				1,	0,									0,										0,
+				0,	cosf(speedAngule * 3.141516 / 180),	-sinf(speedAngule * 3.141516 / 180),	0,
+				0,	sinf(speedAngule * 3.141516 / 180),	cosf(speedAngule * 3.141516 / 180),		0,
+				0,	0,									0,										1
+			};
+		}
+
 	}
 
-	if (secondPos.y > m_originalMousePos.y) {
+	if (secondPos.y > m_originalMousePos.y && m_angule > -m_maxAngule) {
 
-		Pitch =
-		{
-			1,	0,					0,					0,
-			0,	cosf(-speedRot),	-sinf(-speedRot),	0,
-			0,	sinf(-speedRot),	cosf(-speedRot),	0,
-			0,	0,					0,					1
-		};
+		m_angule -= speedAngule;
+
+		if (m_angule < -m_maxAngule) {
+
+			m_angule = -m_maxAngule;
+		}
+		else {
+
+			Pitch =
+			{
+				1,	0,										0,										0,
+				0,	cosf(-speedAngule * 3.141516 / 180),	-sinf(-speedAngule * 3.141516 / 180),	0,
+				0,	sinf(-speedAngule * 3.141516 / 180),	cosf(-speedAngule * 3.141516 / 180),	0,
+				0,	0,										0,										1
+			};
+		}
+
 	}
 
+	SetCursorPos(m_originalMousePos.x, m_originalMousePos.y);
 	m_view *= Yaw;
 	UpdateViewMatrix();
 
@@ -295,6 +312,7 @@ void CCamera::CreateView(){
 	m_front = glm::normalize(m_front);
 
 	m_right = glm::cross(m_cameraDesc.s_up, m_front);
+	m_right = { m_right.x, 0, m_right.z };
 	m_right = glm::normalize(m_right);
 
 	m_up = glm::cross(m_front, m_right);
@@ -318,18 +336,12 @@ void CCamera::CreateView(){
 
 	m_position *= m_axis;
 	m_view = m_position;
-
-	//m_view = glm::lookAtLH(m_cameraDesc.s_eye,
-	//	m_cameraDesc.s_lookAt,
-	//	m_cameraDesc.s_up);
 }
 
 void CCamera::CreateProjectionMatrix(){
 
 	m_projection = glm::perspectiveFovLH(m_cameraDesc.s_foV, m_cameraDesc.s_width,
 		m_cameraDesc.s_height, m_cameraDesc.s_near, m_cameraDesc.s_far);
-
-	m_projection = glm::transpose(m_projection);
 }
 
 void CCamera::SetWidht(float _width){

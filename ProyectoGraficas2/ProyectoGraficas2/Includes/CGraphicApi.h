@@ -195,7 +195,7 @@ class CGraphicApi {
 		///Destructor
 		~CGraphicApi() = default;
 
-        virtual bool InitDevice(HWND& _hWnd) = 0;
+        virtual bool InitDevice(HWND _hWnd) = 0;
 
         virtual void DrawIndex(unsigned int _indexCount,
             unsigned int _startIndexLocation,
@@ -204,7 +204,8 @@ class CGraphicApi {
         virtual void SwapChainPresent(unsigned int _syncInterval ,
             unsigned int _flags ) = 0;
 
-        virtual CTexture* LoadTextureFromFile(const std::string _srcFile) = 0;
+        virtual CTexture* LoadTextureFromFile(std::string _srcFile,
+            std::string _directory) = 0;
 
         virtual CTexture* GetDefaultBackBuffer() = 0;
 
@@ -223,9 +224,9 @@ class CGraphicApi {
         /// C L E A R´s
         /// 
 
-        virtual CTexture* ClearYourRenderTargetView(CTexture* _renderTarget ) = 0;
+        virtual void ClearYourRenderTargetView(CTexture* _renderTarget ) = 0;
 
-        virtual CTexture* ClearYourDepthStencilView(CTexture* _depthStencil ) = 0;
+        virtual void ClearYourDepthStencilView(CTexture* _depthStencil ) = 0;
 
         virtual void CleanUpDevices() = 0;
 

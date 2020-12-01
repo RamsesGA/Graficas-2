@@ -32,6 +32,9 @@ class CCamera{
 
         bool m_clickPressed = false;
 
+        float m_angule;
+        float m_maxAngule = 2160.0f;
+
         glm::vec2 m_originalMousePos;
 
         glm::vec3 m_up;

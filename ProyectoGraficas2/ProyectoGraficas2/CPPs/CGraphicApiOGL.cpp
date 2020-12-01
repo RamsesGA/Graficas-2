@@ -91,7 +91,7 @@ bool AnalyzePixelShaderOGL(const std::wstring& _namePS) {
 /// H E R E N C I A
 ///
 
-bool CGraphicApiOGL::InitDevice(HWND& _hWnd){
+bool CGraphicApiOGL::InitDevice(HWND _hWnd){
 
 	PIXELFORMATDESCRIPTOR pfd = {
 
@@ -113,6 +113,8 @@ bool CGraphicApiOGL::InitDevice(HWND& _hWnd){
 		0, 0, 0
 	};
 
+	m_hWnd = _hWnd;
+
 	m_HandleToDC = GetDC(_hWnd);
 
 	int pixelFormat = ChoosePixelFormat(m_HandleToDC, &pfd);
@@ -127,30 +129,28 @@ bool CGraphicApiOGL::InitDevice(HWND& _hWnd){
 
 		return false;
 	}
-	else {
 
-		RECT rc;
+	RECT rc;
 
-		GetWindowRect(_hWnd, &rc);
+	GetClientRect(_hWnd, &rc);
 
-		m_width = rc.right - rc.left;
-		m_height = rc.bottom - rc.top;
+	m_width = rc.right - rc.left;
+	m_height = rc.bottom - rc.top;
 
-		SetViewport(1, m_width, m_height);
+	SetViewport(1, m_width, m_height);
 
-		glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		GLuint detectError = glGetError();
+	GLuint detectError = glGetError();
 
-		if (detectError != 0) {
+	if (detectError != 0) {
 
-			exit(1);
-		}
-
-		return true;
+		exit(1);
 	}
+
+	return true;
 }
 
 void CGraphicApiOGL::DrawIndex(unsigned int _indexCount , 
@@ -168,10 +168,14 @@ void CGraphicApiOGL::DrawIndex(unsigned int _indexCount ,
 	}
 }
 
-void CGraphicApiOGL::SwapChainPresent(unsigned int _syncInterval , 
-	unsigned int _flags ){}
+void CGraphicApiOGL::SwapChainPresent(unsigned int _syncInterval,
+	unsigned int _flags) {
 
-CTexture* CGraphicApiOGL::LoadTextureFromFile(const std::string _srcFile){return nullptr;}
+	SwapBuffers(m_HandleToDC);
+}
+
+CTexture* CGraphicApiOGL::LoadTextureFromFile(std::string _srcFile,
+	std::string _directory){return nullptr;}
 
 CTexture* CGraphicApiOGL::GetDefaultBackBuffer(){return nullptr;}
 
@@ -208,7 +212,8 @@ void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcData ,
 /// C L E A R´s
 /// 
 
-CTexture* CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){
+///TODO: Pedir de parámetro el color
+void CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){
 	
 	glClearColor(0.0f, 0.125f,
 		0.3f, 1.0f);
@@ -220,11 +225,9 @@ CTexture* CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){
 
 		exit(1);
 	}
-
-	return _renderTarget;
 }
 
-CTexture* CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
+void CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -234,8 +237,6 @@ CTexture* CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
 
 		exit(1);
 	}
-
-	return _depthStencil;
 }
 
 void CGraphicApiOGL::CleanUpDevices(){}
@@ -380,7 +381,7 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex
 	auto VBO = new CVertexBufferOGL();
 
 	///Guardamos el tamaño del buffer
-	VBO->m_vertexBufferSize = sizeof(SimpleVertex);
+	VBO->m_vertexBufferSize = sizeof(SimpleVertex) * _simpleVertex.size();
 
 	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
 	glGenBuffers(1, &VBO->m_vertexBufferObject);
@@ -389,7 +390,8 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex
 	glBindBuffer(GL_ARRAY_BUFFER, VBO->m_vertexBufferObject);
 
 	///Copiamos los datos en el objeto de búfer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(SimpleVertex) * _simpleVertex.size(), 
+	glBufferData(GL_ARRAY_BUFFER, 
+		VBO->m_vertexBufferSize,
 		_simpleVertex.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -408,7 +410,7 @@ CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _si
 
 	auto EBO = new CIndexBufferOGL();
 
-	EBO->m_indexBufferSize = sizeof(_simpleIndex);
+	EBO->m_indexBufferSize = sizeof(uint32_t) * _simpleIndex.size();
 
 	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
 	glGenBuffers(1, &EBO->m_indexBufferObject);
@@ -417,7 +419,9 @@ CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _si
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO->m_indexBufferObject);
 
 	///Copiamos los datos en el objeto de búfer
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_simpleIndex), &_simpleIndex, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+		EBO->m_indexBufferSize, _simpleIndex.data(), 
+		GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -644,7 +648,7 @@ void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer) {
 
 	auto vertex = reinterpret_cast<CVertexBufferOGL&>(_vertexBuffer);
 
-	glBindVertexBuffer(0, vertex.m_vertexBufferObject, 0, vertex.m_vertexBufferSize);
+	glBindVertexBuffer(0, vertex.m_vertexBufferObject, 0, sizeof(SimpleVertex));
 
 	GLuint detectError = glGetError();
 
@@ -821,23 +825,50 @@ void CGraphicApiOGL::SetShaders(CShaders& _shaders){
 	}
 }
 
-///
-///  F U N C I O N E S 
-///  Q U E
-///  N O
-///  U S A
-///  O G L
-/// 
-
-void CGraphicApiOGL::SetYourVS(CShaders& _vertexShader ){}
-
 void CGraphicApiOGL::SetYourVSConstantBuffers(CConstantBuffer* _constantBuffer , 
-	const unsigned int _startSlot , const unsigned int _numBuffers ){}
+	const unsigned int _startSlot , const unsigned int _numBuffers ){
 
-void CGraphicApiOGL::SetYourPS(CShaders& _pixelShader ){}
+	auto* constantBuffer = reinterpret_cast<CConstantBufferOGL*>(_constantBuffer);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 
+		_startSlot, 
+		constantBuffer->m_uniformBufferObject);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+}
 
 void CGraphicApiOGL::SetYourPSConstantBuffers(CConstantBuffer* _constantBuffer , 
-	const unsigned int _startSlot , const unsigned int _numBuffers ){}
+	const unsigned int _startSlot , const unsigned int _numBuffers ){
+
+	auto* constantBuffer = reinterpret_cast<CConstantBufferOGL*>(_constantBuffer);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER,
+		_startSlot,
+		constantBuffer->m_uniformBufferObject);
+
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		exit(1);
+	}
+}
 
 void CGraphicApiOGL::SetYourPSSampler(CSamplerState& _sampler , 
 	const unsigned int _startSlot , const unsigned int _numSamplers ){}
+
+
+///
+/// N O
+/// T O C A R
+/// A B A N D O N A D O S
+/// 
+
+void CGraphicApiOGL::SetYourVS(CShaders& _vertexShader) {}
+
+void CGraphicApiOGL::SetYourPS(CShaders& _pixelShader) {}

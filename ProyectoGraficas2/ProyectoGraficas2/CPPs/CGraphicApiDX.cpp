@@ -92,7 +92,7 @@ bool AnalyzePixelShaderDX(const std::wstring& _namePS) {
 /// H E R E N C I A
 ///
 
-bool CGraphicApiDX::InitDevice(HWND& _hWnd) {
+bool CGraphicApiDX::InitDevice(HWND _hWnd) {
 
     HRESULT hr = S_OK;
 
@@ -259,7 +259,8 @@ void CGraphicApiDX::SwapChainPresent(unsigned int _syncIntervalDX,
     m_pSwapChain->Present(_syncIntervalDX, _flagsDX);
 }
 
-CTexture* CGraphicApiDX::LoadTextureFromFile(const std::string _srcFile){
+CTexture* CGraphicApiDX::LoadTextureFromFile(std::string _srcFile, 
+    std::string _directory){
 
     HRESULT hr = S_OK;
     return nullptr;
@@ -294,25 +295,21 @@ void CGraphicApiDX::UpdateConstantBuffer(const void* _srcData,
 /// C L E A R´s
 /// 
 
-CTexture* CGraphicApiDX::ClearYourRenderTargetView(CTexture* _renderTargetDX){
+void CGraphicApiDX::ClearYourRenderTargetView(CTexture* _renderTargetDX){
 
     float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
     auto renderTarget = reinterpret_cast<CTextureDX*>(_renderTargetDX);
 
     m_pImmediateContext->ClearRenderTargetView(renderTarget->m_pRenderTargetView,
         ClearColor);
-
-    return renderTarget;
 }
 
-CTexture* CGraphicApiDX::ClearYourDepthStencilView(CTexture* _depthStencilDX){
+void CGraphicApiDX::ClearYourDepthStencilView(CTexture* _depthStencilDX){
 
     auto depthStencil = reinterpret_cast<CTextureDX*>(_depthStencilDX);
 
     m_pImmediateContext->ClearDepthStencilView(depthStencil->m_pDepthStencilView,
         D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-    return depthStencil;
 }
 
 void CGraphicApiDX::CleanUpDevices(){}

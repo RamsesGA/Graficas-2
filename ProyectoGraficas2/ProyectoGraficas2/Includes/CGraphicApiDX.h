@@ -64,7 +64,7 @@ class CGraphicApiDX : public CGraphicApi{
 		/// H E R E N C I A
 		/// 
 
-		bool InitDevice(HWND& _hWnd)override;
+		bool InitDevice(HWND _hWnd)override;
 
 		void DrawIndex(unsigned int _indexCount,
 			unsigned int _startIndexLocation,
@@ -73,7 +73,8 @@ class CGraphicApiDX : public CGraphicApi{
 		void SwapChainPresent(unsigned int _syncInterval,
 			unsigned int _flags)override;
 
-		CTexture* LoadTextureFromFile(const std::string _srcFile)override;
+		CTexture* LoadTextureFromFile(std::string _srcFile,
+			std::string _directory)override;
 
 		CTexture* GetDefaultBackBuffer()override;
 
@@ -94,9 +95,9 @@ class CGraphicApiDX : public CGraphicApi{
 		/// 
 
 
-		CTexture* ClearYourRenderTargetView(CTexture* _renderTarget)override;
+		void ClearYourRenderTargetView(CTexture* _renderTarget)override;
 
-		CTexture* ClearYourDepthStencilView(CTexture* _depthStencil)override;
+		void ClearYourDepthStencilView(CTexture* _depthStencil)override;
 
 		void CleanUpDevices()override;
 

@@ -9,8 +9,6 @@
 #include "CIndexBuffer.h"
 
 #include "glad/glad.h"
-#include <GLFW/glfw3.h>
-
 
 class CGraphicApiOGL : public CGraphicApi {
 
@@ -19,6 +17,8 @@ class CGraphicApiOGL : public CGraphicApi {
 		/// Miembros
 		/// 
 
+
+		HWND m_hWnd;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -47,7 +47,7 @@ class CGraphicApiOGL : public CGraphicApi {
 		/// H E R E N C I A
 		/// 
 		
-		bool InitDevice(HWND& _hWnd)override;
+		bool InitDevice(HWND _hWnd)override;
 		
 		void DrawIndex(unsigned int _indexCount ,
 			unsigned int _startIndexLocation ,
@@ -56,7 +56,8 @@ class CGraphicApiOGL : public CGraphicApi {
 		void SwapChainPresent(unsigned int _syncInterval ,
 			unsigned int _flags )override;
 		
-		CTexture* LoadTextureFromFile(const std::string _srcFile)override;
+		CTexture* LoadTextureFromFile(std::string _srcFile,
+			std::string _directory)override;
 		
 		CTexture* GetDefaultBackBuffer()override;
 
@@ -77,9 +78,9 @@ class CGraphicApiOGL : public CGraphicApi {
 		/// 
 
 		
-		CTexture* ClearYourRenderTargetView(CTexture* _renderTarget )override;
+		void ClearYourRenderTargetView(CTexture* _renderTarget )override;
 		
-		CTexture* ClearYourDepthStencilView(CTexture* _depthStencil )override;
+		void ClearYourDepthStencilView(CTexture* _depthStencil )override;
 		
 		void CleanUpDevices()override;
 

@@ -44,8 +44,8 @@ CCamera g_mainCamera;
 /// A P I
 /// 
 
-CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
-//CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
+//CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
+CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
 
 CTexture* g_pRenderTargetView = nullptr;
 CTexture* g_pDepthStencil = nullptr;
@@ -188,7 +188,8 @@ void SetWndClassEx(WNDCLASSEX& _wcex, _In_ HINSTANCE& _hInstance) {
 /// <returns></returns>
 HWND& CreateNewWindow() {
 
-    HWND hWnd = CreateWindow(
+    HWND hWnd = CreateWindowEx(
+        0,
         ///g_szWindowClass: the name of the application
         g_szWindowClass,
         ///g_szTitle: the text that appears in the title bar
@@ -200,13 +201,13 @@ HWND& CreateNewWindow() {
         ///initial size (width, height)
         g_width, g_height,
         ///NULL: the parent of this window
-        NULL,
+        nullptr,
         ///NULL: this application does not have a menu bar
-        NULL,
+        nullptr,
         // _hInstance: the first parameter from WinMain
-        g_hInst,
+        ::GetModuleHandle(nullptr),
         ///NULL: not used in this application
-        NULL
+        nullptr
     );
 
     return hWnd;
@@ -303,14 +304,22 @@ void InitCamera() {
 void Update() {
 
     ConstantBuffer1 meshData;
+
+    ///DX
+    //meshData.mProjection = glm::transpose(g_mainCamera.GetProjection());
+    //meshData.mView = g_mainCamera.GetView();
+    
+    ///OGL
     meshData.mProjection = g_mainCamera.GetProjection();
-    meshData.mView = g_mainCamera.GetView();
+    meshData.mView = glm::transpose(g_mainCamera.GetView());
+
     g_pGraphicApi->UpdateConstantBuffer
     (&meshData, *g_pConstantBuffer1);
 
     ConstantBuffer2 cb;
-    cb.mWorld = glm::transpose(g_world);
+    cb.mWorld = g_world;
     cb.vMeshColor = g_vMeshColor;
+
     g_pGraphicApi->UpdateConstantBuffer(&cb, *g_pConstantBuffer2);
 }
 
@@ -319,6 +328,9 @@ void Update() {
 /// información para la pantalla
 /// </summary>
 void Render() {
+    
+    ///Guardamos los render targets
+    g_pGraphicApi->SetRenderTarget(g_pRenderTargetView, g_pDepthStencil);
 
     ///Guardamos un viewport
     g_pGraphicApi->SetViewport(1, g_width, g_height);
@@ -326,16 +338,22 @@ void Render() {
     ///
     /// Clear the back buffer
     ///
-    g_pRenderTargetView = g_pGraphicApi->ClearYourRenderTargetView(g_pRenderTargetView);
+    g_pGraphicApi->ClearYourRenderTargetView(g_pRenderTargetView);
 
     ///
     /// Clear the depth buffer to 1.0 (max depth)
     ///
-    g_pDepthStencil = g_pGraphicApi->ClearYourDepthStencilView(g_pDepthStencil);
+    g_pGraphicApi->ClearYourDepthStencilView(g_pDepthStencil);
 
-    ///
-    /// Render the cube
-    ///
+    ///Guardamos el input layout
+    g_pGraphicApi->SetInputLayout(*g_pVertexLayout);
+    ///Guardamos el vertex buffer
+    g_pGraphicApi->SetVertexBuffer(*g_pVertexBuffer);
+    ///Guardamos el index buffer
+    g_pGraphicApi->SetIndexBuffer(*g_pIndexBuffer);
+    ///Guardamos la topología
+    g_pGraphicApi->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
     g_pGraphicApi->SetShaders(*g_pBothShaders);
     g_pGraphicApi->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
     g_pGraphicApi->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
@@ -353,7 +371,7 @@ void Render() {
 /// Función donde generamos el proyecto
 /// </summary>
 /// <param name="_hWnd"></param>
-void Proyect(HWND _hWnd) {
+void CreateProject(HWND _hWnd) {
 
     ///Mandamos la ventana a la API
     g_pGraphicApi->InitDevice(_hWnd);
@@ -418,23 +436,7 @@ void Proyect(HWND _hWnd) {
     if (nullptr == g_pConstantBuffer2) {
 
         exit(1);
-    }
-
-    ///
-    /// F I R S T
-    /// S E T´s
-    /// 
-    
-    ///Guardamos el input layout
-    g_pGraphicApi->SetInputLayout(*g_pVertexLayout);
-    ///Guardamos los render targets
-    g_pGraphicApi->SetRenderTarget(g_pRenderTargetView, g_pDepthStencil);
-    ///Guardamos el vertex buffer
-    g_pGraphicApi->SetVertexBuffer(*g_pVertexBuffer);
-    ///Guardamos el index buffer
-    g_pGraphicApi->SetIndexBuffer(*g_pIndexBuffer);
-    ///Guardamos la topología
-    g_pGraphicApi->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    }  
 }
 
 ///
@@ -482,29 +484,27 @@ int CALLBACK WinMain(
     }
 
     ///hWnd: the value returned from CreateWindow
-    ///_nCmdShow: the fourth parameter from WinMain
-    ShowWindow(hWnd, _nCmdShow);
-
-    Proyect(hWnd);
+    ShowWindow(hWnd, SW_SHOW);
 
     ///Actualizamos la ventana
-    UpdateWindow(hWnd);
+    //UpdateWindow(hWnd);
+
+    ///Función para 
+    CreateProject(hWnd);
 
     ///Main message loop:
     MSG msg = { 0 };
     while (WM_QUIT != msg.message){
 
-        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)){
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        else{
 
-            Update();
+        Update();
 
-            Render();
-        }
+        Render();
     }
     return (int)msg.wParam;
 }
