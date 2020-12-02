@@ -25,12 +25,6 @@
     <Filter Include="Archivos de encabezado\ClassOGL">
       <UniqueIdentifier>{e6252b26-8e37-4eba-8268-ebe3a7ffd2a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Archivos de origen\ClassDX">
-      <UniqueIdentifier>{ab59c20c-4cd4-4c55-9ef7-19db7f709db6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Archivos de origen\ClassOGL">
-      <UniqueIdentifier>{0b535766-d081-4b51-bffd-9b80b21e2af2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Archivos de origen\Shaders">
       <UniqueIdentifier>{fe4a6564-76a7-4275-807c-ac37b80ec8c9}</UniqueIdentifier>
     </Filter>
@@ -40,6 +34,9 @@
     <Filter Include="Archivos de origen\LoadingModels">
       <UniqueIdentifier>{9e86956c-bf8b-43e1-a153-fe922992c410}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de origen\GraphicApi">
+      <UniqueIdentifier>{a617111c-c17f-4587-ad58-2406d7f1c883}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPPs\Main.cpp">
@@ -47,12 +44,6 @@
     </ClCompile>
     <ClCompile Include="CPPs\glad.c">
       <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CGraphicApiDX.cpp">
-      <Filter>Archivos de origen\ClassDX</Filter>
-    </ClCompile>
-    <ClCompile Include="CPPs\CGraphicApiOGL.cpp">
-      <Filter>Archivos de origen\ClassOGL</Filter>
     </ClCompile>
     <ClCompile Include="CPPs\CCamera.cpp">
       <Filter>Archivos de origen</Filter>
@@ -63,16 +54,16 @@
     <ClCompile Include="CPPs\CMesh.cpp">
       <Filter>Archivos de origen\LoadingModels</Filter>
     </ClCompile>
+    <ClCompile Include="CPPs\CGraphicApiOGL.cpp">
+      <Filter>Archivos de origen\GraphicApi</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPs\CGraphicApiDX.cpp">
+      <Filter>Archivos de origen\GraphicApi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\CGraphicApi.h">
       <Filter>Archivos de encabezado\GraphicApi</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CGraphicApiDX.h">
-      <Filter>Archivos de encabezado\ClassDX</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\CGraphicApiOGL.h">
-      <Filter>Archivos de encabezado\ClassOGL</Filter>
     </ClInclude>
     <ClInclude Include="Includes\CConstantBuffer.h">
       <Filter>Archivos de encabezado\Class</Filter>
@@ -148,6 +139,15 @@
     </ClInclude>
     <ClInclude Include="Includes\CMesh.h">
       <Filter>Archivos de encabezado\LoadingModels</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\Structures.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CGraphicApiOGL.h">
+      <Filter>Archivos de encabezado\GraphicApi</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\CGraphicApiDX.h">
+      <Filter>Archivos de encabezado\GraphicApi</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

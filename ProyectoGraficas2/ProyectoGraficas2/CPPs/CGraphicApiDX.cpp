@@ -6,6 +6,7 @@
 #include "..\Includes\CShadersDX.h"
 #include "..\Includes\CVertexBufferDX.h"
 #include "..\Includes\CIndexBufferDX.h"
+#include "..\Includes\stb_image.h"
 
 
 #include <iostream>
@@ -87,6 +88,26 @@ bool AnalyzePixelShaderDX(const std::wstring& _namePS) {
 
     return false;
 }
+
+///
+/// D E S T R U C T O R
+/// 
+
+CGraphicApiDX::~CGraphicApiDX(){
+
+    ///Liberar mis miembros del API
+    /// (SON LOS QUE TENGO DOMINIO PROPIO)
+    delete m_pd3dDevice;
+
+    delete m_pSwapChain;
+    
+    delete m_pImmediateContext;
+    
+    delete m_pDepthStencil;
+    
+    delete m_pBackBuffer;
+}
+
 
 ///
 /// H E R E N C I A
@@ -259,11 +280,86 @@ void CGraphicApiDX::SwapChainPresent(unsigned int _syncIntervalDX,
     m_pSwapChain->Present(_syncIntervalDX, _flagsDX);
 }
 
-CTexture* CGraphicApiDX::LoadTextureFromFile(std::string _srcFile, 
-    std::string _directory){
+CTexture* CGraphicApiDX::LoadTextureFromFile(std::string _srcFile){
 
-    HRESULT hr = S_OK;
-    return nullptr;
+    int width;
+    int height;
+    int components;
+
+    unsigned char* data = stbi_load(_srcFile.c_str(), 
+        &width, &height, &components, 0);
+
+    if (!data){
+
+        return nullptr;
+    }
+    else{
+
+        auto* texture = new CTextureDX();
+
+        D3D11_TEXTURE2D_DESC desc;
+        ZeroMemory(&desc, sizeof(desc));
+        desc.Width = width;
+        desc.Height = height;
+        desc.MipLevels = 1;
+        desc.ArraySize = 1;
+        desc.SampleDesc.Count = 1;
+        desc.SampleDesc.Quality = 0;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.MiscFlags = 0;
+
+        if (1 == components){
+
+            desc.Format = DXGI_FORMAT_R16_FLOAT;
+        }
+        else if (2 == components){
+
+            desc.Format = DXGI_FORMAT_R16G16_FLOAT;
+        }
+        else if (3 == components){
+
+            desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+        }
+        else if (4 == components){
+
+            desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+        }
+
+        //Texture data
+        D3D11_SUBRESOURCE_DATA initData;
+        ZeroMemory(&initData, sizeof(initData));
+        initData.pSysMem = data;
+        initData.SysMemPitch = 1;
+
+        if (FAILED(m_pd3dDevice->CreateTexture2D(&desc,
+            &initData,
+            &texture->m_pTexture))){
+
+            delete texture;
+            stbi_image_free(data);
+            return nullptr;
+        }
+
+        //Shader resource data
+        D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+        ZeroMemory(&viewDesc, sizeof(viewDesc));
+        viewDesc.Format = desc.Format;
+        viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        viewDesc.Texture2D.MostDetailedMip = 0;
+        viewDesc.Texture2D.MipLevels = 1;
+
+        if (FAILED(m_pd3dDevice->CreateShaderResourceView(texture->m_pTexture,
+            &viewDesc,
+            &texture->m_pShaderResourceView))){
+
+            delete texture;
+            stbi_image_free(data);
+            return nullptr;
+        }
+
+        return texture;
+    }
 }
 
 CTexture* CGraphicApiDX::GetDefaultBackBuffer(){
@@ -390,7 +486,8 @@ CShaders* CGraphicApiDX::CreateVertexAndPixelShader(const std::wstring& _nameVS,
     return shaders;
 }
 
-CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertex){
+CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const void* _data,
+    const unsigned int _size){
 
     ///Generamos una variable auto
     ///para adaptar el tipo de dato que ocupamos
@@ -399,37 +496,58 @@ CVertexBuffer* CGraphicApiDX::CreateVertexBuffer(const std::vector<SimpleVertex>
     ///Asignamos datos a la variable
     HRESULT hr = S_OK;
 
-    ///Rellenamos el descriptor de buffer
-    CD3D11_BUFFER_DESC bd(_simpleVertex.size() * sizeof(SimpleVertex),
-        D3D11_BIND_VERTEX_BUFFER);
+    if (0 != _size) {
 
-    ///Generamos una variable descriptor
-    D3D11_SUBRESOURCE_DATA InitData;
+        ///Rellenamos el descriptor de buffer
+        CD3D11_BUFFER_DESC bd(_size, D3D11_BIND_VERTEX_BUFFER);
 
-    ///Limpiamos la memoria y dejamos
-    ///definido todo en 0
-    ZeroMemory(&InitData, sizeof(InitData));
+        if (nullptr != _data) {
 
-    ///Asignamos datos a las variables
-    InitData.pSysMem = _simpleVertex.data();
+            ///Generamos una variable descriptor
+            D3D11_SUBRESOURCE_DATA InitData;
 
-    ///Creamos el buffer
-    hr = m_pd3dDevice->CreateBuffer(&bd, &InitData,
-        &VB->m_pVertexBuffer);
+            ///Limpiamos la memoria y dejamos
+            ///definido todo en 0
+            ZeroMemory(&InitData, sizeof(InitData));
 
-    ///Finalmente regresamos el dato en caso
-    ///de no obtener un error
-    if (FAILED(hr)) {
+            ///Asignamos datos a las variables
+            InitData.pSysMem = _data;
 
-        return nullptr;
+            ///Creamos el buffer
+            hr = m_pd3dDevice->CreateBuffer(&bd, &InitData,
+                &VB->m_pVertexBuffer);
+
+            if (FAILED(hr)) {
+
+                return nullptr;
+            }
+            else {
+
+                return VB;
+            }
+        }
+        else {
+
+            hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &VB->m_pVertexBuffer);
+
+            if (FAILED(hr)) {
+
+                return nullptr;
+            }
+            else {
+
+                return VB;
+            }
+        }
     }
     else {
 
-        return VB;
+        return nullptr;
     }
 }
 
-CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndex){
+CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const void* _data,
+    const unsigned int _size){
 
     ///Generamos una variable auto
     ///para adaptar el tipo de dato que ocupamos
@@ -438,38 +556,55 @@ CIndexBuffer* CGraphicApiDX::CreateIndexBuffer(const std::vector<uint32_t>& _sim
     ///Asignamos datos a la variable
     HRESULT hr = S_OK;
 
-    ///Rellenamos el descriptor de buffer
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(uint32_t) * _simpleIndex.size();
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    bd.MiscFlags = 0;
+    if (0 != _size) {
 
-    ///Generamos una variable descriptor
-    D3D11_SUBRESOURCE_DATA InitData;
-    ///Limpiamos la memoria y dejamos
-    ///definido todo en 0
-    ZeroMemory(&InitData, sizeof(InitData));
-    ///Asignamos datos a las variables
-    InitData.pSysMem = &_simpleIndex[0];
-    InitData.SysMemPitch = 0;
-    InitData.SysMemSlicePitch = 0;
+        ///Rellenamos el descriptor de buffer
+        D3D11_BUFFER_DESC bd;
+        ZeroMemory(&bd, sizeof(bd));
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = _size;
+        bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        bd.CPUAccessFlags = 0;
+        bd.MiscFlags = 0;
 
-    ///Creamos el buffer
-    hr = m_pd3dDevice->CreateBuffer(&bd, &InitData,
-        &IB->m_pIndexBuffer);
+        if (nullptr != _data) {
 
-    ///Finalmente regresamos el dato en caso
-    ///de no obtener un error
-    if (FAILED(hr)) {
+            ///Generamos una variable descriptor
+            D3D11_SUBRESOURCE_DATA InitData;
+            ///Limpiamos la memoria y dejamos
+            ///definido todo en 0
+            ZeroMemory(&InitData, sizeof(InitData));
+            ///Asignamos datos a las variables
+            InitData.pSysMem = _data;
+            InitData.SysMemPitch = 0;
+            InitData.SysMemSlicePitch = 0;
 
-        return nullptr;
-    }
-    else {
+            ///Creamos el buffer
+            hr = m_pd3dDevice->CreateBuffer(&bd, &InitData,
+                &IB->m_pIndexBuffer);
 
-        return IB;
+            if (FAILED(hr)) {
+
+                return nullptr;
+            }
+            else {
+
+                return IB;
+            }
+        }
+        else {
+
+            hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &IB->m_pIndexBuffer);
+
+            if (FAILED(hr)) {
+
+                return nullptr;
+            }
+            else {
+
+                return IB;
+            }
+        }
     }
 }
 
@@ -815,7 +950,7 @@ void CGraphicApiDX::SetVertexBuffer(CVertexBuffer& _vertexBufferDX){
 
     auto vertexBuffer = reinterpret_cast<CVertexBufferDX&>(_vertexBufferDX);
 
-    UINT stride = sizeof(SimpleVertex);
+    UINT stride = sizeof(Vertex);
     UINT offset = 0;
     m_pImmediateContext->IASetVertexBuffers(0, 
                                             1, 
@@ -866,17 +1001,14 @@ void CGraphicApiDX::SetSamplerState(const unsigned int _startSlotDX,
     }
 }
 
-void CGraphicApiDX::SetShaderResourceView(std::vector <CTexture*>& _shaderResourceViewDX,
+void CGraphicApiDX::SetShaderResourceView(CTexture* _shaderResourceViewDX,
     const unsigned int _startSlotDX,
     const unsigned int _numViewsDX){
 
-    for (unsigned int i = 0; i < _shaderResourceViewDX.size(); i++) {
+    auto* shaderResource = reinterpret_cast<CTextureDX*>(_shaderResourceViewDX);
 
-        auto shaderResource = reinterpret_cast<CTextureDX&>(_shaderResourceViewDX[i]);
-
-        m_pImmediateContext->PSSetShaderResources(_startSlotDX, _numViewsDX,
-            &shaderResource.m_pShaderResourceView);
-    }
+    m_pImmediateContext->PSSetShaderResources(_startSlotDX, _numViewsDX,
+        &shaderResource->m_pShaderResourceView);
 }
 
 void CGraphicApiDX::SetRenderTarget(CTexture* _renderTargetDX,
@@ -970,7 +1102,7 @@ void CGraphicApiDX::SetYourPSSampler(CSamplerState& _samplerDX,
 
 void CGraphicApiDX::SetShaders(CShaders& _shaders){
 
-    auto shaders = reinterpret_cast<CShadersDX&>(_shaders);
+    auto& shaders = reinterpret_cast<CShadersDX&>(_shaders);
 
     m_pImmediateContext->VSSetShader(shaders.m_pVertexShader, 
         0, 0);

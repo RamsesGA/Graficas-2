@@ -1,25 +1,13 @@
 #pragma once
+#include "Structures.h"
+
 #include <string>
 #include <vector>
 
-/*
-
-struct Vertex {
-
-    //glm::vec3 Position;
-    //glm::vec3 Normal;
-    //glm::vec2 TexCoords;
-    //glm::vec3 Tangent;
-    //glm::vec3 Bitangent;
-};
-
-struct Texture {
-
-    unsigned int id;
-    std::string type;
-    std::string path;
-};
-
+class CGraphicApi;
+class CVertexBuffer;
+class CIndexBuffer;
+class CSamplerState;
 
 class CMesh {
 
@@ -29,36 +17,27 @@ class CMesh {
         /// 
 
         /// <summary>
-        /// Vertex Array Object
-        /// </summary>
-        unsigned int m_VAO;
-        /// <summary>
-        /// Vertex Buffer Object
-        /// </summary>
-        unsigned int m_VBO;
-        /// <summary>
-        /// Element Buffer Object
-        /// </summary>
-        unsigned int m_EBO;
-    
-        ///
-        /// Métodos
         /// 
-        
-        void SetUpMesh();
+        /// </summary>
+        CVertexBuffer* m_vertexBuffer;
+        /// <summary>
+        /// 
+        /// </summary>
+        CIndexBuffer* m_indexBuffer;
+        /// <summary>
+        /// 
+        /// </summary>
+        std::vector<Vertex>* m_vertices;
+        /// <summary>
+        /// 
+        /// </summary>
+        std::vector<unsigned int>* m_indices;
+        /// <summary>
+        /// 
+        /// </summary>
+        std::vector<Texture> m_textures;
 
     public:
-        ///
-        /// Miembros
-        /// 
-
-        // mesh data
-        std::vector<Vertex> m_vertices;
-
-        std::vector<unsigned int> m_indices;
-
-        std::vector<Texture> m_textures;
-       
         ///
         /// Métodos
         /// 
@@ -68,11 +47,20 @@ class CMesh {
         ///Destructor
         ~CMesh() = default;
 
-        void Init(std::vector<Vertex> _vertices,
-            std::vector<unsigned int> _indices,
-            std::vector<Texture> _textures);
-
-        //void Draw(Shader& _shader);
+        /// <summary>
+        /// 
+        /// </summary>
+        void Init(std::vector<Vertex>* _vertices,
+            std::vector<unsigned int>* _indices,
+            std::vector<Texture> _textures,
+            CGraphicApi* _graphicApi);
+        /// <summary>
+        /// 
+        /// </summary>
+        void SetUpMesh(CGraphicApi* _graphicApi);
+        /// <summary>
+        /// 
+        /// </summary>
+        void Draw(CGraphicApi* _graphicApi,
+            std::vector <CSamplerState*> _samplerState);
 };
-
-*/

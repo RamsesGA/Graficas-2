@@ -4,41 +4,23 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-#include <vector>
-#include <string>
+class CTexture;
 
 class CModel {
 
-    /*
     private:
         ///
         /// Miembros
         /// 
        
-        /// <summary>
-        /// Model data
-        /// </summary>
-        std::vector<CMesh> m_meshes;
-
         std::string m_directory;
 
-        std::vector<Texture> m_textures_loaded;
-    
-        ///
-        /// Métodos
-        /// 
-        
-        void LoadModel(std::string _path);
+        std::vector <CSamplerState*> m_sampler;
 
-        void ProcessNode(aiNode* _node, 
-            const aiScene* _scene);
+        std::vector<CMesh*> m_meshes;
 
-        CMesh ProcessMesh(aiMesh* _mesh, 
-            const aiScene* _scene);
+        std::vector<Texture> m_textures;
 
-        std::vector<Texture> LoadMaterialTextures(aiMaterial* _mat, 
-            aiTextureType _type, std::string _typeName);
-    
     public:
         ///
         /// Métodos
@@ -49,8 +31,22 @@ class CModel {
         ///Destructor
         ~CModel() = default;
 
-        void Init(char* _path);
+        void Init(std::string const& _path,
+            CGraphicApi* _graphicApi);
 
-        //void Draw(Shader& _shader);
-        */
+        void Draw(CGraphicApi* _graphicApi);
+
+        void ProcessNode(aiNode* _node,
+            const aiScene* _scene,
+            CGraphicApi* _graphicApi);
+
+        CMesh* ProcessMesh(aiMesh* _mesh,
+            const aiScene* _scene,
+            CGraphicApi* _graphicApi);
+
+        std::vector<Texture> LoadMaterialTextures(aiMaterial* _mat,
+            aiTextureType _type,
+            CGraphicApi* _graphicApi);
+
+        std::string GetTexturePath(std::string _file);
 };

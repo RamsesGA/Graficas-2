@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <windows.h>
+
+#include "Structures.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -142,15 +144,6 @@ using PRIMITIVE_TOPOLOGY = enum
 };
 
 /// <summary>
-/// Estructura con los datos
-/// para el vertex buffer
-/// </summary>
-struct SimpleVertex{
-
-	glm::vec4 Pos;
-};
-
-/// <summary>
 /// Instancias de las clases
 /// abstraidas
 /// </summary>
@@ -204,8 +197,7 @@ class CGraphicApi {
         virtual void SwapChainPresent(unsigned int _syncInterval ,
             unsigned int _flags ) = 0;
 
-        virtual CTexture* LoadTextureFromFile(std::string _srcFile,
-            std::string _directory) = 0;
+        virtual CTexture* LoadTextureFromFile(std::string _srcFile) = 0;
 
         virtual CTexture* GetDefaultBackBuffer() = 0;
 
@@ -257,7 +249,8 @@ class CGraphicApi {
         /// <param name="_simpleVertex"></param>
         /// <param name="_vertexBufferObject"></param>
         /// <returns></returns>
-        virtual CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertex) = 0;
+        virtual CVertexBuffer* CreateVertexBuffer(const void* _data,
+            const unsigned int _size) = 0;
 
         /// <summary>
         /// Función para generar el
@@ -266,7 +259,8 @@ class CGraphicApi {
         /// <param name="_simpleIndex"></param>
         /// <param name="_indexBufferObject"></param>
         /// <returns></returns>
-        virtual CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t> & _simpleIndex) = 0;
+        virtual CIndexBuffer* CreateIndexBuffer(const void* _data,
+            const unsigned int _size) = 0;
 
 		/// <summary>
         /// Función para generar los
@@ -369,7 +363,7 @@ class CGraphicApi {
         /// <param name="_shaderResourceView "></param>
         /// <param name="_startSlot "></param>
         /// <param name="_numViews "></param>
-        virtual void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceView ,
+        virtual void SetShaderResourceView(CTexture* _shaderResourceView ,
             const unsigned int _startSlot ,
             const unsigned int _numViews ) = 0;
 

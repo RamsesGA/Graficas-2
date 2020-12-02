@@ -1,6 +1,4 @@
 #pragma once
-
-
 #include "CGraphicApi.h"
 #include "CConstantBuffer.h"
 #include "CTexture.h"
@@ -58,7 +56,7 @@ class CGraphicApiDX : public CGraphicApi{
 		///Constructor
 		CGraphicApiDX() = default;
 		///Destructor
-		~CGraphicApiDX() = default;
+		~CGraphicApiDX();
 
 		///
 		/// H E R E N C I A
@@ -73,8 +71,7 @@ class CGraphicApiDX : public CGraphicApi{
 		void SwapChainPresent(unsigned int _syncInterval,
 			unsigned int _flags)override;
 
-		CTexture* LoadTextureFromFile(std::string _srcFile,
-			std::string _directory)override;
+		CTexture* LoadTextureFromFile(std::string _srcFile)override;
 
 		CTexture* GetDefaultBackBuffer()override;
 
@@ -109,9 +106,11 @@ class CGraphicApiDX : public CGraphicApi{
 			const std::string& _entryPointVS, const std::wstring& _namePS,
 			const std::string& _entryPointPS)override;
 
-		CVertexBuffer* CreateVertexBuffer(const std::vector <SimpleVertex>& _simpleVertex)override;
+		CVertexBuffer* CreateVertexBuffer(const void* _data,
+			const unsigned int _size)override;
 
-		CIndexBuffer* CreateIndexBuffer(const std::vector <uint32_t> & _simpleIndex)override;
+		CIndexBuffer* CreateIndexBuffer(const void* _data,
+			const unsigned int _size)override;
 
 		CConstantBuffer* CreateConstantBuffer(const unsigned int _bufferSize)override;
 
@@ -147,7 +146,7 @@ class CGraphicApiDX : public CGraphicApi{
 			std::vector<CSamplerState*>& _samplerState,
 			CTexture & _texture)override;
 
-		void SetShaderResourceView(std::vector <CTexture*>& _shaderResourceView,
+		void SetShaderResourceView(CTexture * _shaderResourceView,
 			const unsigned int _startSlot,
 			const unsigned int _numViews)override;
 

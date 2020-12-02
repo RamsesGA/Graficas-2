@@ -1,12 +1,3 @@
-//--------------------------------------------------------------------------------------
-// File: CubeShader.fx
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
 cbuffer ConstantBuffer1 : register( b0 )
 {
     matrix View;
@@ -19,16 +10,19 @@ cbuffer ConstantBuffer2 : register( b1 )
     float4 vMeshColor;
 };
 
-
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
-    float4 Pos : POSITION;
+    float3 position : POSITION;
+    float2 texCoords : TEXCOORD;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 bitangent : BINORMAL;
 };
 
 struct PS_INPUT
 {
-    float4 Pos : SV_POSITION;
+    float4 position : SV_POSITION;
 };
 
 
@@ -38,9 +32,9 @@ struct PS_INPUT
 PS_INPUT VS( VS_INPUT input )
 {
     PS_INPUT output = (PS_INPUT)0;
-    output.Pos = mul( input.Pos, World );
-    output.Pos = mul( output.Pos, View );
-    output.Pos = mul( output.Pos, Projection );
+    output.position  = mul( float4(input.position, 1.0f), World );
+    output.position  = mul( output.position , View );
+    output.position  = mul( output.position , Projection );
     
     return output;
 }

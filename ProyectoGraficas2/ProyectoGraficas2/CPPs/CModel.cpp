@@ -1,223 +1,201 @@
-#include <iostream>
 #include "..\Includes\CModel.h"
 #include "..\Includes\CGraphicApi.h"
 
-/*
+void CModel::Init(std::string const& _path, CGraphicApi* _graphicApi){
 
-void CModel::LoadModel(std::string _path){
+	//Read _file via assimp
+	Assimp::Importer importer;
 
-    Assimp::Importer import;
+	const aiScene* scene = importer.ReadFile(_path,
+		aiProcessPreset_TargetRealtime_Fast |
+		aiProcess_ConvertToLeftHanded |
+		aiProcess_FindInstances |
+		aiProcess_ValidateDataStructure |
+		aiProcess_OptimizeMeshes |
+		aiProcess_Debone);
 
-    const aiScene* scene = import.ReadFile(_path, 
-        aiProcess_Triangulate | aiProcess_FlipUVs);
+	//Check for errors
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
 
-    if (!scene || 
-        scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || 
-        !scene->mRootNode){
+		return;
+	}
 
-        std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-        return;
-    }
+	//Retrieve the directory path of the _file
+	m_directory = _path.substr(0, _path.find_last_of('/'));
 
-    m_directory = _path.substr(0, _path.find_last_of('/'));
+	//Process assimp's root node recursively
+	ProcessNode(scene->mRootNode, scene, _graphicApi);
 
-    ProcessNode(scene->mRootNode, scene);
+	//Create texture sampler for model's textures
+	m_sampler.push_back(_graphicApi->CreateSamplerState());
+}
+
+void CModel::Draw(CGraphicApi* _graphicApi){
+
+	for (unsigned int i = 0; i < m_meshes.size(); i++){
+
+		m_meshes[i]->Draw(_graphicApi, m_sampler);
+	}
 }
 
 void CModel::ProcessNode(aiNode* _node, 
-    const aiScene* _scene){
+	const aiScene* _scene,
+	CGraphicApi* _graphicApi){
 
-    // process all the node's meshes (if any)
-    for (unsigned int i = 0; i < _node->mNumMeshes; i++){
+	//Process each _mesh located at the current node
+	for (unsigned int i = 0; i < _node->mNumMeshes; i++){
 
-        aiMesh* _mesh = _scene->mMeshes[_node->mMeshes[i]];
-        m_meshes.push_back(ProcessMesh(_mesh, _scene));
-    }
+		//The node object only contains indices to index the actual objects in the scene.
+		//The scene contains all the data, node is just to keep stuff organized.
+		aiMesh* _mesh = _scene->mMeshes[_node->mMeshes[i]];
+		m_meshes.push_back(ProcessMesh(_mesh, _scene, _graphicApi));
+	}
 
-    // then do the same for each of its children
-    for (unsigned int i = 0; i < _node->mNumChildren; i++){
+	for (unsigned int i = 0; i < _node->mNumChildren; i++){
 
-        ProcessNode(_node->mChildren[i], _scene);
-    }
+		ProcessNode(_node->mChildren[i], _scene, _graphicApi);
+	}
 }
 
-CMesh CModel::ProcessMesh(aiMesh* _mesh,
-    const aiScene* _scene){
+CMesh* CModel::ProcessMesh(aiMesh* _mesh, 
+	const aiScene* _scene,
+	CGraphicApi* _graphicApi){
 
-    // data to fill
-    std::vector<Vertex> vertices;
+	//Data to fill
+	std::vector<Vertex>* vertices = new std::vector<Vertex>();
+	std::vector<unsigned int>* indices = new std::vector<unsigned int>();
+	std::vector<Texture> textures;
 
-    std::vector<unsigned int> indices;
+	//Walk through each of the _mesh's vertices.
+	for (unsigned int i = 0; i < _mesh->mNumVertices; i++){
 
-    std::vector<Texture> textures;
+		Vertex structVertex;
 
-    // walk through each of the _mesh's vertices
-    for (unsigned int i = 0; i < _mesh->mNumVertices; i++){
+		//Positions
+		structVertex.position.x = _mesh->mVertices[i].x;
+		structVertex.position.y = _mesh->mVertices[i].y;
+		structVertex.position.z = _mesh->mVertices[i].z;
 
-        Vertex vertex;
+		//Texcoords
+		//Check if _mesh contains texcoords
+		if (_mesh->mTextureCoords[0]){
 
-        /// we declare a placeholder std::vector since assimp uses its own std::vector
-        ///  class that doesn't directly convert to glm's vec3 class so we transfer 
-        /// the data to this placeholder glm::vec3 first.
-        glm::vec3 vector; 
+			structVertex.texCoords.x = _mesh->mTextureCoords[0][i].x;
+			structVertex.texCoords.y = _mesh->mTextureCoords[0][i].y;
+		}
+		else{
 
-        // positions
-        vector.x = _mesh->mVertices[i].x;
-        vector.y = _mesh->mVertices[i].y;
-        vector.z = _mesh->mVertices[i].z;
+			structVertex.texCoords = glm::vec2(0.0f, 0.0f);
+		}
 
-        vertex.Position = vector;
+		//Normals
+		structVertex.normal.x = _mesh->mNormals[i].x;
+		structVertex.normal.y = _mesh->mNormals[i].y;
+		structVertex.normal.z = _mesh->mNormals[i].z;
 
-        // normals
-        if (_mesh->HasNormals()){
+		//Tangents
+		structVertex.tangent.x = _mesh->mTangents[i].x;
+		structVertex.tangent.y = _mesh->mTangents[i].y;
+		structVertex.tangent.z = _mesh->mTangents[i].z;
 
-            vector.x = _mesh->mNormals[i].x;
-            vector.y = _mesh->mNormals[i].y;
-            vector.z = _mesh->mNormals[i].z;
+		//Bitangents
+		structVertex.tangent.x = _mesh->mBitangents[i].x;
+		structVertex.tangent.y = _mesh->mBitangents[i].y;
+		structVertex.tangent.z = _mesh->mBitangents[i].z;
 
-            vertex.Normal = vector;
-        }
-        // texture coordinates
-        if (_mesh->mTextureCoords[0]){
+		vertices->push_back(structVertex);
+	}
 
-            glm::vec2 vec;
+	//Go through each of the _mesh's faces and retrieve the corresponding indices.
+	for (unsigned int i = 0; i < _mesh->mNumFaces; i++){
 
-            // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-            // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-            vec.x = _mesh->mTextureCoords[0][i].x;
-            vec.y = _mesh->mTextureCoords[0][i].y;
+		aiFace face = _mesh->mFaces[i];
+		//retrieve all indices of the face and store them in the indices vector
+		for (unsigned int j = 0; j < face.mNumIndices; j++){
 
-            vertex.TexCoords = vec;
+			indices->push_back(face.mIndices[j]);
+		}
+	}
 
-            // tangent
-            vector.x = _mesh->mTangents[i].x;
-            vector.y = _mesh->mTangents[i].y;
-            vector.z = _mesh->mTangents[i].z;
+	aiMaterial* material = _scene->mMaterials[_mesh->mMaterialIndex];
 
-            vertex.Tangent = vector;
+	std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
+		aiTextureType_DIFFUSE,
+		_graphicApi);
 
-            // bitangent
-            vector.x = _mesh->mBitangents[i].x;
-            vector.y = _mesh->mBitangents[i].y;
-            vector.z = _mesh->mBitangents[i].z;
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-            vertex.Bitangent = vector;
-        }
-        else {
+	CMesh* newMesh = new CMesh();
+	newMesh->Init(vertices, indices, textures, _graphicApi);
 
-            vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-        }
-
-        vertices.push_back(vertex);
-    }
-
-    /// now wak through each of the _mesh's faces (a face is a _mesh its triangle) 
-    /// and retrieve the corresponding vertex indices.
-    for (unsigned int i = 0; i < _mesh->mNumFaces; i++){
-
-        aiFace face = _mesh->mFaces[i];
-
-        // retrieve all indices of the face and store them in the indices std::vector
-        for (unsigned int j = 0; j < face.mNumIndices; j++) {
-
-            indices.push_back(face.mIndices[j]);
-        }
-    }
-
-    // process materials
-    aiMaterial* material = _scene->mMaterials[_mesh->mMaterialIndex];
-
-    // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-    // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-    // Same applies to other texture as the following list summarizes:
-    // diffuse: texture_diffuseN
-    // specular: texture_specularN
-    // normal: texture_normalN
-
-    // 1. diffuse maps
-    std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
-        aiTextureType_DIFFUSE, "texture_diffuse");
-
-    textures.insert(textures.end(), 
-        diffuseMaps.begin(), 
-        diffuseMaps.end());
-
-    // 2. specular maps
-    std::vector<Texture> specularMaps = LoadMaterialTextures(material, 
-        aiTextureType_SPECULAR, "texture_specular");
-
-    textures.insert(textures.end(), 
-        specularMaps.begin(), 
-        specularMaps.end());
-
-    // 3. normal maps
-    std::vector<Texture> normalMaps = LoadMaterialTextures(material, 
-        aiTextureType_HEIGHT, "texture_normal");
-
-    textures.insert(textures.end(), 
-        normalMaps.begin(), 
-        normalMaps.end());
-
-    // 4. height maps
-    std::vector<Texture> heightMaps = LoadMaterialTextures(material, 
-        aiTextureType_AMBIENT, "texture_height");
-
-    textures.insert(textures.end(), 
-        heightMaps.begin(), 
-        heightMaps.end());
-
-    // return a _mesh object created from the extracted mesh data
-    //return CMesh(vertices, indices, textures);
+	return newMesh;
 }
 
 std::vector<Texture> CModel::LoadMaterialTextures(aiMaterial* _mat, 
-    aiTextureType _type, std::string _typeName){
+	aiTextureType _type,
+	CGraphicApi* _graphicApi){
 
-   //std::std::vector<Texture> textures;
-   //
-   //for (unsigned int i = 0; i < _mat->GetTextureCount(_type); i++){
-   //
-   //    aiString str;
-   //
-   //    _mat->GetTexture(_type, i, &str);
-   //    bool skip = false;
-   //
-   //    for (unsigned int j = 0; j < m_textures_loaded.size(); j++){
-    //
-    //        if (std::strcmp(m_textures_loaded[j].path.data(), str.C_Str()) == 0){
-    //
-    //            textures.push_back(m_textures_loaded[j]);
-    //            skip = true;
-    //            break;
-    //        }
-    //    }
-   //
-   //    if (!skip){
-   //
-   //        CGraphicApi object;
-   //
-   //        // if texture hasn't been loaded already, load it
-   //        Texture texture;
-   //        texture.id = object.LoadTextureFromFile(str.C_Str(), m_directory);
-   //        texture.type = _typeName;
-   //        texture.path = str.C_Str();
-   //        textures.push_back(texture);
-   //
-   //        // add to loaded textures
-   //        m_textures_loaded.push_back(texture); 
-   //    }
-   //}
-   //return textures;
+	std::vector<Texture> textures;
+
+	for (unsigned int i = 0; i < _mat->GetTextureCount(_type); i++){
+
+		aiString aistr;
+
+		_mat->GetTexture(_type, i, &aistr);
+
+		std::string srcFile = std::string(aistr.C_Str());
+
+		srcFile = m_directory + GetTexturePath(srcFile);
+
+		bool skip = false;
+
+		for (unsigned int j = 0; j < m_textures.size(); j++){
+
+			if (std::strcmp(m_textures[j].path.data(), srcFile.data()) == 0){
+
+				textures.push_back(m_textures[j]);
+				skip = true;
+				break;
+			}
+		}
+		if (!skip){
+
+			Texture meshTexture;
+			meshTexture.texture = _graphicApi->LoadTextureFromFile(srcFile);
+			meshTexture.path = srcFile;
+			textures.push_back(meshTexture);
+			m_textures.push_back(meshTexture);
+		}
+	}
+
+	return textures;
 }
 
-void CModel::Init(char* _path){
+std::string CModel::GetTexturePath(std::string _file){
 
-    LoadModel(_path);
+	size_t realPos = 0;
+	size_t posInvSlash = _file.rfind('\\');
+	size_t posSlash = _file.rfind('/');
+
+	if (posInvSlash == std::string::npos){
+
+		if (posSlash != std::string::npos){
+
+			realPos = posSlash;
+		}
+	}
+	else{
+
+		realPos = posInvSlash;
+
+		if (!posSlash == std::string::npos){
+
+			if (posSlash > realPos){
+
+				posSlash = realPos;
+			}
+		}
+	}
+
+	return _file.substr(realPos, _file.length() - realPos);
 }
-
-//void CModel::Draw(){
-//
-//    
-//}
-
-*/

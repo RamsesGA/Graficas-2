@@ -87,6 +87,15 @@ bool AnalyzePixelShaderOGL(const std::wstring& _namePS) {
 	return false;
 }
 
+/// 
+/// D E S T R U C T O R
+/// 
+
+CGraphicApiOGL::~CGraphicApiOGL(){
+
+	//BORRAR EL HGLRC m_renderingContext;
+}
+
 ///
 /// H E R E N C I A
 ///
@@ -174,8 +183,68 @@ void CGraphicApiOGL::SwapChainPresent(unsigned int _syncInterval,
 	SwapBuffers(m_HandleToDC);
 }
 
-CTexture* CGraphicApiOGL::LoadTextureFromFile(std::string _srcFile,
-	std::string _directory){return nullptr;}
+CTexture* CGraphicApiOGL::LoadTextureFromFile(std::string _srcFile){
+
+	int width;
+	int height; 
+	int components;
+
+	unsigned char* data = stbi_load(_srcFile.c_str(), 
+		&width, &height, &components, 0);
+
+	if (!data) {
+
+		return nullptr;
+		stbi_image_free(data);
+	}
+	else{
+
+		GLenum format = GL_ZERO;
+
+		if (1 == components){
+
+			format = GL_RED;
+		}
+		else if (2 == components){
+
+			format = GL_RG;
+		}
+		else if (3 == components){
+
+			format = GL_RGB;
+		}
+		else if (4 == components){
+
+			format = GL_RGBA;
+		}
+
+		auto* texture = new CTextureOGL();
+
+		glGenTextures(1, &texture->m_texture);
+		glBindTexture(GL_TEXTURE_2D, texture->m_texture);
+		glTexImage2D(GL_TEXTURE_2D,
+			0,
+			format,
+			width,
+			height,
+			0,
+			format,
+			GL_UNSIGNED_BYTE,
+			data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		stbi_image_free(data);
+
+		return texture;
+	}
+}
 
 CTexture* CGraphicApiOGL::GetDefaultBackBuffer(){return nullptr;}
 
@@ -376,12 +445,13 @@ CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS
 	return shaders;
 }
 
-CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex>& _simpleVertex){
+CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const void* _data,
+	const unsigned int _size){
 
 	auto VBO = new CVertexBufferOGL();
 
 	///Guardamos el tamaño del buffer
-	VBO->m_vertexBufferSize = sizeof(SimpleVertex) * _simpleVertex.size();
+	VBO->m_vertexBufferSize = _size;
 
 	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
 	glGenBuffers(1, &VBO->m_vertexBufferObject);
@@ -392,7 +462,7 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex
 	///Copiamos los datos en el objeto de búfer
 	glBufferData(GL_ARRAY_BUFFER, 
 		VBO->m_vertexBufferSize,
-		_simpleVertex.data(), GL_STATIC_DRAW);
+		_data, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -406,11 +476,12 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const std::vector<SimpleVertex
 	return VBO;
 }
 
-CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _simpleIndex){
+CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const void* _data,
+	const unsigned int _size){
 
 	auto EBO = new CIndexBufferOGL();
 
-	EBO->m_indexBufferSize = sizeof(uint32_t) * _simpleIndex.size();
+	EBO->m_indexBufferSize = _size;
 
 	///Creamos objetos de búfer y devolvemos los identificadores de los objetos de búfer
 	glGenBuffers(1, &EBO->m_indexBufferObject);
@@ -420,7 +491,7 @@ CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const std::vector<uint32_t>& _si
 
 	///Copiamos los datos en el objeto de búfer
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-		EBO->m_indexBufferSize, _simpleIndex.data(), 
+		EBO->m_indexBufferSize, _data,
 		GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -648,7 +719,7 @@ void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer) {
 
 	auto vertex = reinterpret_cast<CVertexBufferOGL&>(_vertexBuffer);
 
-	glBindVertexBuffer(0, vertex.m_vertexBufferObject, 0, sizeof(SimpleVertex));
+	glBindVertexBuffer(0, vertex.m_vertexBufferObject, 0, sizeof(Vertex));
 
 	GLuint detectError = glGetError();
 
@@ -706,7 +777,7 @@ void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlot ,
 	}
 }
 
-void CGraphicApiOGL::SetShaderResourceView(std::vector<CTexture*>& _shaderResourceView,
+void CGraphicApiOGL::SetShaderResourceView(CTexture* _shaderResourceView,
 	const unsigned int _startSlot, const unsigned int _numViews) {
 
 	auto resourceView = reinterpret_cast<CTextureOGL&>(_shaderResourceView);

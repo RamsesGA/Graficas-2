@@ -2,6 +2,7 @@
 #include "..\Includes\CGraphicApiDX.h"
 #include "..\Includes\CGraphicApiOGL.h"
 #include "..\Includes\CCamera.h"
+#include "..\Includes\CModel.h"
 
 #include <windows.h>
 #include <stdlib.h>
@@ -24,12 +25,13 @@ static TCHAR g_szTitle[] = _T("Windows - KriegerFS-");
 unsigned int g_width = 800;
 unsigned int g_height = 600;
 
-HINSTANCE g_hInst;
-
-std::vector<SimpleVertex> g_pVertices;
-std::vector<uint32_t> g_pIndices;
-
 glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
+
+///
+/// M O D E L
+/// 
+
+CModel* g_model = nullptr;
 
 ///
 /// C A M E R A
@@ -38,14 +40,13 @@ glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 glm::mat4x4 g_world;
 CCamera g_mainCamera;
 
-
 ///
 /// G R A P H I C
 /// A P I
 /// 
 
-//CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
-CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
+CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
+//CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
 
 CTexture* g_pRenderTargetView = nullptr;
 CTexture* g_pDepthStencil = nullptr;
@@ -214,71 +215,9 @@ HWND& CreateNewWindow() {
 }
 
 /// <summary>
-/// Creación del simple vertex
+/// Función para inicializaro los
+/// valores principales de la cámara
 /// </summary>
-void CreateSimpleVertex() {
-
-    g_pVertices =
-    {
-        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)  },
-        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f) },
-
-        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f) },
-        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f)},
-
-        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f)},
-        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f)},
-        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f)},
-        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f) },
-
-        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f) },
-        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f) },
-        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)  },
-
-        { glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, -1.0f, -1.0f, 1.0f)},
-        { glm::vec4(1.0f, 1.0f, -1.0f, 1.0f) },
-        { glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f)},
-
-        { glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f)},
-        { glm::vec4(1.0f, -1.0f, 1.0f, 1.0f) },
-        { glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)  },
-        { glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f) },
-    };
-}
-
-/// <summary>
-/// Creación del indices
-/// </summary>
-void CreateIndices() {
-
-    g_pIndices =
-    {
-        3,1,0,
-        2,1,3,
-
-        6,4,5,
-        7,4,6,
-
-        11,9,8,
-        10,9,11,
-
-        14,12,13,
-        15,12,14,
-
-        19,17,16,
-        18,17,19,
-
-        22,20,21,
-        23,20,22
-    };
-}
-
 void InitCamera() {
 
     ///Inicializamos la matriz de identidad
@@ -306,12 +245,12 @@ void Update() {
     ConstantBuffer1 meshData;
 
     ///DX
-    //meshData.mProjection = glm::transpose(g_mainCamera.GetProjection());
-    //meshData.mView = g_mainCamera.GetView();
+    meshData.mProjection = glm::transpose(g_mainCamera.GetProjection());
+    meshData.mView = g_mainCamera.GetView();
     
     ///OGL
-    meshData.mProjection = g_mainCamera.GetProjection();
-    meshData.mView = glm::transpose(g_mainCamera.GetView());
+    //meshData.mProjection = g_mainCamera.GetProjection();
+    //meshData.mView = glm::transpose(g_mainCamera.GetView());
 
     g_pGraphicApi->UpdateConstantBuffer
     (&meshData, *g_pConstantBuffer1);
@@ -328,7 +267,7 @@ void Update() {
 /// información para la pantalla
 /// </summary>
 void Render() {
-    
+
     ///Guardamos los render targets
     g_pGraphicApi->SetRenderTarget(g_pRenderTargetView, g_pDepthStencil);
 
@@ -358,7 +297,8 @@ void Render() {
     g_pGraphicApi->SetYourVSConstantBuffers(g_pConstantBuffer1, 0, 1);
     g_pGraphicApi->SetYourVSConstantBuffers(g_pConstantBuffer2, 1, 1);
     g_pGraphicApi->SetYourPSConstantBuffers(g_pConstantBuffer2, 1, 1);
-    g_pGraphicApi->DrawIndex(36, 0, 0);
+
+    g_model->Draw(g_pGraphicApi);
 
     ///
     /// Present our back buffer to our front buffer
@@ -410,16 +350,14 @@ void CreateProject(HWND _hWnd) {
     }
 
     ///Creamos el vertex buffer
-    CreateSimpleVertex();
-    g_pVertexBuffer = g_pGraphicApi->CreateVertexBuffer(g_pVertices);
+    g_pVertexBuffer = g_pGraphicApi->CreateVertexBuffer(nullptr, sizeof(Matrices));
     if (nullptr == g_pVertexBuffer) {
 
         exit(1);
     }
 
     ///Creamos el index buffer
-    CreateIndices();
-    g_pIndexBuffer = g_pGraphicApi->CreateIndexBuffer(g_pIndices);
+    g_pIndexBuffer = g_pGraphicApi->CreateIndexBuffer(nullptr, sizeof(ViewCB));
     if (nullptr == g_pIndexBuffer) {
 
         exit(1);
@@ -436,7 +374,40 @@ void CreateProject(HWND _hWnd) {
     if (nullptr == g_pConstantBuffer2) {
 
         exit(1);
-    }  
+    }
+
+    g_model = new CModel();
+    //g_model->Init("Models/POD/POD.obj", g_pGraphicApi);
+    //g_model->Init("Models/ugandan/FBX/Knuckles.fbx", g_pGraphicApi);
+    //g_model->Init("Models/sonic/FBX/sonic.fbx", g_pGraphicApi);
+    //g_model->Init("Models/Nier2b/Nier2b.obj", g_pGraphicApi);
+}
+
+/// <summary>
+/// Función para eliminar los punteros
+/// declarados en la aplicación
+/// </summary>
+void Delete() {
+
+    delete g_model;
+
+    delete g_pRenderTargetView;
+
+    delete g_pDepthStencil;
+
+    delete g_pVertexLayout;
+
+    delete g_pBothShaders;
+
+    delete g_pVertexBuffer;
+
+    delete g_pIndexBuffer;
+
+    delete g_pConstantBuffer1;
+
+    delete g_pConstantBuffer2;
+
+    delete g_pGraphicApi;
 }
 
 ///
@@ -466,9 +437,6 @@ int CALLBACK WinMain(
         return 1;
     }
 
-    ///Store instance handle in our global variable
-    g_hInst = _hInstance;
-
     ///Creamos la ventana
     HWND hWnd = CreateNewWindow();
 
@@ -486,10 +454,8 @@ int CALLBACK WinMain(
     ///hWnd: the value returned from CreateWindow
     ShowWindow(hWnd, SW_SHOW);
 
-    ///Actualizamos la ventana
-    //UpdateWindow(hWnd);
-
-    ///Función para 
+    ///Función para mandar a llamar
+    /// la generación del proyecto
     CreateProject(hWnd);
 
     ///Main message loop:
@@ -506,5 +472,10 @@ int CALLBACK WinMain(
 
         Render();
     }
+
+    ///Mandar a llamar todos los deletes
+    /// del lado de la aplicación
+    Delete();
+
     return (int)msg.wParam;
 }
