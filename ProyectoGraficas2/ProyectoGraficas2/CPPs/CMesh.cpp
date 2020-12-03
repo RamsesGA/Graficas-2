@@ -1,7 +1,6 @@
 #include "..\Includes\CMesh.h"
 #include "..\Includes\CGraphicApi.h"
 
-
 void CMesh::Init(std::vector<Vertex>* _vertices,
 	std::vector<unsigned int>* _indices,
 	std::vector<Texture> _textures,

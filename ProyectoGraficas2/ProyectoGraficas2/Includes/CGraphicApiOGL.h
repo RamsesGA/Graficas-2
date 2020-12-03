@@ -80,8 +80,6 @@ class CGraphicApiOGL : public CGraphicApi {
 		void ClearYourRenderTargetView(CTexture* _renderTarget )override;
 		
 		void ClearYourDepthStencilView(CTexture* _depthStencil )override;
-		
-		void CleanUpDevices()override;
 
 		///
 		/// C R E A T E´s 

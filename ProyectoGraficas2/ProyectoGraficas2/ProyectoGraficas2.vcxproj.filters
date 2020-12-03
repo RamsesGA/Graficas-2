@@ -25,9 +25,6 @@
     <Filter Include="Archivos de encabezado\ClassOGL">
       <UniqueIdentifier>{e6252b26-8e37-4eba-8268-ebe3a7ffd2a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Archivos de origen\Shaders">
-      <UniqueIdentifier>{fe4a6564-76a7-4275-807c-ac37b80ec8c9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Archivos de encabezado\LoadingModels">
       <UniqueIdentifier>{d9a81bf3-0473-4c85-9f69-98cc91ccd54c}</UniqueIdentifier>
     </Filter>

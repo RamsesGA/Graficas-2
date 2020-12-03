@@ -220,8 +220,6 @@ class CGraphicApi {
 
         virtual void ClearYourDepthStencilView(CTexture* _depthStencil ) = 0;
 
-        virtual void CleanUpDevices() = 0;
-
 		///
 		/// C R E A T E´s
 		/// 

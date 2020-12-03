@@ -1,7 +1,10 @@
 #include "..\Includes\CCamera.h"
 #include "..\Includes\CConstantBufferDX.h"
 
-void CCamera::Init(CameraDescriptor _cameraDesc){
+void CCamera::Init(CameraDescriptor _cameraDesc,
+	bool _isOGL){
+
+	m_isOGL = _isOGL;
 
 	SetWidht(_cameraDesc.s_width);
 	SetHeight(_cameraDesc.s_height);
@@ -404,12 +407,22 @@ void CCamera::SetClickPressed(bool _bool){
 
 glm::mat4x4 CCamera::GetView() {
 
+	if (m_isOGL) {
+
+		return glm::transpose(m_view);
+	}
+
 	return m_view;
 }
 
 glm::mat4x4 CCamera::GetProjection(){
 
-	return m_projection;
+	if (m_isOGL) {
+
+		return m_projection;
+	}
+
+	return glm::transpose(m_projection);
 }
 
 glm::vec2 CCamera::GetOriginalMousePos(){

@@ -57,7 +57,7 @@ bool AnalyzeVertexShaderOGL(const std::wstring& _nameVS) {
 		else if (('_' == bufferAnalyze[i]) &&
 				("OGL_" == bufferAnalyze)) {
 
-			return true;
+				return true;
 		}
 	}
 
@@ -80,7 +80,7 @@ bool AnalyzePixelShaderOGL(const std::wstring& _namePS) {
 		else if (('_' == bufferAnalyze[i]) &&
 				("OGL_" == bufferAnalyze)) {
 
-			return true;
+				return true;
 		}
 	}
 
@@ -93,7 +93,8 @@ bool AnalyzePixelShaderOGL(const std::wstring& _namePS) {
 
 CGraphicApiOGL::~CGraphicApiOGL(){
 
-	//BORRAR EL HGLRC m_renderingContext;
+	// delete the rendering context  
+	wglDeleteContext(m_renderingContext);
 }
 
 ///
@@ -263,7 +264,7 @@ void CGraphicApiOGL::UnbindOGL(){
 void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcData , 
 	CConstantBuffer& _updateDataCB ){
 
-	auto UBO = reinterpret_cast<CConstantBufferOGL&>(_updateDataCB);
+	auto& UBO = reinterpret_cast<CConstantBufferOGL&>(_updateDataCB);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO.m_uniformBufferObject);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO.m_bufferSize, _srcData);
@@ -308,8 +309,6 @@ void CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
 	}
 }
 
-void CGraphicApiOGL::CleanUpDevices(){}
-
 ///
 /// C R E A T E´s 
 ///
@@ -335,7 +334,7 @@ CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS
 
 	///Generamos el tipo de dato para ir guardando
 	/// los datos necesarios y entregarlo al usuario
-	auto shaders = new CShadersOGL();
+	auto* shaders = new CShadersOGL();
 
 	// Create an empty vertex shader handle
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -448,7 +447,7 @@ CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS
 CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const void* _data,
 	const unsigned int _size){
 
-	auto VBO = new CVertexBufferOGL();
+	auto* VBO = new CVertexBufferOGL();
 
 	///Guardamos el tamaño del buffer
 	VBO->m_vertexBufferSize = _size;
@@ -470,6 +469,7 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const void* _data,
 
 	if (detectError != 0) {
 
+		delete VBO;
 		exit(1);
 	}
 
@@ -479,7 +479,7 @@ CVertexBuffer* CGraphicApiOGL::CreateVertexBuffer(const void* _data,
 CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const void* _data,
 	const unsigned int _size){
 
-	auto EBO = new CIndexBufferOGL();
+	auto* EBO = new CIndexBufferOGL();
 
 	EBO->m_indexBufferSize = _size;
 
@@ -500,6 +500,7 @@ CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const void* _data,
 
 	if (detectError != 0) {
 
+		delete EBO;
 		exit(1);
 	}
 
@@ -508,7 +509,7 @@ CIndexBuffer* CGraphicApiOGL::CreateIndexBuffer(const void* _data,
 
 CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _bufferSize){
 
-	auto UBO = new CConstantBufferOGL();
+	auto* UBO = new CConstantBufferOGL();
 	
 	///Generamos el buffer y lo inicializamos
 	glGenBuffers(1, &UBO->m_uniformBufferObject);
@@ -522,6 +523,7 @@ CConstantBuffer* CGraphicApiOGL::CreateConstantBuffer(const unsigned int _buffer
 
 	if (detectError != 0) {
 
+		delete UBO;
 		exit(1);
 	}
 
@@ -533,7 +535,7 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _width ,
 	TEXTURE_FORMAT _textureFormat ,
 	const std::string _fileName){
 
-	auto tex = new CTextureOGL();
+	auto* tex = new CTextureOGL();
 
 	unsigned int texture;
 
@@ -573,6 +575,7 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _width ,
 
 	if (detectError != 0) {
 
+		delete tex;
 		exit(1);
 	}
 
@@ -581,7 +584,7 @@ CTexture* CGraphicApiOGL::CreateTexture(const unsigned int _width ,
 
 CSamplerState* CGraphicApiOGL::CreateSamplerState() {
 
-	auto samplerState = new CSamplerStateOGL();
+	auto* samplerState = new CSamplerStateOGL();
 
 	glGenSamplers(1, &samplerState->m_samplerState);
 	glSamplerParameteri(samplerState->m_samplerState, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -589,13 +592,21 @@ CSamplerState* CGraphicApiOGL::CreateSamplerState() {
 	glSamplerParameteri(samplerState->m_samplerState, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glSamplerParameteri(samplerState->m_samplerState, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+	GLuint detectError = glGetError();
+
+	if (detectError != 0) {
+
+		delete samplerState;
+		exit(1);
+	}
+
 	return samplerState;
 }
 
 CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 	
-	auto inputLayout = new CInputLayoutOGL();
-	auto shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
+	auto* inputLayout = new CInputLayoutOGL();
+	auto& shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
 
 	///Creamos el vertex array
 	glGenVertexArrays(1, &inputLayout->m_inputLayout);
@@ -666,6 +677,7 @@ CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 
 		if (detectError != 0) {
 
+			delete inputLayout;
 			exit(1);
 		}
 
@@ -677,6 +689,7 @@ CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 
 	if (detectError != 0) {
 
+		delete inputLayout;
 		exit(1);
 	}
 
@@ -689,7 +702,7 @@ CInputLayout* CGraphicApiOGL::CreateInputLayout(CShaders& _vertexShader){
 
 void CGraphicApiOGL::SetPixelShader(CShaders& _pixelShader ){
 
-	auto shader = reinterpret_cast<CShadersOGL&>(_pixelShader);
+	auto& shader = reinterpret_cast<CShadersOGL&>(_pixelShader);
 
 	glUseProgram(shader.m_rendererID);
 
@@ -703,7 +716,7 @@ void CGraphicApiOGL::SetPixelShader(CShaders& _pixelShader ){
 
 void CGraphicApiOGL::SetVertexShader(CShaders& _vertexShader ){
 
-	auto shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
+	auto& shader = reinterpret_cast<CShadersOGL&>(_vertexShader);
 
 	glUseProgram(shader.m_rendererID);
 
@@ -717,7 +730,7 @@ void CGraphicApiOGL::SetVertexShader(CShaders& _vertexShader ){
 
 void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer) {
 
-	auto vertex = reinterpret_cast<CVertexBufferOGL&>(_vertexBuffer);
+	auto& vertex = reinterpret_cast<CVertexBufferOGL&>(_vertexBuffer);
 
 	glBindVertexBuffer(0, vertex.m_vertexBufferObject, 0, sizeof(Vertex));
 
@@ -731,7 +744,7 @@ void CGraphicApiOGL::SetVertexBuffer(CVertexBuffer& _vertexBuffer) {
 
 void CGraphicApiOGL::SetIndexBuffer(CIndexBuffer& _indexBuffer){
 
-	auto index = reinterpret_cast<CIndexBufferOGL&>(_indexBuffer);
+	auto& index = reinterpret_cast<CIndexBufferOGL&>(_indexBuffer);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index.m_indexBufferObject);
 
@@ -748,7 +761,7 @@ void CGraphicApiOGL::SetConstantBuffer(bool _isVertex,
 	const unsigned int _startSlot,
 	const unsigned int _numBuffers){
 
-	auto constantBuffer = reinterpret_cast<CConstantBufferOGL&>(_constantBuffer);
+	auto& constantBuffer = reinterpret_cast<CConstantBufferOGL&>(_constantBuffer);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, constantBuffer.m_uniformBufferObject);
 
@@ -764,8 +777,8 @@ void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlot ,
 	std::vector<CSamplerState*>& _samplerState,
 	CTexture& _texture){
 
-	auto sampler = reinterpret_cast<CSamplerStateOGL&>(_samplerState);
-	auto texture = reinterpret_cast<CTextureOGL&>(_texture);
+	auto& sampler = reinterpret_cast<CSamplerStateOGL&>(_samplerState);
+	auto& texture = reinterpret_cast<CTextureOGL&>(_texture);
 
 	glBindSampler(texture.m_texture, sampler.m_samplerState);
 
@@ -780,16 +793,17 @@ void CGraphicApiOGL::SetSamplerState(const unsigned int _startSlot ,
 void CGraphicApiOGL::SetShaderResourceView(CTexture* _shaderResourceView,
 	const unsigned int _startSlot, const unsigned int _numViews) {
 
-	auto resourceView = reinterpret_cast<CTextureOGL&>(_shaderResourceView);
+	auto* resourceView = reinterpret_cast<CTextureOGL*>(_shaderResourceView);
 	
 	glActiveTexture(GL_TEXTURE0 + _startSlot);
 
-	glBindTexture(GL_TEXTURE_2D, resourceView.m_texture);
+	glBindTexture(GL_TEXTURE_2D, resourceView->m_texture);
 
 	GLuint detectError = glGetError();
 
 	if (detectError != 0) {
 
+		delete resourceView;
 		exit(1);
 	}
 }
@@ -797,11 +811,7 @@ void CGraphicApiOGL::SetShaderResourceView(CTexture* _shaderResourceView,
 void CGraphicApiOGL::SetRenderTarget(CTexture* _renderTarget , 
 	CTexture* _depthStencil ){
 
-	if (nullptr == _renderTarget) {
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-	else {
+	if (nullptr != _renderTarget) {
 
 		auto* renderTarget = reinterpret_cast<CTextureOGL*>(_renderTarget);
 		auto* depthStencil = reinterpret_cast<CTextureOGL*>(_depthStencil);
@@ -817,6 +827,8 @@ void CGraphicApiOGL::SetRenderTarget(CTexture* _renderTarget ,
 			exit(1);
 		}
 	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void CGraphicApiOGL::SetDepthStencil(CTexture& _depthStencil , 
@@ -824,7 +836,7 @@ void CGraphicApiOGL::SetDepthStencil(CTexture& _depthStencil ,
 
 void CGraphicApiOGL::SetInputLayout(CInputLayout& _vertexLayout ){
 
-	auto inputLayout = reinterpret_cast<CInputLayoutOGL&>(_vertexLayout);
+	auto& inputLayout = reinterpret_cast<CInputLayoutOGL&>(_vertexLayout);
 
 	glBindVertexArray(inputLayout.m_inputLayout);
 
@@ -884,7 +896,7 @@ void CGraphicApiOGL::SetPrimitiveTopology(const unsigned int _topology ){
 
 void CGraphicApiOGL::SetShaders(CShaders& _shaders){
 
-	auto shaders = reinterpret_cast<CShadersOGL&>(_shaders);
+	auto& shaders = reinterpret_cast<CShadersOGL&>(_shaders);
 
 	glUseProgram(shaders.m_rendererID);
 
@@ -909,6 +921,7 @@ void CGraphicApiOGL::SetYourVSConstantBuffers(CConstantBuffer* _constantBuffer ,
 
 	if (detectError != 0) {
 
+		delete constantBuffer;
 		exit(1);
 	}
 }
@@ -926,6 +939,7 @@ void CGraphicApiOGL::SetYourPSConstantBuffers(CConstantBuffer* _constantBuffer ,
 
 	if (detectError != 0) {
 
+		delete constantBuffer;
 		exit(1);
 	}
 }
@@ -937,7 +951,6 @@ void CGraphicApiOGL::SetYourPSSampler(CSamplerState& _sampler ,
 ///
 /// N O
 /// T O C A R
-/// A B A N D O N A D O S
 /// 
 
 void CGraphicApiOGL::SetYourVS(CShaders& _vertexShader) {}

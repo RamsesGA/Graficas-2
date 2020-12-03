@@ -22,8 +22,8 @@ static TCHAR g_szWindowClass[] = _T("DesktopApp");
 ///The string that appears in the application's title bar.
 static TCHAR g_szTitle[] = _T("Windows - KriegerFS-");
 ///Tamaño de pantalla
-unsigned int g_width = 800;
-unsigned int g_height = 600;
+unsigned int g_width = 1000;
+unsigned int g_height = 800;
 
 glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
@@ -218,7 +218,7 @@ HWND& CreateNewWindow() {
 /// Función para inicializaro los
 /// valores principales de la cámara
 /// </summary>
-void InitCamera() {
+void InitCamera(bool _isOGL = false) {
 
     ///Inicializamos la matriz de identidad
     g_world = glm::mat4(1.0f);
@@ -233,7 +233,7 @@ void InitCamera() {
     mainCamera.s_height = g_height;
     mainCamera.s_width = g_width;
 
-    g_mainCamera.Init(mainCamera);
+    g_mainCamera.Init(mainCamera, _isOGL);
 }
 
 /// <summary>
@@ -243,14 +243,9 @@ void InitCamera() {
 void Update() {
 
     ConstantBuffer1 meshData;
-
-    ///DX
-    meshData.mProjection = glm::transpose(g_mainCamera.GetProjection());
-    meshData.mView = g_mainCamera.GetView();
     
-    ///OGL
-    //meshData.mProjection = g_mainCamera.GetProjection();
-    //meshData.mView = glm::transpose(g_mainCamera.GetView());
+    meshData.mProjection = g_mainCamera.GetProjection();
+    meshData.mView = g_mainCamera.GetView();
 
     g_pGraphicApi->UpdateConstantBuffer
     (&meshData, *g_pConstantBuffer1);
@@ -335,11 +330,12 @@ void CreateProject(HWND _hWnd) {
 
         g_pBothShaders = g_pGraphicApi->CreateVertexAndPixelShader(L"OGL_VertexShader.txt", "main",
             L"OGL_PixelShader.txt", "main");
-
         if (nullptr == g_pBothShaders) {
 
             exit(1);
         }
+
+        InitCamera(true);
     }
 
     ///Creamos el input layout
@@ -377,10 +373,10 @@ void CreateProject(HWND _hWnd) {
     }
 
     g_model = new CModel();
-    //g_model->Init("Models/POD/POD.obj", g_pGraphicApi);
+    g_model->Init("Models/POD/OBJ/POD.obj", g_pGraphicApi);
     //g_model->Init("Models/ugandan/FBX/Knuckles.fbx", g_pGraphicApi);
     //g_model->Init("Models/sonic/FBX/sonic.fbx", g_pGraphicApi);
-    //g_model->Init("Models/Nier2b/Nier2b.obj", g_pGraphicApi);
+    //g_model->Init("Models/Nier2b/OBJ/Nier2b.obj", g_pGraphicApi);
 }
 
 /// <summary>
