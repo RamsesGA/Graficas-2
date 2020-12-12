@@ -11,7 +11,13 @@ class CIndexBufferOGL : public CIndexBuffer {
 		/// Métodos
 		/// 
 	
+		/// <summary>
+		/// Miembro para guardar el índice
+		/// </summary>
 		unsigned int m_indexBufferObject;
+		/// <summary>
+		/// Miembro para almacenar el tamaño
+		/// </summary>
 		unsigned int m_indexBufferSize;
 	
 	public:

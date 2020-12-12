@@ -9,6 +9,10 @@ class CSamplerStateDX : public CSamplerState {
 		/// Miembros
 		/// 
 
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el sampler state
+		/// </summary>
 		ID3D11SamplerState* m_pSamplerState;
 
 	public:

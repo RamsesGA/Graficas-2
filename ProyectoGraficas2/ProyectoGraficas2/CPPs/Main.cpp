@@ -22,8 +22,8 @@ static TCHAR g_szWindowClass[] = _T("DesktopApp");
 ///The string that appears in the application's title bar.
 static TCHAR g_szTitle[] = _T("Windows - KriegerFS-");
 ///Tamaño de pantalla
-unsigned int g_width = 1000;
-unsigned int g_height = 800;
+const unsigned int g_width = 1000;
+const unsigned int g_height = 800;
 
 glm::vec4 g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
@@ -45,8 +45,8 @@ CCamera g_mainCamera;
 /// A P I
 /// 
 
-CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
-//CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
+//CGraphicApi* g_pGraphicApi = new CGraphicApiDX();
+CGraphicApi* g_pGraphicApi = new CGraphicApiOGL();
 
 CTexture* g_pRenderTargetView = nullptr;
 CTexture* g_pDepthStencil = nullptr;
@@ -272,7 +272,8 @@ void Render() {
     ///
     /// Clear the back buffer
     ///
-    g_pGraphicApi->ClearYourRenderTargetView(g_pRenderTargetView);
+    g_pGraphicApi->ClearYourRenderTargetView(g_pRenderTargetView, 
+        0.0f, 156.0f, 140.0f, 1.6f);
 
     ///
     /// Clear the depth buffer to 1.0 (max depth)
@@ -324,11 +325,11 @@ void CreateProject(HWND _hWnd) {
     g_pDepthStencil = g_pGraphicApi->GetDefaultDepthStencil();
 
     ///Creamos el vertex shader y pixel shader
-    g_pBothShaders = g_pGraphicApi->CreateVertexAndPixelShader(L"DX_CubeShader.fx", "VS", 
+    g_pBothShaders = g_pGraphicApi->CreateShadersProgram(L"DX_CubeShader.fx", "VS", 
         L"DX_CubeShader.fx", "PS");
     if (nullptr == g_pBothShaders) {
 
-        g_pBothShaders = g_pGraphicApi->CreateVertexAndPixelShader(L"OGL_VertexShader.txt", "main",
+        g_pBothShaders = g_pGraphicApi->CreateShadersProgram(L"OGL_VertexShader.txt", "main",
             L"OGL_PixelShader.txt", "main");
         if (nullptr == g_pBothShaders) {
 
@@ -373,10 +374,10 @@ void CreateProject(HWND _hWnd) {
     }
 
     g_model = new CModel();
-    g_model->Init("Models/POD/OBJ/POD.obj", g_pGraphicApi);
+    //g_model->Init("Models/POD/OBJ/POD.obj", g_pGraphicApi);
     //g_model->Init("Models/ugandan/FBX/Knuckles.fbx", g_pGraphicApi);
     //g_model->Init("Models/sonic/FBX/sonic.fbx", g_pGraphicApi);
-    //g_model->Init("Models/Nier2b/OBJ/Nier2b.obj", g_pGraphicApi);
+    g_model->Init("Models/Nier2b/OBJ/Nier2b.obj", g_pGraphicApi);
 }
 
 /// <summary>

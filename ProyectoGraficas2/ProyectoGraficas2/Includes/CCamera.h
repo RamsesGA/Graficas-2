@@ -139,11 +139,11 @@ class CCamera{
         /// <summary>
         /// Función para poder aplicar una rotación ROLL
         /// </summary>
-        void RollY(WPARAM _param);
+        void RollZ(WPARAM _param);
         /// <summary>
         /// Función para poder aplicar una rotación YAW
         /// </summary>
-        void YawZ(WPARAM _param);
+        void YawY(WPARAM _param);
         /// <summary>
         /// Función para poder aplicar un movimiento a la cámara
         /// </summary>

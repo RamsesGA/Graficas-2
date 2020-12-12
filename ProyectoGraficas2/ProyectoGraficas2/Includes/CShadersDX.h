@@ -9,9 +9,25 @@ class CShadersDX : public CShaders {
 		/// Miembros
 		/// 
 
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el vertex shader
+		/// </summary>
 		ID3D11VertexShader* m_pVertexShader;
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el blob
+		/// </summary>
 		ID3DBlob* m_pVSBlob;
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el pixel shader
+		/// </summary>
 		ID3D11PixelShader* m_pPixelShader;
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el blob
+		/// </summary>
 		ID3DBlob* m_pPSBlob;
 
 	public:

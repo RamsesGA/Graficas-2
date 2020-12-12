@@ -34,6 +34,10 @@ void CCamera::UpdateViewMatrix(){
 	m_front.y = m_view[2].y;
 	m_front.z = m_view[2].z;
 
+	/*m_right = { m_view[0][0], m_view[1][0], m_view[2][0] };
+	m_up =	{	m_view[0][1], m_view[1][1], m_view[2][1] };
+	m_front = { m_view[0][2], m_view[1][2], m_view[2][2] };*/
+
 	m_cameraDesc.s_lookAt = m_cameraDesc.s_eye + m_front;
 }
 
@@ -45,11 +49,11 @@ void CCamera::InputDetection(WPARAM _param){
 	}
 	if (_param == VK_RIGHT || _param == VK_LEFT) {
 
-		RollY(_param);
+		RollZ(_param);
 	}
 	if (_param == 'z' || _param == 'Z' || _param == 'c' || _param == 'C') {
 
-		YawZ(_param);
+		YawY(_param);
 	}
 	else {
 
@@ -88,7 +92,7 @@ void CCamera::PitchX(WPARAM _param){
 	UpdateViewMatrix();
 }
 
-void CCamera::RollY(WPARAM _param){
+void CCamera::RollZ(WPARAM _param){
 
 	glm::mat4x4 rotation;
 	float speedrot = 0.10f;
@@ -119,7 +123,7 @@ void CCamera::RollY(WPARAM _param){
 	UpdateViewMatrix();
 }
 
-void CCamera::YawZ(WPARAM _param){
+void CCamera::YawY(WPARAM _param){
 
 	glm::mat4x4 rotation;
 	float speedrot = 0.10f;
@@ -214,8 +218,8 @@ void CCamera::MouseRotation(){
 	glm::vec2 firstPos;
 	glm::vec2 secondPos;
 
-	float speedRot = 0.020f;
-	float speedAngule = 1.0f;
+	float speedRot = 0.010f;
+	float speedAngule = 0.5f;
 
 	glm::mat4x4 Yaw =
 	{
@@ -337,6 +341,23 @@ void CCamera::CreateView(){
 		0,	0,	0,	1
 	};
 
+	/*m_axis =
+	{
+		m_right.x, m_up.x, m_front.x,    0,
+		m_right.y, m_up.y, m_front.y,    0,
+		m_right.z, m_up.z, m_front.z,    0,
+		0,			0,     0,			 1
+	};
+
+	m_position = 
+	{
+		1,    0,    0,    0,
+		0,    1,    0,    0,
+		0,    0,    1,    0,
+		-m_cameraDesc.s_eye.x, -m_cameraDesc.s_eye.y, -m_cameraDesc.s_eye.z, 1
+	};*/
+
+	//m_view = m_axis * m_position;
 	m_position *= m_axis;
 	m_view = m_position;
 }
@@ -408,7 +429,7 @@ void CCamera::SetClickPressed(bool _bool){
 glm::mat4x4 CCamera::GetView() {
 
 	if (m_isOGL) {
-
+	
 		return glm::transpose(m_view);
 	}
 
@@ -418,7 +439,7 @@ glm::mat4x4 CCamera::GetView() {
 glm::mat4x4 CCamera::GetProjection(){
 
 	if (m_isOGL) {
-
+	
 		return m_projection;
 	}
 

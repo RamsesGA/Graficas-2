@@ -77,7 +77,8 @@ class CGraphicApiOGL : public CGraphicApi {
 		/// 
 
 		
-		void ClearYourRenderTargetView(CTexture* _renderTarget )override;
+		void ClearYourRenderTargetView(CTexture* _renderTarget,
+			float _r, float _g, float _b, float _a)override;
 		
 		void ClearYourDepthStencilView(CTexture* _depthStencil )override;
 
@@ -85,7 +86,7 @@ class CGraphicApiOGL : public CGraphicApi {
 		/// C R E A T E´s 
 		/// 
 
-		CShaders* CreateVertexAndPixelShader(const std::wstring& _nameVS,
+		CShaders* CreateShadersProgram(const std::wstring& _nameVS,
 			const std::string& _entryPointVS, const std::wstring& _namePS,
 			const std::string& _entryPointPS)override;
 

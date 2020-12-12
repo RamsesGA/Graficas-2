@@ -8,7 +8,14 @@ class CVertexBufferOGL : public CVertexBuffer {
 		/// Miembros 
 		/// 
 	
+		/// <summary>
+		/// Miembro para guardar la posición
+		/// de la información
+		/// <summary>
 		unsigned int m_vertexBufferObject;
+		/// <summary>
+		/// Miembro para el tamaño
+		/// <summary>
 		unsigned int m_vertexBufferSize;
 	
 	public:

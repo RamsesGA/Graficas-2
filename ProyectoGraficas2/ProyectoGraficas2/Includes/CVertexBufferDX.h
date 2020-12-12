@@ -9,6 +9,10 @@ class CVertexBufferDX : public CVertexBuffer {
 		/// Miembros
 		/// 
 	
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el buffer
+		/// </summary>
 		ID3D11Buffer* m_pVertexBuffer;
 	
 	public:

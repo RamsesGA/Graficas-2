@@ -188,27 +188,55 @@ class CGraphicApi {
 		///Destructor
 		~CGraphicApi() = default;
 
+        /// <summary>
+        /// Función para inicializar el device y
+        /// generamos para DX por default el back buffer
+        /// y depth stencil
+        /// </summary>
         virtual bool InitDevice(HWND _hWnd) = 0;
 
+        /// <summary>
+        /// Función para mandar a dibujar los indíces
+        /// de un objeto declarado
+        /// </summary>
         virtual void DrawIndex(unsigned int _indexCount,
             unsigned int _startIndexLocation,
             unsigned int _baseVertexLocation ) = 0;
 
+        /// <summary>
+        /// Función para intercambiar los buffers y actualizar
+        /// su información
+        /// </summary>
         virtual void SwapChainPresent(unsigned int _syncInterval ,
             unsigned int _flags ) = 0;
 
+        /// <summary>
+        /// Función para cargar texturas en archivo
+        /// </summary>
         virtual CTexture* LoadTextureFromFile(std::string _srcFile) = 0;
 
+        /// <summary>
+        /// Función para obtener el back buffer generado automáticamente
+        /// </summary>
         virtual CTexture* GetDefaultBackBuffer() = 0;
 
+        /// <summary>
+        /// Función para obtener el depth stencil generado automáticamente
+        /// </summary>
         virtual CTexture* GetDefaultDepthStencil() = 0;
 
+        /// <summary>
+        /// Función de OGL para separar un programa
+        /// </summary>
         virtual void UnbindOGL() = 0;
 
         ///
         /// U P D A T E´s
         /// 
 
+        /// <summary>
+        /// Función para actualizar los constant buffers
+        /// </summary>
         virtual void UpdateConstantBuffer(const void* _srcData , 
             CConstantBuffer& _updateDataCB ) = 0;
 
@@ -216,8 +244,15 @@ class CGraphicApi {
         /// C L E A R´s
         /// 
 
-        virtual void ClearYourRenderTargetView(CTexture* _renderTarget ) = 0;
+        /// <summary>
+        /// Función para limpiar nuestro render target view
+        /// </summary>
+        virtual void ClearYourRenderTargetView(CTexture* _renderTarget,
+            float _r, float _g, float _b, float _a) = 0;
 
+        /// <summary>
+        /// Función para limpiar nuestro depth stencil view
+        /// </summary>
         virtual void ClearYourDepthStencilView(CTexture* _depthStencil ) = 0;
 
 		///
@@ -236,7 +271,7 @@ class CGraphicApi {
         /// <param name="_entryPoint"></param>
         /// <param name="_fragmentSrc"></param>
         /// <returns></returns>
-        virtual CShaders* CreateVertexAndPixelShader(const std::wstring& _nameVS,
+        virtual CShaders* CreateShadersProgram(const std::wstring& _nameVS,
             const std::string& _entryPointVS, const std::wstring& _namePS,
             const std::string& _entryPointPS) = 0;
 

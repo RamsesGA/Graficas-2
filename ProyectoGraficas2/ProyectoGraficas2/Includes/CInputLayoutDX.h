@@ -9,7 +9,15 @@ class CInputLayoutDX : public CInputLayout {
 		/// Miembros
 		/// 
 	
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el vertex layout
+		/// </summary>
 		ID3D11InputLayout* m_pVertexLayout;
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el byte off set
+		/// </summary>
 		unsigned int* inputLayoutByteLength;
 
 	public:

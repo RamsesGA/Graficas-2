@@ -8,6 +8,10 @@ class CSamplerStateOGL : public CSamplerState {
 		/// Miembros
 		/// 
 
+		/// <summary>
+		/// Miembro para almacenar el
+		/// sampler state generado
+		/// </summary>
 		unsigned int m_samplerState;
 
 	public:

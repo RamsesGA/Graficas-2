@@ -7,7 +7,12 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
-struct Matrices{
+/// <summary>
+/// .h Para declarar las estructuras y 
+/// tener más orden en el código
+/// </summary>
+
+struct Matrices {
 
 	glm::mat4 World;
 	glm::mat4 Projection;

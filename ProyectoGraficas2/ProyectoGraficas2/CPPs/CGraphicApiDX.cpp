@@ -181,94 +181,84 @@ bool CGraphicApiDX::InitDevice(HWND _hWnd) {
 
         return false;
     }
-    else {
 
-        auto* backBuffer = new CTextureDX();
+    auto* backBuffer = new CTextureDX();
 
-        hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
-            (LPVOID*)&backBuffer->m_pTexture);
+    hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+        (LPVOID*)&backBuffer->m_pTexture);
 
-        ///Checamos que todo salga bien, si no mandamos un error
-        if (FAILED(hr)) {
+    ///Checamos que todo salga bien, si no mandamos un error
+    if (FAILED(hr)) {
 
-            delete backBuffer;
-            return false;
-        }
-        else {
-
-            hr = m_pd3dDevice->CreateRenderTargetView(backBuffer->m_pTexture,
-                nullptr,
-                &backBuffer->m_pRenderTargetView);
-
-            if (FAILED(hr)) {
-
-                delete backBuffer;
-                return false;
-            }
-            else {
-
-                m_pBackBuffer = backBuffer;
-
-                auto* depthStencil = new CTextureDX();
-
-                //Textura del depth y hago el depth
-                D3D11_TEXTURE2D_DESC textureDesc;
-                ZeroMemory(&textureDesc, sizeof(textureDesc));
-                textureDesc.Width = m_width;
-                textureDesc.Height = m_height;
-                textureDesc.MipLevels = 1;
-                textureDesc.ArraySize = 1;
-                textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-                textureDesc.SampleDesc.Count = 1;
-                textureDesc.SampleDesc.Quality = 0;
-                textureDesc.Usage = D3D11_USAGE_DEFAULT;
-                textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-                textureDesc.CPUAccessFlags = 0;
-                textureDesc.MiscFlags = 0;
-
-                ///Creamos la textura
-                hr = m_pd3dDevice->CreateTexture2D(&textureDesc, 
-                    nullptr, &depthStencil->m_pTexture);
-
-                if (FAILED(hr)) {
-
-                    delete backBuffer;
-                    delete depthStencil;
-                    return false;
-                }
-                else {
-
-                    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilDesc;
-                    ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-                    depthStencilDesc.Format = textureDesc.Format;
-                    depthStencilDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-                    depthStencilDesc.Texture2D.MipSlice = 0;
-
-                    hr = m_pd3dDevice->CreateDepthStencilView(depthStencil->m_pTexture,
-                        &depthStencilDesc,
-                        &depthStencil->m_pDepthStencilView);
-
-                    ///Checamos que todo salga bien, si no mandamos un error
-                    if (FAILED(hr)) {
-
-                        delete backBuffer;
-                        delete depthStencil;
-                        return false;
-                    }
-                    else {
-
-                        m_pImmediateContext->OMSetRenderTargets(1,
-                            &backBuffer->m_pRenderTargetView,
-                            depthStencil->m_pDepthStencilView);
-
-                        m_pDepthStencil = depthStencil;
-
-                        return true;
-                    }
-                }
-            }
-        }
+        delete backBuffer;
+        return false;
     }
+
+    hr = m_pd3dDevice->CreateRenderTargetView(backBuffer->m_pTexture,
+        nullptr,
+        &backBuffer->m_pRenderTargetView);
+
+    if (FAILED(hr)) {
+
+        delete backBuffer;
+        return false;
+    }
+
+    m_pBackBuffer = backBuffer;
+
+    auto* depthStencil = new CTextureDX();
+
+    //Textura del depth y hago el depth
+    D3D11_TEXTURE2D_DESC textureDesc;
+    ZeroMemory(&textureDesc, sizeof(textureDesc));
+    textureDesc.Width = m_width;
+    textureDesc.Height = m_height;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.SampleDesc.Quality = 0;
+    textureDesc.Usage = D3D11_USAGE_DEFAULT;
+    textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    textureDesc.CPUAccessFlags = 0;
+    textureDesc.MiscFlags = 0;
+
+    ///Creamos la textura
+    hr = m_pd3dDevice->CreateTexture2D(&textureDesc, 
+        nullptr, &depthStencil->m_pTexture);
+
+    if (FAILED(hr)) {
+
+        delete backBuffer;
+        delete depthStencil;
+        return false;
+    }
+    
+    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilDesc;
+    ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+    depthStencilDesc.Format = textureDesc.Format;
+    depthStencilDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    depthStencilDesc.Texture2D.MipSlice = 0;
+
+    hr = m_pd3dDevice->CreateDepthStencilView(depthStencil->m_pTexture,
+        &depthStencilDesc,
+        &depthStencil->m_pDepthStencilView);
+
+    ///Checamos que todo salga bien, si no mandamos un error
+    if (FAILED(hr)) {
+
+        delete backBuffer;
+        delete depthStencil;
+        return false;
+    }
+
+    m_pImmediateContext->OMSetRenderTargets(1,
+        &backBuffer->m_pRenderTargetView,
+        depthStencil->m_pDepthStencilView);
+
+    m_pDepthStencil = depthStencil;
+
+    return true;
 }
 
 void CGraphicApiDX::DrawIndex(unsigned int _indexCountDX, 
@@ -298,73 +288,71 @@ CTexture* CGraphicApiDX::LoadTextureFromFile(std::string _srcFile){
 
         return nullptr;
     }
-    else{
 
-        auto* texture = new CTextureDX();
+    auto* texture = new CTextureDX();
 
-        D3D11_TEXTURE2D_DESC desc;
-        ZeroMemory(&desc, sizeof(desc));
-        desc.Width = width;
-        desc.Height = height;
-        desc.MipLevels = 1;
-        desc.ArraySize = 1;
-        desc.SampleDesc.Count = 1;
-        desc.SampleDesc.Quality = 0;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        desc.MiscFlags = 0;
+    D3D11_TEXTURE2D_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.MiscFlags = 0;
 
-        if (1 == components){
+    if (1 == components){
 
-            desc.Format = DXGI_FORMAT_R16_FLOAT;
-        }
-        else if (2 == components){
-
-            desc.Format = DXGI_FORMAT_R16G16_FLOAT;
-        }
-        else if (3 == components){
-
-            desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-        }
-        else if (4 == components){
-
-            desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-        }
-
-        //Texture data
-        D3D11_SUBRESOURCE_DATA initData;
-        ZeroMemory(&initData, sizeof(initData));
-        initData.pSysMem = data;
-        initData.SysMemPitch = 1;
-
-        if (FAILED(m_pd3dDevice->CreateTexture2D(&desc,
-            &initData,
-            &texture->m_pTexture))){
-
-            delete texture;
-            stbi_image_free(data);
-            return nullptr;
-        }
-
-        //Shader resource data
-        D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
-        ZeroMemory(&viewDesc, sizeof(viewDesc));
-        viewDesc.Format = desc.Format;
-        viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-        viewDesc.Texture2D.MostDetailedMip = 0;
-        viewDesc.Texture2D.MipLevels = 1;
-
-        if (FAILED(m_pd3dDevice->CreateShaderResourceView(texture->m_pTexture,
-            &viewDesc,
-            &texture->m_pShaderResourceView))){
-
-            delete texture;
-            stbi_image_free(data);
-            return nullptr;
-        }
-
-        return texture;
+        desc.Format = DXGI_FORMAT_R16_FLOAT;
     }
+    else if (2 == components){
+
+        desc.Format = DXGI_FORMAT_R16G16_FLOAT;
+    }
+    else if (3 == components){
+
+        desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    }
+    else if (4 == components){
+
+        desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    }
+
+    //Texture data
+    D3D11_SUBRESOURCE_DATA initData;
+    ZeroMemory(&initData, sizeof(initData));
+    initData.pSysMem = data;
+    initData.SysMemPitch = 1;
+
+    if (FAILED(m_pd3dDevice->CreateTexture2D(&desc,
+        &initData,
+        &texture->m_pTexture))){
+
+        delete texture;
+        stbi_image_free(data);
+        return nullptr;
+    }
+
+    //Shader resource data
+    D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+    ZeroMemory(&viewDesc, sizeof(viewDesc));
+    viewDesc.Format = desc.Format;
+    viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    viewDesc.Texture2D.MostDetailedMip = 0;
+    viewDesc.Texture2D.MipLevels = 1;
+
+    if (FAILED(m_pd3dDevice->CreateShaderResourceView(texture->m_pTexture,
+        &viewDesc,
+        &texture->m_pShaderResourceView))){
+
+        delete texture;
+        stbi_image_free(data);
+        return nullptr;
+    }
+
+    return texture;
 }
 
 CTexture* CGraphicApiDX::GetDefaultBackBuffer(){
@@ -397,11 +385,12 @@ void CGraphicApiDX::UpdateConstantBuffer(const void* _srcData,
 /// C L E A R´s
 /// 
 
-void CGraphicApiDX::ClearYourRenderTargetView(CTexture* _renderTargetDX){
+void CGraphicApiDX::ClearYourRenderTargetView(CTexture* _renderTarget,
+    float _r, float _g, float _b, float _a){
 
-    float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+    float ClearColor[4] = { _r, _g, _b, _a };
 
-    auto* renderTarget = reinterpret_cast<CTextureDX*>(_renderTargetDX);
+    auto* renderTarget = reinterpret_cast<CTextureDX*>(_renderTarget);
 
     m_pImmediateContext->ClearRenderTargetView(renderTarget->m_pRenderTargetView,
         ClearColor);
@@ -419,12 +408,12 @@ void CGraphicApiDX::ClearYourDepthStencilView(CTexture* _depthStencilDX){
 /// C R E A T E´s 
 /// 
 
-CShaders* CGraphicApiDX::CreateVertexAndPixelShader(const std::wstring& _nameVS,
+CShaders* CGraphicApiDX::CreateShadersProgram(const std::wstring& _nameVS,
     const std::string& _entryPointVS, const std::wstring& _namePS,
     const std::string& _entryPointPS){
 
     ///Generamos una variable auto
-   ///para adaptar el tipo de dato que ocupamos
+    ///para adaptar el tipo de dato que ocupamos
     auto* shaders = new CShadersDX();
 
     if (!(AnalyzeVertexShaderDX(_nameVS))) {

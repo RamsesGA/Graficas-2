@@ -283,10 +283,12 @@ void CGraphicApiOGL::UpdateConstantBuffer(const void* _srcData ,
 /// 
 
 ///TODO: Pedir de parámetro el color
-void CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget ){
+void CGraphicApiOGL::ClearYourRenderTargetView(CTexture* _renderTarget,
+	float _r, float _g, float _b, float _a){
 	
-	glClearColor(0.0f, 0.125f,
-		0.3f, 1.0f);
+	glClearColor(_r, _g,
+		_b, _a);
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint detectError = glGetError();
@@ -313,10 +315,7 @@ void CGraphicApiOGL::ClearYourDepthStencilView(CTexture* _depthStencil ){
 /// C R E A T E´s 
 ///
 
-///Tener en cuenta la abstracción de PROGRAM
-///Y tener separado vertex / pixel shaders
-/// Cambiar el nombre de la fuinción a CreateShadersProgram
-CShaders* CGraphicApiOGL::CreateVertexAndPixelShader(const std::wstring& _nameVS,
+CShaders* CGraphicApiOGL::CreateShadersProgram(const std::wstring& _nameVS,
 	const std::string& _entryPointVS, const std::wstring& _namePS, 
 	const std::string& _entryPointPS){
 

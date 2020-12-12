@@ -9,6 +9,10 @@ class CConstantBufferDX : public CConstantBuffer {
 		/// Miembros
 		/// 
 
+		/// <summary>
+		/// Miembro de DX para guardar
+		/// el buffer
+		/// </summary>
 		ID3D11Buffer* m_pConstantBuffer;
 
 		///
